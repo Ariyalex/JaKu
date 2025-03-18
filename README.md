@@ -8,18 +8,18 @@ JaKu adalah aplikasi Jadwal Kuliah yang berbasis Flutter dan menggunakan Firebas
 
 Untuk menginstall aplikasi ini, diperlukan Flutter SDK minimal versi yang sudah support null safety.  
 
-1. Clone Repository
+1. Clone Repository  
     '''
     git clone https://github.com/username/jaku.git
     cd jaku
     '''
-2. Setup Firebase
+2. Setup Firebase  
     buat proyek di firebase lalu konfigurasi firebase dengan flutter
-3. Install Dependencies
+3. Install Dependencies  
     '''
     flutter pub get
     '''
-    4. Jalankan Aplikasi
+    4. Jalankan Aplikasi  
     '''
     flutter run
     '''
