@@ -57,9 +57,7 @@ function/node_modules/
 
 .firebaserc
 
+android/app/google-services.json
 
 #flutter envireonmet
 .env
-
-
-android/app/google-services.json
