@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "642294183098",
+    "firebase_url": "https://jaku-4baf2-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "jaku-4baf2",
+    "storage_bucket": "jaku-4baf2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642294183098:android:6c0656d9e6ce9a4a79fe83",
+        "android_client_info": {
+          "package_name": "com.example.jaku"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "642294183098-8fjepvh05n2mt39ldnm8tskupcnho9tg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.jaku",
+            "certificate_hash": "1bc6968600a0c2412a5706830f45fdcbe409c3b8"
+          }
+        },
+        {
+          "client_id": "642294183098-lgi6s4hmm8vrqs4g058e977takfdp1t8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7yXtbrJUNc3PyWVo9br4-zGTROrQBjqw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "642294183098-lgi6s4hmm8vrqs4g058e977takfdp1t8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "642294183098-l0m0j8o2ooclj601k03ie88iobffdm6t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.jaku"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
