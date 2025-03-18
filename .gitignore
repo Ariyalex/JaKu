@@ -47,6 +47,7 @@ app.*.map.json
 .firebase/
 firebase-debug.log
 lib/firebase_options.dart
+android\app\google-services.json
 
 #firebase hosting cache
 **/firebase-hosting-cache/
@@ -60,3 +61,4 @@ function/node_modules/
 
 #flutter envireonmet
 .env
+
