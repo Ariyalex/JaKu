@@ -81,7 +81,9 @@ class MatkulBuilder extends StatelessWidget {
                 fontSize: 14,
               ),
               title: Text(
-                (matkul.kelas == null)
+                (matkul.kelas == null ||
+                        matkul.kelas == "" ||
+                        matkul.kelas == "null")
                     ? "${matkul.matkul}"
                     : "${matkul.matkul} (${matkul.kelas})",
                 textAlign: TextAlign.center,

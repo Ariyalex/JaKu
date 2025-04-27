@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
-import 'package:jaku/screens/auth_page.dart';
+import 'package:jaku/provider/pdf_back.dart';
+import 'package:jaku/screens/auth_screen/sign_in_screen.dart';
+import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/hari_kuliah.dart';
 import '../provider/jadwal_kuliah.dart';
 import '../screens/add_matkul.dart';
 import '../widgets/day_card_builder.dart';
+import 'pdf_parsing.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,14 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: Text("Error Occured"),
+                    title: const Text("Error Occured"),
                     content: Text(err.toString()),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text("Okay"),
+                        child: const Text("Okay"),
                       ),
                     ],
                   );
@@ -69,14 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("LogOut"),
-        content: Text("Yakin LogOut dari account?"),
+        title: const Text("LogOut"),
+        content: const Text("Yakin LogOut dari account?"),
         actions: [
           TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("Tidak")),
+              child: const Text("Tidak")),
           FilledButton(
               onPressed: () async {
                 Navigator.pop(context);
@@ -92,84 +95,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   () {
                     if (context.mounted) {
                       Navigator.pushReplacementNamed(
-                          context, LoginScreen.routeName);
+                          context, SignIn.routeNamed);
                     }
                   },
                 );
               },
-              child: Text("Ya"))
+              child: const Text("Ya"))
         ],
       ),
     );
   }
 
   Drawer howTo = Drawer(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const DrawerHeader(
-          decoration: BoxDecoration(color: Color(0xFF748BAC)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Text(
-                "Panduan Aplikasi",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Pelajari cara menggunakan aplikasi. cara hapus Matkul, persyaratan data, recovery password, dll.",
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.all(16),
-            children: const [
-              ListTile(
-                leading: Icon(Icons.add),
-                title: Text("Add Matkul"),
-                subtitle: Text(
-                    "Gunakan tombol add di pojok kiri atas untuk membuka add page. Matkul harus beirisi:\nNama Matkul, Hari, dan Jam Awal"),
-              ),
-              ListTile(
-                leading: Icon(Icons.edit),
-                title: Text("Edit Matkul"),
-                subtitle: Text(
-                    "Tekan matkul untuk memasuki Edit page, Matkul yang diedit harus berisi:\nNama Matkul, Hari, Jam awal."),
-              ),
-              ListTile(
-                leading: Icon(Icons.delete),
-                title: Text("Delete Matkul"),
-                subtitle: Text(
-                    "Tekan tahan Matkul untuk menghapus Matkul, Matkul yang dihapus tidak dapat dipulihkan."),
-              ),
-              ListTile(
-                leading: Icon(Icons.info_outline),
-                title: Text("Fitur"),
-                subtitle: Text(
-                    "Matkul akan disortir sesuai Hari, Hari yang ditampilkan di paling atas merupakan Hari sekarang diikuti hari berikutnya"),
-              ),
-              ListTile(
-                leading: Icon(Icons.password),
-                title: Text("Reset Password"),
-                subtitle: Text(
-                    "Reset password dengan logOut terlebih dahulu, lalu pilih forgot password? dan masukkan Email yang terdaftar. Reset password akan dikirim ke email yang terdaftar"),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
+    child: DrawerGuide(),
   );
 
   @override
@@ -177,6 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final allMatkulProvider = Provider.of<Jadwalkuliah>(context);
     final jadwalKuliahDayProvider =
         Provider.of<JadwalKuliahDay>(context, listen: true);
+    final pdfBack = Provider.of<PdfBack>(context);
+    final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -185,20 +125,30 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Builder(
           builder: (context) => PopupMenuButton<String>(
             icon: const Icon(Icons.menu), // Burger Icon
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == "info") {
                 _showInfoDialog(context);
               } else if (value == "logout") {
                 _logout(context);
+              } else if (value == "clear") {
+                await pdfBack.clearUserData();
+                Navigator.pushReplacementNamed(context, HomeScreen.routeName);
               }
             },
             position: PopupMenuPosition.under,
             itemBuilder: (BuildContext context) => [
               const PopupMenuItem<String>(
+                value: "clear",
+                child: ListTile(
+                  leading: Icon(Icons.delete_sweep),
+                  title: Text("Clear All Data"),
+                ),
+              ),
+              const PopupMenuItem<String>(
                 value: "info",
                 child: ListTile(
                   leading: Icon(Icons.info),
-                  title: Text("Guide"),
+                  title: Text("Info"),
                 ),
               ),
               const PopupMenuItem<String>(
@@ -229,25 +179,99 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else if (allMatkulProvider.allMatkul.isEmpty) {
-            return SizedBox(
-              width: double.infinity,
+            return Container(
+              margin: EdgeInsets.only(top: 50),
+              width: mediaQueryWidth,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text(
-                    "No Data",
-                    style: TextStyle(fontSize: 25),
+                  Column(
+                    children: [
+                      const Text(
+                        "Jadwal Kosong??!!!",
+                        style: TextStyle(fontSize: 25),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                          width: mediaQueryWidth * 5 / 7,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.asset(
+                              "images/bochi.jpg",
+                            ),
+                          )),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  OutlinedButton(
+                  SizedBox(
+                    height: 10,
+                  ),
+                  FilledButton(
                     onPressed: () {
                       Navigator.pushNamed(context, AddMatkul.routeName);
                     },
-                    child: const Text(
-                      "Add Matkul",
-                      style: TextStyle(fontSize: 20),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Add Matkul",
+                          style: TextStyle(fontSize: 17),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Icon(Icons.add_task),
+                      ],
                     ),
                   ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  FilledButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text(
+                              "Peringatan!!",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                              "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                              textAlign: TextAlign.center,
+                            ),
+                            actions: [
+                              OutlinedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("Ga jadi")),
+                              FilledButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                        context, PdfParsing.routeNamed);
+                                  },
+                                  child: Text("Ok Bang"))
+                            ],
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "PDF Otomation",
+                            style: TextStyle(fontSize: 17),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Icon(Icons.picture_as_pdf),
+                        ],
+                      )),
                 ],
               ),
             );

@@ -34,6 +34,12 @@ abstract final class AppTheme {
       navigationRailUseIndicator: true,
       navigationRailLabelType: NavigationRailLabelType.all,
     ),
+    fontFamily: "Urbanist",
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      bodyMedium: TextStyle(fontSize: 16),
+      bodySmall: TextStyle(fontSize: 14),
+    ),
     visualDensity: FlexColorScheme.comfortablePlatformDensity,
     cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
   );
@@ -54,6 +60,12 @@ abstract final class AppTheme {
       snackBarElevation: 1,
       navigationRailUseIndicator: true,
       navigationRailLabelType: NavigationRailLabelType.all,
+    ),
+    fontFamily: "Urbanist",
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      bodyMedium: TextStyle(fontSize: 16),
+      bodySmall: TextStyle(fontSize: 14),
     ),
     visualDensity: FlexColorScheme.comfortablePlatformDensity,
     cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),

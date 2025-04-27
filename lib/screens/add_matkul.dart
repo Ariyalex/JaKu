@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/screens/pdf_parsing.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -96,9 +97,42 @@ class _AddMatkulState extends State<AddMatkul> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text("Add Matkul"),
+        centerTitle: true,
         actions: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text(
+                      "Peringatan!!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    content: const Text(
+                      "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                      textAlign: TextAlign.center,
+                    ),
+                    actions: [
+                      OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text("Ga jadi")),
+                      FilledButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, PdfParsing.routeNamed);
+                          },
+                          child: Text("Ok Bang"))
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.picture_as_pdf)),
           IconButton(
               onPressed: () {
                 if (matkulController.text.isNotEmpty &&
@@ -109,14 +143,14 @@ class _AddMatkulState extends State<AddMatkul> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text("Form tidak lengkap"),
-                      content: Text("Harap Isi Matkul, Hari, dan Jam"),
+                      title: const Text("Form tidak lengkap"),
+                      content: const Text("Harap Isi Matkul, Hari, dan Jam"),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: Text(
+                          child: const Text(
                             "OK",
                             style: TextStyle(fontSize: 17),
                           ),
@@ -126,252 +160,259 @@ class _AddMatkulState extends State<AddMatkul> {
                   );
                 }
               },
-              icon: const Icon(Icons.save))
+              icon: const Icon(Icons.save)),
         ],
       ),
-      body: Container(
-        width: mediaQueryWidth,
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        child: Column(
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                  labelStyle:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                  hintText: "Ex: Basis Data",
-                  labelText: "Matkul",
-                  alignLabelWithHint: true),
-              autocorrect: false,
-              textInputAction: TextInputAction.next,
-              controller: matkulController,
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            TextField(
-              decoration: const InputDecoration(
-                labelText: "Dosen1",
-                labelStyle:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
+      body: SingleChildScrollView(
+        child: Container(
+          width: mediaQueryWidth,
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          child: Column(
+            children: [
+              TextField(
+                decoration: const InputDecoration(
+                    labelStyle:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
+                    hintText: "Ex: Basis Data",
+                    labelText: "Matkul",
+                    alignLabelWithHint: true),
+                autocorrect: false,
+                style: const TextStyle(fontWeight: FontWeight.normal),
+                textInputAction: TextInputAction.next,
+                controller: matkulController,
               ),
-              autocorrect: false,
-              textInputAction: TextInputAction.next,
-              controller: dosen1Controller,
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            TextField(
-              decoration: const InputDecoration(
+              const SizedBox(
+                height: 12,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: "Dosen1",
                   labelStyle:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                      TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                   hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
-                  labelText: "Dosen2",
-                  alignLabelWithHint: true),
-              autocorrect: false,
-              textInputAction: TextInputAction.next,
-              controller: dosen2Controller,
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            TextField(
-              decoration: const InputDecoration(
-                  labelStyle:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                  hintText: "Ex: fst-404",
-                  labelText: "Ruang kelas",
-                  alignLabelWithHint: true),
-              autocorrect: false,
-              textInputAction: TextInputAction.next,
-              controller: ruanganController,
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            DropdownSearch<String>(
-              selectedItem: hariController,
-              decoratorProps: DropDownDecoratorProps(
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    hintStyle: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 17),
-                    hintText: "Pilih hari..."),
-              ),
-              suffixProps: const DropdownSuffixProps(
-                dropdownButtonProps: DropdownButtonProps(
-                  iconOpened: Icon(Icons.keyboard_arrow_up),
-                  iconClosed: Icon(Icons.keyboard_arrow_down),
                 ),
+                autocorrect: false,
+                style: const TextStyle(fontWeight: FontWeight.normal),
+                textInputAction: TextInputAction.next,
+                controller: dosen1Controller,
               ),
-              popupProps: PopupProps.menu(
-                itemBuilder: (context, item, isDisabled, isSelected) {
-                  return Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Text(
-                      item,
-                    ),
-                  );
-                },
-                constraints: const BoxConstraints(maxHeight: 200),
-                menuProps: const MenuProps(
-                  backgroundColor: Color(0xFF151515),
-                  margin: EdgeInsets.only(top: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
+              const SizedBox(
+                height: 12,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                    labelStyle:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
+                    hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
+                    labelText: "Dosen2",
+                    alignLabelWithHint: true),
+                autocorrect: false,
+                style: const TextStyle(fontWeight: FontWeight.normal),
+                textInputAction: TextInputAction.next,
+                controller: dosen2Controller,
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                    labelStyle:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
+                    hintText: "Ex: fst-404",
+                    labelText: "Ruang kelas",
+                    alignLabelWithHint: true),
+                autocorrect: false,
+                style: const TextStyle(fontWeight: FontWeight.normal),
+                textInputAction: TextInputAction.next,
+                controller: ruanganController,
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              DropdownSearch<String>(
+                selectedItem: hariController,
+                decoratorProps: DropDownDecoratorProps(
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      hintStyle: const TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 17),
+                      hintText: "Pilih hari..."),
+                ),
+                suffixProps: const DropdownSuffixProps(
+                  dropdownButtonProps: DropdownButtonProps(
+                    iconOpened: Icon(Icons.keyboard_arrow_up),
+                    iconClosed: Icon(Icons.keyboard_arrow_down),
                   ),
                 ),
-              ),
-              items: (filter, loadProps) => hari.toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  hariController = value;
-                } else {
-                  hariController = "";
-                }
-              },
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            DropdownSearch<String>(
-              selectedItem: kelasController,
-              decoratorProps: DropDownDecoratorProps(
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    hintStyle: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 17),
-                    hintText: "Pilih kelas..."),
-              ),
-              suffixProps: const DropdownSuffixProps(
-                dropdownButtonProps: DropdownButtonProps(
-                  iconOpened: Icon(Icons.keyboard_arrow_up),
-                  iconClosed: Icon(Icons.keyboard_arrow_down),
-                ),
-              ),
-              popupProps: PopupProps.menu(
-                itemBuilder: (context, item, isDisabled, isSelected) {
-                  return Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Text(item),
-                  );
-                },
-                constraints: const BoxConstraints(maxHeight: 200),
-                menuProps: const MenuProps(
-                  backgroundColor: Color(0xFF151515),
-                  margin: EdgeInsets.only(top: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-              items: (filter, loadProps) => kelas.toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  kelasController = value;
-                } else if (value == null) {
-                  kelasController = "";
-                }
-              },
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  (formattedJamAwal == null)
-                      ? "Jam Kuliah"
-                      : formattedJamAwal! +
-                          divider(formattedJamAkhir!) +
-                          formattedJamAkhir!,
-                  style: const TextStyle(fontSize: 18),
-                ),
-                TextButton(
-                  style: const ButtonStyle(
-                      padding: WidgetStatePropertyAll(
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 8))),
-                  onPressed: () {
-                    TimeRangePicker.show(
-                      autoAdjust: true,
-                      unSelectedEmpty: true,
-                      context: context,
-                      onSubmitted: (TimeRangeValue value) {
-                        setState(() {
-                          if (value.endTime != null) {
-                            formattedJamAwal =
-                                "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                            formattedJamAkhir =
-                                "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
-                          } else if (value.startTime == null) {
-                            formattedJamAwal = null;
-                            formattedJamAkhir = null;
-                          } else {
-                            formattedJamAwal =
-                                "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                            formattedJamAkhir = "";
-                          }
-                        });
-                      },
-                    );
-                  },
-                  child: const Text(
-                    "Select Time",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            OutlinedButton(
-                style: ButtonStyle(
-                    alignment: Alignment.center,
-                    fixedSize: WidgetStatePropertyAll(
-                        Size.fromWidth(mediaQueryWidth * 1 / 3))),
-                onPressed: () {
-                  if (matkulController.text.isNotEmpty &&
-                      hariController != null &&
-                      formattedJamAwal != null) {
-                    addJadwal();
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text("Form tidak lengkap"),
-                        content: Text("Harap Isi Matkul, Hari, dan Jam"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "ok",
-                              style: TextStyle(fontSize: 17),
-                            ),
-                          )
-                        ],
+                popupProps: PopupProps.menu(
+                  itemBuilder: (context, item, isDisabled, isSelected) {
+                    return Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Text(
+                        item,
                       ),
                     );
+                  },
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  menuProps: const MenuProps(
+                    backgroundColor: Color(0xFF151515),
+                    margin: EdgeInsets.only(top: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                items: (filter, loadProps) => hari.toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    hariController = value;
+                  } else {
+                    hariController = "";
                   }
                 },
-                // onPressed: addJadwal,
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [Text("Simpan"), Icon(Icons.save)],
-                ))
-          ],
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              DropdownSearch<String>(
+                selectedItem: kelasController,
+                decoratorProps: DropDownDecoratorProps(
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      hintStyle: const TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 17),
+                      hintText: "Pilih kelas..."),
+                ),
+                suffixProps: const DropdownSuffixProps(
+                  dropdownButtonProps: DropdownButtonProps(
+                    iconOpened: Icon(Icons.keyboard_arrow_up),
+                    iconClosed: Icon(Icons.keyboard_arrow_down),
+                  ),
+                ),
+                popupProps: PopupProps.menu(
+                  itemBuilder: (context, item, isDisabled, isSelected) {
+                    return Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Text(item),
+                    );
+                  },
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  menuProps: const MenuProps(
+                    backgroundColor: Color(0xFF151515),
+                    margin: EdgeInsets.only(top: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                items: (filter, loadProps) => kelas.toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    kelasController = value;
+                  } else if (value == null) {
+                    kelasController = "";
+                  }
+                },
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    (formattedJamAwal == null)
+                        ? "Jam Kuliah"
+                        : formattedJamAwal! +
+                            divider(formattedJamAkhir!) +
+                            formattedJamAkhir!,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  TextButton(
+                    style: const ButtonStyle(
+                        padding: WidgetStatePropertyAll(
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 8))),
+                    onPressed: () {
+                      TimeRangePicker.show(
+                        autoAdjust: true,
+                        unSelectedEmpty: true,
+                        context: context,
+                        onSubmitted: (TimeRangeValue value) {
+                          setState(() {
+                            if (value.endTime != null) {
+                              formattedJamAwal =
+                                  "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
+                              formattedJamAkhir =
+                                  "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
+                            } else if (value.startTime == null) {
+                              formattedJamAwal = null;
+                              formattedJamAkhir = null;
+                            } else {
+                              formattedJamAwal =
+                                  "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
+                              formattedJamAkhir = "";
+                            }
+                          });
+                        },
+                      );
+                    },
+                    child: const Text(
+                      "Select Time",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              OutlinedButton(
+                  style: ButtonStyle(
+                      alignment: Alignment.center,
+                      fixedSize: WidgetStatePropertyAll(
+                          Size.fromWidth(mediaQueryWidth * 1 / 3))),
+                  onPressed: () {
+                    if (matkulController.text.isNotEmpty &&
+                        hariController != null &&
+                        formattedJamAwal != null) {
+                      addJadwal();
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Form tidak lengkap"),
+                          content:
+                              const Text("Harap Isi Matkul, Hari, dan Jam"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
+                                "ok",
+                                style: TextStyle(fontSize: 17),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    }
+                  },
+                  // onPressed: addJadwal,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [Text("Simpan"), Icon(Icons.save)],
+                  ))
+            ],
+          ),
         ),
       ),
     );
