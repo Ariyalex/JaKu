@@ -255,7 +255,7 @@ class _AddMatkulState extends State<DetailMatkul> {
               DropdownSearch<String>(
                 selectedItem:
                     (kelasController == "null" || kelasController == "")
-                        ? "Kelas tidak dipilih"
+                        ? "Kelas belum dipilih"
                         : kelasController,
                 decoratorProps: DropDownDecoratorProps(
                   decoration: InputDecoration(

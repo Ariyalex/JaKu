@@ -317,8 +317,8 @@ class _AddMatkulState extends State<AddMatkul> {
                 onChanged: (value) {
                   if (value != null) {
                     kelasController = value;
-                  } else if (value == null) {
-                    kelasController = "";
+                  } else if (value == null || value == "") {
+                    kelasController = null;
                   }
                 },
               ),

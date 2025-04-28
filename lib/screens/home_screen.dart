@@ -106,6 +106,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  static void clearAllData(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Hapus Semua Data"),
+        content: Text("Yakin ingin menghapus semua data?"),
+        actions: [
+          OutlinedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Tidak")),
+          FilledButton(
+              onPressed: () async {
+                final pdfBack = Provider.of<PdfBack>(context);
+                await pdfBack.clearUserData();
+                Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+              },
+              child: const Text("Ya"))
+        ],
+      ),
+    );
+  }
+
   Drawer howTo = Drawer(
     child: DrawerGuide(),
   );
@@ -115,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final allMatkulProvider = Provider.of<Jadwalkuliah>(context);
     final jadwalKuliahDayProvider =
         Provider.of<JadwalKuliahDay>(context, listen: true);
-    final pdfBack = Provider.of<PdfBack>(context);
+
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -125,14 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Builder(
           builder: (context) => PopupMenuButton<String>(
             icon: const Icon(Icons.menu), // Burger Icon
-            onSelected: (value) async {
+            onSelected: (value) {
               if (value == "info") {
                 _showInfoDialog(context);
               } else if (value == "logout") {
                 _logout(context);
               } else if (value == "clear") {
-                await pdfBack.clearUserData();
-                Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+                clearAllData(context);
               }
             },
             position: PopupMenuPosition.under,
