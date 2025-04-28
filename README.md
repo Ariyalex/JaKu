@@ -2,7 +2,7 @@
 
 Jaku apps all version : https://drive.google.com/drive/folders/1CGp_dSi73SUdnOZ-KD2QuTRkrUn2YaAl?usp=sharing  
 
-Jaku adalah aplikasi Jadwal Kuliah yang berbasis Flutter dan menggunakan Firebase sebagai backend. Project ini dibuat untuk memudahkan user terutama Mahasiswa khususnya mahasiswa UIN SUKA yang ingin melihat jadwal kuliah harus melakukan login SIA. JaKu menawarkan tampilan jadwal yang informatif yang disorting menurut waktu, ini memudahkan user melihat jadwal pada hari itu. Untuk sekarang, kekurangan JaKu yaitu pada input jadwal yang monoton dan terlalu berulang-ulang, ini menyebabkan user experience buruk. Mungkin di versi yang akan datang masalah ini akan diatasi.
+Jaku adalah aplikasi Jadwal Kuliah yang berbasis Flutter dan menggunakan Firebase sebagai backend. Project ini dibuat untuk memudahkan Mahasiswa khususnya mahasiswa UIN SUKA yang setiap melihat jadwal kuliah harus login SIA, Aplikasi ini bisa menampilkan jadwal kuliah hanya dengan membuka aplikasi. JaKu menawarkan tampilan jadwal yang informatif yang disorting menurut waktu, ini memudahkan user melihat jadwal pada hari itu. Jaku dapat mengimport data jadwal kuliah secara otomatis (khusus UIN SUKA) sehingga memudahkan pengguna menambahkan jadwal.
 
 ## Getting Started
 
