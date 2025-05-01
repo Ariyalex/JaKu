@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:jaku/controllers/edit_matkul_c.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:provider/provider.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
+import 'package:get/get.dart';
+
 import '../provider/jadwal_kuliah.dart';
 
 class DetailMatkul extends StatefulWidget {
@@ -27,43 +30,38 @@ class _AddMatkulState extends State<DetailMatkul> {
 
   final Set<String> kelas = {"A", "B", "C", "D"};
 
-  String? hariController, kelasController;
-
-  String? formattedJamAwal, formattedJamAkhir;
-
   @override
   Widget build(BuildContext context) {
+    final editC = Get.put(EditMatkulC());
+
     final allMatkulProvider = Provider.of<Jadwalkuliah>(context);
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final matkulId = ModalRoute.of(context)?.settings.arguments as String;
     final selectedMatkul = allMatkulProvider.selectById(matkulId);
 
-    TextEditingController matkulController =
-        TextEditingController(text: selectedMatkul!.matkul);
-    TextEditingController dosen1Controller =
-        TextEditingController(text: selectedMatkul.dosen1);
-    TextEditingController dosen2Controller =
-        TextEditingController(text: selectedMatkul.dosen2);
-    TextEditingController ruanganController =
-        TextEditingController(text: selectedMatkul.room);
-
-    hariController ??= selectedMatkul.day;
-    kelasController ??= selectedMatkul.kelas;
-    formattedJamAwal ??= selectedMatkul.formattedJamAwal;
-    formattedJamAkhir ??= selectedMatkul.formattedJamAkhir;
+    if (editC.matkulC.text.isEmpty) {
+      editC.matkulC.text = selectedMatkul!.matkul!;
+      editC.dosen1C.text = selectedMatkul.dosen1!;
+      editC.dosen2C.text = selectedMatkul.dosen2!;
+      editC.ruanganC.text = selectedMatkul.room!;
+      editC.kelas.value = selectedMatkul.kelas;
+      editC.hari.value = selectedMatkul.day;
+      editC.jamAwal.value = selectedMatkul.formattedJamAwal!;
+      editC.jamAkhir.value = selectedMatkul.formattedJamAkhir!;
+    }
 
     void editJadwal() {
       allMatkulProvider
           .updateMatkul(
               matkulId,
-              matkulController.text,
-              kelasController.toString(),
-              formattedJamAwal!,
-              formattedJamAkhir.toString(),
-              dosen1Controller.text,
-              dosen2Controller.text,
-              ruanganController.text,
-              hariController!)
+              editC.matkulC.text,
+              editC.kelas.value.toString(),
+              editC.jamAwal.value!,
+              editC.jamAkhir.value.toString(),
+              editC.dosen1C.text,
+              editC.dosen2C.text,
+              editC.ruanganC.text,
+              editC.hari.value!)
           .then(
         (response) {
           Provider.of<JadwalKuliahDay>(context, listen: false)
@@ -78,18 +76,18 @@ class _AddMatkulState extends State<DetailMatkul> {
       ).then(
         (value) {
           setState(() {
-            matkulController.clear();
-            dosen1Controller.clear();
-            dosen2Controller.clear();
-            ruanganController.clear();
-            kelasController = null;
-            formattedJamAkhir = null;
-            formattedJamAwal = null;
-            hariController = null;
+            editC.matkulC.clear();
+            editC.dosen1C.clear();
+            editC.dosen2C.clear();
+            editC.ruanganC.clear();
+            editC.kelas.value = null;
+            editC.jamAkhir.value = null;
+            editC.jamAwal.value = null;
+            editC.hari.value = null;
           });
         },
       );
-      Navigator.pop(context);
+      Get.back();
     }
 
     String divider(String formattedJamAkhir) {
@@ -106,9 +104,9 @@ class _AddMatkulState extends State<DetailMatkul> {
         actions: [
           IconButton(
               onPressed: () {
-                if (matkulController.text.isNotEmpty &&
-                    hariController != null &&
-                    formattedJamAwal != null) {
+                if (editC.matkulC.text.isNotEmpty &&
+                    editC.hari.value != null &&
+                    editC.jamAwal.value != null) {
                   editJadwal();
                 } else {
                   showDialog(
@@ -119,7 +117,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.pop(context);
+                            Get.back();
                           },
                           child: const Text(
                             "ok",
@@ -150,7 +148,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: matkulController,
+                controller: editC.matkulC,
               ),
               const SizedBox(
                 height: 12,
@@ -165,7 +163,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: dosen1Controller,
+                controller: editC.dosen1C,
               ),
               const SizedBox(
                 height: 12,
@@ -180,7 +178,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: dosen2Controller,
+                controller: editC.dosen2C,
               ),
               const SizedBox(
                 height: 12,
@@ -195,14 +193,14 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: ruanganController,
+                controller: editC.ruanganC,
               ),
               const SizedBox(
                 height: 12,
               ),
               DropdownSearch<String>(
                 selectedItem:
-                    (hariController == "null") ? null : hariController,
+                    (editC.hari.value == "null") ? null : editC.hari.value,
                 decoratorProps: DropDownDecoratorProps(
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -242,9 +240,9 @@ class _AddMatkulState extends State<DetailMatkul> {
                 onChanged: (value) {
                   setState(() {
                     if (value != null) {
-                      hariController = value;
+                      editC.hari.value = value;
                     } else {
-                      hariController = null;
+                      editC.hari.value = null;
                     }
                   });
                 },
@@ -254,9 +252,9 @@ class _AddMatkulState extends State<DetailMatkul> {
               ),
               DropdownSearch<String>(
                 selectedItem:
-                    (kelasController == "null" || kelasController == "")
+                    (editC.kelas.value == "null" || editC.kelas.value == "")
                         ? "Kelas belum dipilih"
-                        : kelasController,
+                        : editC.kelas.value,
                 decoratorProps: DropDownDecoratorProps(
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -293,9 +291,9 @@ class _AddMatkulState extends State<DetailMatkul> {
                 items: (filter, loadProps) => kelas.toList(),
                 onChanged: (value) {
                   if (value != null) {
-                    kelasController = value;
+                    editC.kelas.value = value;
                   } else if (value == null) {
-                    kelasController = "";
+                    editC.kelas.value = "";
                   }
                 },
               ),
@@ -306,9 +304,10 @@ class _AddMatkulState extends State<DetailMatkul> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    (formattedJamAwal == null)
+                    (editC.jamAwal.value == null ||
+                            editC.jamAwal.value == "null:null")
                         ? "Jam Kuliah"
-                        : "$formattedJamAwal ${divider(formattedJamAkhir!)} $formattedJamAkhir",
+                        : "${editC.jamAwal.value} ${divider(editC.jamAkhir.value!)} ${editC.jamAkhir.value}",
                     style: const TextStyle(fontSize: 19),
                   ),
                   FilledButton(
@@ -323,16 +322,17 @@ class _AddMatkulState extends State<DetailMatkul> {
                         onSubmitted: (TimeRangeValue value) {
                           setState(() {
                             if (value.endTime != null) {
-                              formattedJamAwal =
+                              editC.jamAwal.value =
                                   "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              formattedJamAkhir =
+                              editC.jamAkhir.value =
                                   "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
                             } else {
-                              formattedJamAwal =
+                              editC.jamAwal.value =
                                   "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              formattedJamAkhir = "";
+                              editC.jamAkhir.value = "";
                             }
                           });
+                          print(editC.jamAwal.value);
                         },
                       );
                     },
@@ -352,9 +352,9 @@ class _AddMatkulState extends State<DetailMatkul> {
                       fixedSize: WidgetStatePropertyAll(
                           Size.fromWidth(mediaQueryWidth * 1 / 3))),
                   onPressed: () {
-                    if (matkulController.text.isNotEmpty &&
-                        hariController != null &&
-                        formattedJamAwal != null) {
+                    if (editC.matkulC.text.isNotEmpty &&
+                        editC.hari.value != null &&
+                        editC.jamAwal.value != "null:null") {
                       editJadwal();
                     } else {
                       showDialog(
@@ -366,7 +366,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                           actions: [
                             TextButton(
                               onPressed: () {
-                                Navigator.pop(context);
+                                Get.back();
                               },
                               child: const Text(
                                 "ok",

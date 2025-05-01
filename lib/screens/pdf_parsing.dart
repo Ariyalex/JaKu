@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:jaku/provider/pdf_back.dart';
-import 'package:jaku/screens/guide_pdf.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+
+import '../routes/route_named.dart';
 
 class PdfParsing extends StatelessWidget {
   static const routeNamed = "/pdf-parsing";
@@ -20,9 +22,9 @@ class PdfParsing extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, GuidePdf.routeNamed);
+                  Get.toNamed(RouteNamed.guidePdf);
                 },
-                icon: Icon(Icons.info_outline))
+                icon: const Icon(Icons.info_outline))
           ],
         ),
         body: Center(
@@ -39,15 +41,15 @@ class PdfParsing extends StatelessWidget {
               ),
               Container(
                 width: mediaQueryWidth * 2 / 3,
-                margin: EdgeInsets.symmetric(vertical: 10),
-                padding: EdgeInsets.all(10),
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.white, width: 1.3),
                 ),
                 child: Column(
                   children: [
-                    Text("File terpilih:"),
+                    const Text("File terpilih:"),
                     Text(
                       pdfback.selectedFile?.path ?? 'Belum ada file dipilih',
                       textAlign: TextAlign.center,
@@ -56,12 +58,12 @@ class PdfParsing extends StatelessWidget {
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(bottom: 10),
+                margin: const EdgeInsets.only(bottom: 10),
                 child: Text(
                   pdfback.responseMessage ?? '',
                   style: TextStyle(
                     color: pdfback.responseMessage?.contains('Error') ?? false
-                        ? Color(0xFFCF6679)
+                        ? const Color(0xFFCF6679)
                         : Colors.green,
                   ),
                 ),
@@ -120,7 +122,7 @@ class PdfParsing extends StatelessWidget {
                 const SizedBox(height: 10),
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/');
+                    Get.offNamed(RouteNamed.homePage);
                   },
                   child: const Text("Kembali ke Home"),
                 ),

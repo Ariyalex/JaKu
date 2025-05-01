@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import '../../provider/auth.dart' as aut;
 
 class RecoveryPass extends StatefulWidget {
-  static const routeNamed = "/recovery-pass";
-
   const RecoveryPass({super.key});
 
   @override
@@ -27,7 +26,7 @@ class _RecoveryPassState extends State<RecoveryPass> {
 
       await Provider.of<aut.Auth>(context, listen: false).resetPassword(email);
 
-      Navigator.pop(context);
+      Get.back();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           duration: Duration(milliseconds: 1200),
@@ -88,7 +87,8 @@ class _RecoveryPassState extends State<RecoveryPass> {
                 style: titleStyle,
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: const Color(0xFF151515),
@@ -168,7 +168,7 @@ class _RecoveryPassState extends State<RecoveryPass> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10))),
                         onPressed: () {
-                          Navigator.pop(context);
+                          Get.back();
                         },
                         child: const Text(
                           "Back",

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/screens/auth_screen/sign_in_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+
+import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
 import '../../provider/auth.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
-  static const routeNamed = "/sign-up";
 
   @override
   State<SignUp> createState() => _SignUpState();
@@ -63,11 +64,7 @@ class _SignUpState extends State<SignUp> {
 
         if (!mounted) return null;
 
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SignIn(),
-            ));
+        Get.offNamed(RouteNamed.signInScreen);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             duration: Duration(milliseconds: 1200),
@@ -116,7 +113,8 @@ class _SignUpState extends State<SignUp> {
                 style: titleStyle,
               ),
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 decoration: BoxDecoration(
                   color: const Color(0xFF151515),
                   borderRadius: BorderRadius.circular(20),
@@ -253,7 +251,7 @@ class _SignUpState extends State<SignUp> {
                       baseline: TextBaseline.alphabetic,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, SignIn.routeNamed);
+                          Get.toNamed(RouteNamed.signInScreen);
                         },
                         child: const Text(
                           "Sign in",

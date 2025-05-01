@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import './home_screen.dart';
+
+import '../routes/route_named.dart';
 import '../provider/auth.dart' as aut;
 
 const users = {
@@ -13,7 +15,6 @@ const users = {
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-  static const routeName = "/auth-page";
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -71,10 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return FlutterLogin(
       title: 'JaKu',
       theme: LoginTheme(
-          pageColorDark: Color.fromARGB(255, 107, 107, 107),
-          pageColorLight: Color.fromARGB(255, 40, 39, 39),
-          errorColor: Color(0xFFCF6679),
-          cardTheme: CardTheme(color: Color(0xFF151515))),
+          pageColorDark: const Color.fromARGB(255, 107, 107, 107),
+          pageColorLight: const Color.fromARGB(255, 40, 39, 39),
+          errorColor: const Color(0xFFCF6679),
+          cardTheme: const CardTheme(color: Color(0xFF151515))),
       // logo: const AssetImage('assets/images/ecorp-lightblue.png'),
       onLogin: authUser,
       onSignup: signupUser,
@@ -90,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 try {
                   await Provider.of<aut.Auth>(context, listen: false)
                       .signInWithGoogle();
-                  Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+                  Get.offNamed(RouteNamed.homePage);
                 } catch (e) {
                   print("error: $e");
                 }
@@ -108,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
-        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+        Get.offNamed(RouteNamed.homePage);
       },
       onRecoverPassword: _recoverPassword,
     );

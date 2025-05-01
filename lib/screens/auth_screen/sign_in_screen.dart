@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/screens/auth_screen/recovery_pass.dart';
-import 'package:jaku/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:jaku/screens/auth_screen/sign_up_screen.dart';
+import 'package:get/get.dart';
 
+import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
 import '../../provider/auth.dart' as aut;
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
-  static const routeNamed = "/sign-in";
 
   @override
   State<SignIn> createState() => _SignInState();
@@ -58,11 +56,7 @@ class _SignInState extends State<SignIn> {
         if (!mounted) return null;
 
         //jika berhasil login, langsung navigasi
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ));
+        Get.offNamed(RouteNamed.homePage);
       } catch (error) {
         if (!mounted) return null;
         print(error.toString());
@@ -103,7 +97,8 @@ class _SignInState extends State<SignIn> {
                 style: titleStyle,
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: const Color(0xFF151515),
@@ -195,7 +190,7 @@ class _SignInState extends State<SignIn> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, RecoveryPass.routeNamed);
+                        Get.toNamed(RouteNamed.recoveryPass);
                       },
                       child: const Text("Forgot password?"),
                     ),
@@ -224,12 +219,7 @@ class _SignInState extends State<SignIn> {
 
                         if (!mounted) return;
 
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
-                          ),
-                        );
+                        Get.offNamed(RouteNamed.homePage);
                       } catch (e) {
                         if (!mounted) return;
 
@@ -284,7 +274,7 @@ class _SignInState extends State<SignIn> {
                       baseline: TextBaseline.alphabetic,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, SignUp.routeNamed);
+                          Get.toNamed(RouteNamed.signUpScreen);
                         },
                         child: const Text(
                           "Sign up",

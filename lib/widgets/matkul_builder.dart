@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 import '../models/jadwal.dart';
 import '../provider/jadwal_kuliah.dart';
-import '../screens/detail_matkul.dart';
+import '../routes/route_named.dart';
 // import '../provider/hari_kuliah.dart';
 
 class MatkulBuilder extends StatelessWidget {
@@ -43,8 +44,7 @@ class MatkulBuilder extends StatelessWidget {
             color: const Color(0xFF282828),
             child: ListTile(
               onTap: () {
-                Navigator.pushNamed(context, DetailMatkul.routeName,
-                    arguments: id);
+                Get.toNamed(RouteNamed.editMatkul, arguments: id);
               },
               onLongPress: () {
                 showDialog(
@@ -55,7 +55,7 @@ class MatkulBuilder extends StatelessWidget {
                     actions: [
                       TextButton(
                           onPressed: () {
-                            Navigator.pop(context);
+                            Get.back();
                           },
                           child: const Text("No")),
                       OutlinedButton(
@@ -65,7 +65,7 @@ class MatkulBuilder extends StatelessWidget {
                             Provider.of<JadwalKuliahDay>(context,
                                 listen: false),
                           );
-                          Navigator.pop(context);
+                          Get.back();
                         },
                         child: const Text("Yes"),
                       )

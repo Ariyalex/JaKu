@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/pdf_back.dart';
-import 'package:jaku/screens/auth_screen/sign_in_screen.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 import '../provider/hari_kuliah.dart';
 import '../provider/jadwal_kuliah.dart';
-import '../screens/add_matkul.dart';
 import '../widgets/day_card_builder.dart';
-import 'pdf_parsing.dart';
+import '../routes/route_named.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     actions: [
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Get.back();
                         },
                         child: const Text("Okay"),
                       ),
@@ -77,12 +76,12 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Get.back();
               },
               child: const Text("Tidak")),
           FilledButton(
               onPressed: () async {
-                Navigator.pop(context);
+                Get.back();
                 var matkuls = Provider.of<Jadwalkuliah>(context, listen: false);
                 var auth = Provider.of<Auth>(context, listen: false);
                 // await Future.delayed(Duration(milliseconds: 100));
@@ -94,8 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Duration.zero,
                   () {
                     if (context.mounted) {
-                      Navigator.pushReplacementNamed(
-                          context, SignIn.routeNamed);
+                      Get.offNamed(RouteNamed.signInScreen);
                     }
                   },
                 );
@@ -110,19 +108,19 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Hapus Semua Data"),
-        content: Text("Yakin ingin menghapus semua data?"),
+        title: const Text("Hapus Semua Data"),
+        content: const Text("Yakin ingin menghapus semua data?"),
         actions: [
           OutlinedButton(
               onPressed: () {
-                Navigator.pop(context);
+                Get.back();
               },
               child: const Text("Tidak")),
           FilledButton(
               onPressed: () async {
-                final pdfBack = Provider.of<PdfBack>(context);
+                final pdfBack = Provider.of<PdfBack>(context, listen: false);
                 await pdfBack.clearUserData();
-                Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+                Get.offNamed(RouteNamed.homePage);
               },
               child: const Text("Ya"))
         ],
@@ -130,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Drawer howTo = Drawer(
+  Drawer howTo = const Drawer(
     child: DrawerGuide(),
   );
 
@@ -187,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, AddMatkul.routeName);
+              Get.toNamed(RouteNamed.addMatkul);
             },
             icon: const Icon(Icons.add),
           ),
@@ -203,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else if (allMatkulProvider.allMatkul.isEmpty) {
             return Container(
-              margin: EdgeInsets.only(top: 50),
+              margin: const EdgeInsets.only(top: 50),
               width: mediaQueryWidth,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -214,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "Jadwal Kosong??!!!",
                         style: TextStyle(fontSize: 25),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       SizedBox(
@@ -227,17 +225,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           )),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   FilledButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, AddMatkul.routeName);
+                      Get.toNamed(RouteNamed.addMatkul);
                     },
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
+                        Text(
                           "Add Matkul",
                           style: TextStyle(fontSize: 17),
                         ),
@@ -248,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   FilledButton(
@@ -268,16 +266,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             actions: [
                               OutlinedButton(
                                   onPressed: () {
-                                    Navigator.pop(context);
+                                    Get.back();
                                   },
-                                  child: Text("Ga jadi")),
+                                  child: const Text("Ga jadi")),
                               FilledButton(
                                   onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(
-                                        context, PdfParsing.routeNamed);
+                                    Get.back();
+                                    Get.toNamed(RouteNamed.pdfParsing);
                                   },
-                                  child: Text("Ok Bang"))
+                                  child: const Text("Ok Bang"))
                             ],
                           ),
                         );

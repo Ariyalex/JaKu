@@ -58,7 +58,7 @@ class GuidePdf extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Guide Otomation"),
+        title: const Text("Guide Otomation"),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -107,10 +107,10 @@ class TutorialStepCard extends StatelessWidget {
   final TutorialStep tutorialStep;
 
   const TutorialStepCard({
-    Key? key,
+    super.key,
     required this.step,
     required this.tutorialStep,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
