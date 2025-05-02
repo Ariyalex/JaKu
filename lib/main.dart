@@ -7,7 +7,6 @@ import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/home_screen.dart';
 import 'package:jaku/screens/auth_screen/sign_in_screen.dart';
-import 'package:provider/provider.dart';
 
 import '../provider/hari_kuliah.dart';
 import '../provider/jadwal_kuliah.dart';
@@ -17,6 +16,16 @@ import './theme/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Inisialisasi controller tanpa menyimpan ke variabel lokal
+  Get.put(AuthController(), permanent: true);
+  Get.put(JadwalkuliahController(), permanent: true);
+  Get.put(DayKuliahController(), permanent: true);
+  Get.put(PdfBack(), permanent: true);
+
+  // Pastikan data login dimuat sebelum menampilkan UI
+  await Get.find<AuthController>().initializeAuth();
+
   runApp(const MyApp());
 }
 
@@ -25,45 +34,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => Auth()..checkLoginStatus()),
-        ChangeNotifierProvider(
-          create: (context) => JadwalKuliahDay(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => PdfBack(),
-        ),
-        ChangeNotifierProxyProvider<Auth, Jadwalkuliah>(
-          create: (context) => Jadwalkuliah(),
-          update: (context, auth, jadwalKuliah) {
-            if (auth.isLoggedIn) {
-              jadwalKuliah ??= Jadwalkuliah();
-              jadwalKuliah.updateAuthData(auth.user);
-              jadwalKuliah.getOnce().then(
-                (value) {
-                  Provider.of<JadwalKuliahDay>(context, listen: false)
-                      .groupByDay(jadwalKuliah!);
-                },
-              );
-            } else {
-              jadwalKuliah?.clearData();
-              jadwalKuliah?.cancelSubscription();
-            }
-            return jadwalKuliah ?? Jadwalkuliah();
-          },
-        )
-      ],
-      builder: (context, child) =>
-          Consumer<Auth>(builder: (context, auth, child) {
-        return GetMaterialApp(
-          theme: AppTheme.dark,
-          debugShowCheckedModeBanner: false,
-          // home: auth.isLoggedIn ? HomeScreen() : LoginScreen(),
-          home: auth.isLoggedIn ? const HomeScreen() : const SignIn(),
-          getPages: AppPage.pages,
-        );
-      }),
+    return GetMaterialApp(
+      theme: AppTheme.dark,
+      debugShowCheckedModeBanner: false,
+      home: Obx(
+        () {
+          final authController = Get.find<AuthController>();
+          return authController.isLoggedIn
+              ? const HomeScreen()
+              : const SignIn();
+        },
+      ),
+      getPages: AppPage.pages,
     );
   }
 }

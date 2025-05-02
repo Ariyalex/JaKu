@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/edit_matkul_c.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
-import 'package:provider/provider.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
@@ -33,8 +32,9 @@ class _AddMatkulState extends State<DetailMatkul> {
   @override
   Widget build(BuildContext context) {
     final editC = Get.put(EditMatkulC());
+    final allMatkulProvider = Get.find<JadwalkuliahController>();
+    final dayKuliahController = Get.find<DayKuliahController>();
 
-    final allMatkulProvider = Provider.of<Jadwalkuliah>(context);
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final matkulId = ModalRoute.of(context)?.settings.arguments as String;
     final selectedMatkul = allMatkulProvider.selectById(matkulId);
@@ -64,8 +64,7 @@ class _AddMatkulState extends State<DetailMatkul> {
               editC.hari.value!)
           .then(
         (response) {
-          Provider.of<JadwalKuliahDay>(context, listen: false)
-              .groupByDay(allMatkulProvider);
+          dayKuliahController.groupByDay(allMatkulProvider);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text("Berhasil diedit"),

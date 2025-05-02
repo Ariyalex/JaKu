@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 
 import '../../routes/route_named.dart';
@@ -27,7 +26,7 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
-    final jadwalProvider = Provider.of<Jadwalkuliah>(context, listen: false);
+    final jadwalProvider = Get.find<JadwalkuliahController>();
 
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final mediaQueryHeight = MediaQuery.of(context).size.height;
@@ -57,10 +56,8 @@ class _SignUpState extends State<SignUp> {
           throw ("password harus lebih dari 6 karakter");
         }
 
-        await Provider.of<Auth>(context, listen: false).signUp(
-            emailController.text.trim(),
-            confirmPassController.text.trim(),
-            jadwalProvider);
+        await Get.find<AuthController>().signUp(emailController.text.trim(),
+            confirmPassController.text.trim(), jadwalProvider);
 
         if (!mounted) return null;
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
-import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 
 import '../provider/hari_kuliah.dart';
@@ -26,9 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     if (isInit) {
-      final jadwalProvider = Provider.of<Jadwalkuliah>(context, listen: false);
-      final jadwalHariProvider =
-          Provider.of<JadwalKuliahDay>(context, listen: false);
+      final jadwalProvider = Get.find<JadwalkuliahController>();
+      final jadwalHariProvider = Get.find<DayKuliahController>();
 
       _futureMatkul = jadwalProvider.getOnce().then(
         (_) {
@@ -81,22 +79,42 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text("Tidak")),
           FilledButton(
               onPressed: () async {
+                // Tutup dialog konfirmasi
                 Get.back();
-                var matkuls = Provider.of<Jadwalkuliah>(context, listen: false);
-                var auth = Provider.of<Auth>(context, listen: false);
-                // await Future.delayed(Duration(milliseconds: 100));
 
-                await auth.signOut(matkuls);
-                print("logout selesai");
-
-                Future.delayed(
-                  Duration.zero,
-                  () {
-                    if (context.mounted) {
-                      Get.offNamed(RouteNamed.signInScreen);
-                    }
-                  },
+                // Tampilkan indikator loading
+                Get.dialog(
+                  const Center(child: CircularProgressIndicator()),
+                  barrierDismissible: false,
                 );
+
+                try {
+                  // Dapatkan controller yang diperlukan
+                  var matkuls = Get.find<JadwalkuliahController>();
+                  var auth = Get.find<AuthController>();
+
+                  // Lakukan proses logout
+                  await auth.signOut(matkuls);
+                  print("logout selesai");
+
+                  // Tutup loading dialog
+                  Get.back();
+
+                  // Navigasi ke halaman login dengan menghapus semua halaman sebelumnya
+                  Get.offAllNamed(RouteNamed.signInScreen);
+                } catch (e) {
+                  // Tutup loading dialog jika terjadi error
+                  Get.back();
+
+                  // Tampilkan pesan error
+                  Get.snackbar(
+                    'Gagal Logout',
+                    'Terjadi kesalahan: $e',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                }
               },
               child: const Text("Ya"))
         ],
@@ -118,9 +136,53 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text("Tidak")),
           FilledButton(
               onPressed: () async {
-                final pdfBack = Provider.of<PdfBack>(context, listen: false);
-                await pdfBack.clearUserData();
-                Get.offNamed(RouteNamed.homePage);
+                Get.back(); // Tutup dialog konfirmasi
+                // Menunjukkan loading indicator
+                Get.dialog(
+                  const Center(child: CircularProgressIndicator()),
+                  barrierDismissible: false,
+                );
+
+                try {
+                  // Dapatkan controller yang diperlukan
+                  final jadwalController = Get.find<JadwalkuliahController>();
+                  final dayController = Get.find<DayKuliahController>();
+                  final pdfBack = Get.find<PdfBack>();
+
+                  // Hapus data dari Firebase
+                  await pdfBack.clearUserData();
+
+                  // Hapus data lokal
+                  jadwalController.clearData();
+                  dayController.clearAllDays();
+
+                  // Tutup dialog loading
+                  Get.back();
+
+                  // Force refresh dengan navigasi
+                  Get.offAllNamed(RouteNamed.homePage);
+
+                  // Tampilkan notifikasi sukses
+                  Get.snackbar(
+                    'Berhasil',
+                    'Semua data berhasil dihapus',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+                } catch (e) {
+                  // Tutup dialog loading
+                  Get.back();
+
+                  // Tampilkan pesan error
+                  Get.snackbar(
+                    'Gagal',
+                    'Terjadi kesalahan saat menghapus data: $e',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                }
               },
               child: const Text("Ya"))
         ],
@@ -134,9 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Provider.of<Jadwalkuliah>(context);
-    final jadwalKuliahDayProvider =
-        Provider.of<JadwalKuliahDay>(context, listen: true);
+    final allMatkulProvider = Get.find<JadwalkuliahController>();
+    final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
 
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 

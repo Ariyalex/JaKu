@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:jaku/provider/pdf_back.dart';
-import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 
 import '../routes/route_named.dart';
@@ -12,8 +11,8 @@ class PdfParsing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pdfback = Provider.of<PdfBack>(context);
-    final jadwalProvider = Provider.of<Jadwalkuliah>(context, listen: false);
+    final pdfback = Get.find<PdfBack>();
+    final jadwalProvider = Get.find<JadwalkuliahController>();
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -50,83 +49,94 @@ class PdfParsing extends StatelessWidget {
                 child: Column(
                   children: [
                     const Text("File terpilih:"),
-                    Text(
-                      pdfback.selectedFile?.path ?? 'Belum ada file dipilih',
-                      textAlign: TextAlign.center,
-                    ),
+                    Obx(() => Text(
+                          pdfback.selectedFile.value?.path ??
+                              'Belum ada file dipilih',
+                          textAlign: TextAlign.center,
+                        )),
                   ],
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  pdfback.responseMessage ?? '',
-                  style: TextStyle(
-                    color: pdfback.responseMessage?.contains('Error') ?? false
-                        ? const Color(0xFFCF6679)
-                        : Colors.green,
-                  ),
-                ),
-              ),
-              FilledButton(
-                onPressed: pdfback.isLoading || pdfback.isUploading
-                    ? null
-                    : () {
-                        pdfback.uploadAndProcessPdf(jadwalProvider);
-                      },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                    (Set<WidgetState> states) {
-                      if (states.contains(WidgetState.disabled)) {
-                        return Colors.grey.shade500;
-                      }
-                      return Colors.green;
-                    },
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      pdfback.isLoading
-                          ? "Memproses..."
-                          : pdfback.isUploading
-                              ? "Menyimpan ke Firebase..."
-                              : "Upload, Proses & Simpan",
+              Obx(() => Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      pdfback.responseMessage.value,
                       style: TextStyle(
-                          color: pdfback.isLoading || pdfback.isUploading
-                              ? Colors.black
-                              : Colors.white),
+                        color: pdfback.responseMessage.value.contains('Error')
+                            ? const Color(0xFFCF6679)
+                            : Colors.green,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    pdfback.isLoading || pdfback.isUploading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.upload_file)
-                  ],
-                ),
-              ),
-              if (pdfback.allMatkul.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                Text(
-                  "Jadwal berhasil diproses: \n${pdfback.allMatkul.length} jadwal ditambahkan",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton(
-                  onPressed: () {
-                    Get.offNamed(RouteNamed.homePage);
-                  },
-                  child: const Text("Kembali ke Home"),
-                ),
-              ]
+                  )),
+              Obx(() => FilledButton(
+                    onPressed:
+                        pdfback.isLoading.value || pdfback.isUploading.value
+                            ? null
+                            : () {
+                                pdfback.uploadAndProcessPdf(jadwalProvider);
+                              },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return Colors.grey.shade500;
+                          }
+                          return Colors.green;
+                        },
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          pdfback.isLoading.value
+                              ? "Memproses..."
+                              : pdfback.isUploading.value
+                                  ? "Menyimpan ke Firebase..."
+                                  : "Upload, Proses & Simpan",
+                          style: TextStyle(
+                              color: pdfback.isLoading.value ||
+                                      pdfback.isUploading.value
+                                  ? Colors.black
+                                  : Colors.white),
+                        ),
+                        const SizedBox(width: 8),
+                        pdfback.isLoading.value || pdfback.isUploading.value
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.upload_file)
+                      ],
+                    ),
+                  )),
+              Obx(() {
+                if (pdfback.allMatkul.isNotEmpty) {
+                  return Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        "Jadwal berhasil diproses: \n${pdfback.allMatkul.length} jadwal ditambahkan",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton(
+                        onPressed: () {
+                          Get.offNamed(RouteNamed.homePage);
+                        },
+                        child: const Text("Kembali ke Home"),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              })
             ],
           ),
         ));

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
-import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 
 import '../models/jadwal.dart';
 import '../provider/jadwal_kuliah.dart';
 import '../routes/route_named.dart';
-// import '../provider/hari_kuliah.dart';
 
 class MatkulBuilder extends StatelessWidget {
   const MatkulBuilder({
@@ -18,7 +16,8 @@ class MatkulBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Provider.of<Jadwalkuliah>(context);
+    final allMatkulProvider = Get.find<JadwalkuliahController>();
+    final dayKuliahController = Get.find<DayKuliahController>();
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -61,10 +60,7 @@ class MatkulBuilder extends StatelessWidget {
                       OutlinedButton(
                         onPressed: () {
                           allMatkulProvider.deleteMatkuls(
-                            id!,
-                            Provider.of<JadwalKuliahDay>(context,
-                                listen: false),
-                          );
+                              id!, dayKuliahController);
                           Get.back();
                         },
                         child: const Text("Yes"),

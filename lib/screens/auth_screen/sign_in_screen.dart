@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
@@ -24,7 +23,8 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    final jadwalProvider = Provider.of<Jadwalkuliah>(context, listen: false);
+    final jadwalProvider = Get.find<JadwalkuliahController>();
+    final authController = Get.find<aut.AuthController>();
 
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final mediaQueryHeight = MediaQuery.of(context).size.height;
@@ -48,10 +48,8 @@ class _SignInState extends State<SignIn> {
           throw "Email dan Password tidak boleh kosong";
         }
 
-        await Provider.of<aut.Auth>(context, listen: false).signIn(
-            emailController.text.trim(),
-            passwordController.text.trim(),
-            jadwalProvider);
+        await authController.signIn(emailController.text.trim(),
+            passwordController.text.trim(), jadwalProvider);
 
         if (!mounted) return null;
 
@@ -214,8 +212,7 @@ class _SignInState extends State<SignIn> {
                           _isLoadingGoogle = true;
                         });
 
-                        await Provider.of<aut.Auth>(context, listen: false)
-                            .signInWithGoogle();
+                        await authController.signInWithGoogle();
 
                         if (!mounted) return;
 

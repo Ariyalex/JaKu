@@ -3,7 +3,6 @@ import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 import '../routes/route_named.dart';
 import '../provider/auth.dart' as aut;
@@ -26,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<String?> _recoverPassword(String email) async {
     debugPrint('Name: $email');
     try {
-      await Provider.of<aut.Auth>(context, listen: false).resetPassword(email);
+      await Get.find<aut.AuthController>().resetPassword(email);
       return null;
     } catch (error) {
       return error.toString();
@@ -35,14 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final jadwalProvider = Provider.of<Jadwalkuliah>(context, listen: false);
+    final jadwalProvider = Get.find<JadwalkuliahController>();
+    final authController = Get.find<aut.AuthController>();
 
     Future<String?> authUser(LoginData data) {
       debugPrint('Name: ${data.name}, Password: ${data.password}');
       return Future.delayed(loginTime).then((_) async {
         try {
-          await Provider.of<aut.Auth>(context, listen: false)
-              .signIn(data.name, data.password, jadwalProvider);
+          await authController.signIn(data.name, data.password, jadwalProvider);
         } catch (error) {
           if (!mounted) {
             return null;
@@ -57,8 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
       return Future.delayed(loginTime).then((_) async {
         try {
-          await Provider.of<aut.Auth>(context, listen: false)
-              .signUp(data.name!, data.password!, jadwalProvider);
+          await authController.signUp(
+              data.name!, data.password!, jadwalProvider);
         } catch (error) {
           if (!mounted) {
             return null;
@@ -89,8 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
             await Future.delayed(loginTime).then(
               (value) async {
                 try {
-                  await Provider.of<aut.Auth>(context, listen: false)
-                      .signInWithGoogle();
+                  await authController.signInWithGoogle();
                   Get.offNamed(RouteNamed.homePage);
                 } catch (e) {
                   print("error: $e");
@@ -103,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
       onSubmitAnimationCompleted: () async {
-        await Provider.of<Jadwalkuliah>(context, listen: false).getOnce();
+        await jadwalProvider.getOnce();
 
         if (!mounted) {
           return;

@@ -2,24 +2,24 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:jaku/models/jadwal.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class PdfBack with ChangeNotifier {
-  List<Matkul> _allMatkul = [];
+class PdfBack extends GetxController {
+  final RxList<Matkul> _allMatkul = <Matkul>[].obs;
   List<Matkul> get allMatkul => _allMatkul;
 
   final String baseUrl = 'https://pdfparsejaku-production.up.railway.app';
-  File? selectedFile;
-  String? responseMessage;
-  bool isLoading = false;
-  bool isUploading = false;
-  final Dio dio = Dio();
+  Rx<File?> selectedFile = Rx<File?>(null);
+  RxString responseMessage = RxString('');
+  RxBool isLoading = false.obs;
+  RxBool isUploading = false.obs;
+  final dio_package.Dio dio = dio_package.Dio();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -31,14 +31,12 @@ class PdfBack with ChangeNotifier {
       );
 
       if (result != null) {
-        selectedFile = File(result.files.single.path!);
-        responseMessage = "File dipilih: ${result.files.single.name}";
-        _allMatkul = []; // Reset data when a new file is selected
+        selectedFile.value = File(result.files.single.path!);
+        responseMessage.value = "File dipilih: ${result.files.single.name}";
+        _allMatkul.clear(); // Reset data when a new file is selected
       }
-      notifyListeners();
     } catch (e) {
-      responseMessage = "Error saat memilih file: $e";
-      notifyListeners();
+      responseMessage.value = "Error saat memilih file: $e";
       throw "Error saat memilih file: $e";
     }
   }
@@ -69,38 +67,35 @@ class PdfBack with ChangeNotifier {
 
       // Clear local data
       _allMatkul.clear();
-      notifyListeners();
     } catch (e) {
       print("Error clearing user data: $e");
       throw "Error clearing user data: $e";
     }
   }
 
-  Future<void> uploadAndProcessPdf(Jadwalkuliah jadwalProvider) async {
-    if (selectedFile == null) {
-      responseMessage = "Pilih file PDF terlebih dahulu";
-      notifyListeners();
+  Future<void> uploadAndProcessPdf(
+      JadwalkuliahController jadwalProvider) async {
+    if (selectedFile.value == null) {
+      responseMessage.value = "Pilih file PDF terlebih dahulu";
       return;
     }
 
-    isLoading = true;
-    responseMessage = "Menghapus data lama...";
-    notifyListeners();
+    isLoading.value = true;
+    responseMessage.value = "Menghapus data lama...";
 
     try {
       // Clear existing data both in Firebase and locally first
       await clearUserData();
       jadwalProvider.clearData(); // Clear data in the JadwalKuliah provider
 
-      responseMessage = "Mengunggah dan memproses file...";
-      notifyListeners();
+      responseMessage.value = "Mengunggah dan memproses file...";
 
-      String fileName = selectedFile!.path.split('/').last;
+      String fileName = selectedFile.value!.path.split('/').last;
 
       // Buat form data
-      FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(
-          selectedFile!.path,
+      dio_package.FormData formData = dio_package.FormData.fromMap({
+        "file": await dio_package.MultipartFile.fromFile(
+          selectedFile.value!.path,
           filename: fileName,
         ),
       });
@@ -109,7 +104,7 @@ class PdfBack with ChangeNotifier {
       await dio.post(
         '$baseUrl/upload',
         data: formData,
-        options: Options(
+        options: dio_package.Options(
           contentType: 'multipart/form-data',
           followRedirects: false,
         ),
@@ -118,7 +113,8 @@ class PdfBack with ChangeNotifier {
       // Download JSON yang dihasilkan
       final downloadResponse = await dio.get(
         '$baseUrl/download',
-        options: Options(responseType: ResponseType.bytes),
+        options:
+            dio_package.Options(responseType: dio_package.ResponseType.bytes),
       );
 
       if (downloadResponse.statusCode == 200) {
@@ -171,9 +167,8 @@ class PdfBack with ChangeNotifier {
         }
 
         // Upload to Firebase
-        isUploading = true;
-        responseMessage = "Menyimpan ke Firebase...";
-        notifyListeners();
+        isUploading.value = true;
+        responseMessage.value = "Menyimpan ke Firebase...";
 
         // Upload each matkul using the existing provider function
         for (var matkul in _allMatkul) {
@@ -192,21 +187,18 @@ class PdfBack with ChangeNotifier {
         // Refresh the jadwalProvider data
         await jadwalProvider.getOnce();
 
-        isLoading = false;
-        isUploading = false;
-        responseMessage = "File berhasil diproses dan disimpan";
-        notifyListeners();
+        isLoading.value = false;
+        isUploading.value = false;
+        responseMessage.value = "File berhasil diproses dan disimpan";
       } else {
-        isLoading = false;
-        isUploading = false;
-        responseMessage = "Error: ${downloadResponse.statusMessage}";
-        notifyListeners();
+        isLoading.value = false;
+        isUploading.value = false;
+        responseMessage.value = "Error: ${downloadResponse.statusMessage}";
       }
     } catch (e) {
-      isLoading = false;
-      isUploading = false;
-      responseMessage = "Error: $e";
-      notifyListeners();
+      isLoading.value = false;
+      isUploading.value = false;
+      responseMessage.value = "Error: $e";
       print("Error saat mengupload dan memproses file: $e");
     }
   }

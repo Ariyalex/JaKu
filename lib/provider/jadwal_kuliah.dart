@@ -2,36 +2,37 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/provider/pdf_back.dart';
+import 'package:jaku/routes/route_named.dart';
 
 import '../models/jadwal.dart';
 
-class Jadwalkuliah with ChangeNotifier {
+class JadwalkuliahController extends GetxController {
+  final CollectionReference _matkulCollection =
+      FirebaseFirestore.instance.collection('matkuls');
+
+  final RxList<Matkul> allMatkul = <Matkul>[].obs;
+
   StreamSubscription? _matkulSubscription;
 
-  List<Matkul> _allMatkul = [];
-
-  List<Matkul> get allMatkul => _allMatkul;
-
-  final JadwalKuliahDay _jadwalKuliahDay = JadwalKuliahDay();
-
-  final CollectionReference _matkulCollection =
-      FirebaseFirestore.instance.collection("matkuls");
+  final DayKuliahController _jadwalKuliahDay = DayKuliahController();
 
   String? _userid;
 
+  int get jumlahMatkul => allMatkul.length;
+
   Matkul? selectById(String id) {
-    if (_allMatkul.isEmpty) {
-      print("data kosong, pastikan sudah memanggil getonce");
+    if (allMatkul.isEmpty) {
+      debugPrint("data kosong, pastikan sudah memanggil getonce");
       return null;
     }
-    return _allMatkul.firstWhere(
+    return allMatkul.firstWhere(
       (element) => element.matkulId == id,
       orElse: () => throw Exception("Matkul degnan ID $id tidak ditemaukan"),
     );
   }
-
-  int get jumlahMatkul => _allMatkul.length;
 
   // Fungsi untuk mendapatkan indeks hari dalam seminggu
   int getDayIndex(String day) {
@@ -49,13 +50,11 @@ class Jadwalkuliah with ChangeNotifier {
 
   void cleanupDays() {
     _jadwalKuliahDay.cleanupEmptyDays(this);
-    notifyListeners();
   }
 
   //gunakan firebase
   void clearData() {
-    _allMatkul = [];
-    notifyListeners();
+    allMatkul.clear();
   }
 
   Future<void> cancelSubscription() async {
@@ -69,39 +68,13 @@ class Jadwalkuliah with ChangeNotifier {
     } else {
       _userid = null;
     }
-    notifyListeners();
   }
 
   @override
-  void dispose() {
+  void onClose() {
     cancelSubscription();
-    super.dispose();
+    super.onClose();
   }
-
-  // Future<void> fetchMatkuls() async {
-  //   try {
-  //     if (_userid == null) {
-  //       return;
-  //     }
-
-  //     _matkulSubscription?.cancel();
-
-  //     _matkulSubscription = _matkulCollection
-  //         .where("userId", isEqualTo: _userid)
-  //         .snapshots()
-  //         .listen(
-  //       (snapshot) {
-  //         _allMatkul = snapshot.docs
-  //             .map(
-  //               (doc) =>
-  //                   Matkul.fromJson(doc.id, doc.data() as Map<String, dynamic>),
-  //             )
-  //             .toList();
-  //         notifyListeners();
-  //       },
-  //     );
-  //   } catch (error) {}
-  // }
 
   Future<void> getOnce() async {
     try {
@@ -112,14 +85,14 @@ class Jadwalkuliah with ChangeNotifier {
       QuerySnapshot snapshot =
           await _matkulCollection.where("userId", isEqualTo: _userid).get();
 
-      _allMatkul = snapshot.docs
+      List<Matkul> data = snapshot.docs
           .map(
             (doc) =>
                 Matkul.fromJson(doc.id, doc.data() as Map<String, dynamic>),
           )
           .toList();
 
-      _allMatkul.sort(
+      data.sort(
         (a, b) {
           //1. urutkan berdasarkan hari
           int dayCompare = getDayIndex(a.day!).compareTo(getDayIndex(b.day!));
@@ -143,7 +116,12 @@ class Jadwalkuliah with ChangeNotifier {
               .compareTo(jamAwalB.hour * 60 + jamAwalB.minute);
         },
       );
-      notifyListeners();
+
+      // Update the observable list with data from Firestore
+      allMatkul.clear();
+      allMatkul.addAll(data);
+
+      Get.find<DayKuliahController>().groupByDay(this);
     } catch (error) {
       print("Error fetching products once: $error");
     }
@@ -175,7 +153,7 @@ class Jadwalkuliah with ChangeNotifier {
         "userId": _userid,
       });
 
-      _allMatkul.add(Matkul(
+      allMatkul.add(Matkul(
         matkulId: docRef.id,
         matkul: matkul,
         kelas: kelas,
@@ -186,7 +164,8 @@ class Jadwalkuliah with ChangeNotifier {
         room: room,
         day: day,
       ));
-      notifyListeners();
+      print(allMatkul);
+      print("matkul berhasil ditambah");
     } catch (error) {
       print("error adding product: $error");
     }
@@ -218,11 +197,11 @@ class Jadwalkuliah with ChangeNotifier {
         "day": day,
       });
 
-      int index = _allMatkul.indexWhere(
+      int index = allMatkul.indexWhere(
         (matkul) => matkul.matkulId == id,
       );
       if (index != -1) {
-        _allMatkul[index] = Matkul(
+        allMatkul[index] = Matkul(
           matkulId: id,
           matkul: matkul,
           kelas: kelas,
@@ -234,13 +213,13 @@ class Jadwalkuliah with ChangeNotifier {
           day: day,
         );
       }
-      notifyListeners();
     } catch (error) {
       print("error updating product: $error");
     }
   }
 
-  Future<void> deleteMatkuls(String id, JadwalKuliahDay JadwalKuliahDay) async {
+  Future<void> deleteMatkuls(
+      String id, DayKuliahController JadwalKuliahDay) async {
     try {
       if (_userid == null) {
         return;
@@ -248,15 +227,66 @@ class Jadwalkuliah with ChangeNotifier {
 
       await _matkulCollection.doc(id).delete();
 
-      _allMatkul.removeWhere(
+      allMatkul.removeWhere(
         (product) => product.matkulId == id,
       );
 
       JadwalKuliahDay.cleanupEmptyDays(this);
-
-      notifyListeners();
     } catch (error) {
       print("error deleting product: $error");
+    }
+  }
+
+  // Menghapus semua data jadwal kuliah dari Firestore dan controller lokal
+  Future<void> clearAllData() async {
+    try {
+      // Tampilkan loading indicator
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+        barrierDismissible: false,
+      );
+
+      // Dapatkan semua controller yang diperlukan
+      final pdfBack = Get.find<PdfBack>();
+      final hariKuliahProvider = Get.find<DayKuliahController>();
+
+      // Hapus data dari Firebase
+      await pdfBack.clearUserData();
+
+      // Hapus data pada controller jadwal
+      clearData();
+
+      // Perbarui tampilan hari
+      hariKuliahProvider.clearAllDays();
+
+      // Tutup dialog loading
+      Get.back();
+
+      // Tampilkan notifikasi sukses
+      Get.snackbar(
+        'Berhasil',
+        'Semua data berhasil dihapus',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Kembali ke halaman home
+      Get.offNamed(RouteNamed.homePage);
+    } catch (e) {
+      // Tutup dialog loading jika terjadi error
+      Get.back();
+
+      // Tampilkan pesan error
+      Get.snackbar(
+        'Gagal',
+        'Terjadi kesalahan saat menghapus data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

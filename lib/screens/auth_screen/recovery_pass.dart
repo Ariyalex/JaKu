@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 import '../../provider/auth.dart' as aut;
 
@@ -24,7 +23,7 @@ class _RecoveryPassState extends State<RecoveryPass> {
         throw "Email recovery harus diisi!";
       }
 
-      await Provider.of<aut.Auth>(context, listen: false).resetPassword(email);
+      await Get.find<aut.AuthController>().resetPassword(email);
 
       Get.back();
       ScaffoldMessenger.of(context).showSnackBar(

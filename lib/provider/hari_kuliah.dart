@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../models/jadwal.dart';
 import './jadwal_kuliah.dart';
 
-class JadwalKuliahDay with ChangeNotifier {
-  List<HariKuliah> _jadwalHari = [];
-
-  List<HariKuliah> get jadwalHari => _jadwalHari;
+class DayKuliahController extends GetxController {
+  final RxList<HariKuliah> jadwalHari = <HariKuliah>[].obs;
 
   int getDayIndex(String day) {
     List<String> hariList = [
@@ -36,10 +34,9 @@ class JadwalKuliahDay with ChangeNotifier {
   }
 
   //mengelompokkan mata kuliah berdasarkan hari
-  void groupByDay(Jadwalkuliah jadwalKuliah) {
-    notifyListeners();
+  void groupByDay(JadwalkuliahController jadwalKuliah) {
     //bershikan data sebelumnya
-    _jadwalHari.clear();
+    jadwalHari.clear();
 
     //buat map untuk mengelompokkan berdasarkan hari
     Map<String, List<Matkul>> groupedMatkul = {};
@@ -53,7 +50,7 @@ class JadwalKuliahDay with ChangeNotifier {
     //masukkan hasil ke dalam _jadwalHari
     groupedMatkul.forEach(
       (day, matkulList) {
-        _jadwalHari.add(HariKuliah(
+        jadwalHari.add(HariKuliah(
           matkulId: day, //gunakan nama hari sebagai ID unik
           day: day,
         ));
@@ -61,31 +58,34 @@ class JadwalKuliahDay with ChangeNotifier {
     );
 
     //urutkan berdasar index hari
-    _jadwalHari.sort(
+    jadwalHari.sort(
       (a, b) => getDayIndex(a.day.toString())
           .compareTo(getDayIndex(b.day.toString())),
     );
 
     // Geser urutan agar dimulai dari hari ini
     int todayIndex = getDayIndex(getCurrentDay());
-    _jadwalHari = [
-      ..._jadwalHari
+    jadwalHari.value = [
+      ...jadwalHari
           .where((hari) => getDayIndex(hari.day.toString()) >= todayIndex),
-      ..._jadwalHari
+      ...jadwalHari
           .where((hari) => getDayIndex(hari.day.toString()) < todayIndex),
     ];
-
-    notifyListeners();
   }
 
-  void cleanupEmptyDays(Jadwalkuliah jadwalKuliah) {
+  void cleanupEmptyDays(JadwalkuliahController jadwalKuliah) {
     Set<String> reminingDays =
         jadwalKuliah.allMatkul.map((matkul) => matkul.day!).toSet();
     print(reminingDays);
 
     //hapus hari yg tidak ada di reminingDays
-    _jadwalHari.removeWhere(
+    jadwalHari.removeWhere(
       (hari) => !reminingDays.contains(hari.day),
     );
+  }
+
+  // Membersihkan semua data hari
+  void clearAllDays() {
+    jadwalHari.clear();
   }
 }

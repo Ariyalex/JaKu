@@ -4,31 +4,112 @@ import 'package:flutter/material.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:get/get.dart';
 
-class Auth with ChangeNotifier {
+class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  User? _user;
+  final Rxn<User> _user = Rxn<User>();
 
-  User? get user => _user;
+  User? get user => _user.value;
 
-  bool get isLoggedIn => _user != null;
+  bool get isLoggedIn => _user.value != null;
 
-  Future<void> checkLoginStatus() async {
-    _user = _auth.currentUser;
+  // Flag untuk melacak apakah inisialisasi sudah selesai
+  final RxBool _initialized = false.obs;
+  @override
+  bool get initialized => _initialized.value;
 
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    bool hasLoggedIn = pref.getBool("hasLoggedIn") ?? false;
+  // Metode untuk inisialisasi auth yang dipanggil dari main.dart
+  Future<void> initializeAuth() async {
+    try {
+      // Periksa dulu apakah user sudah login di Firebase
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        _user.value = currentUser;
+        print("Auth initialized with user: ${currentUser.uid}");
 
-    if (_user != null && hasLoggedIn) {
-      notifyListeners();
+        // Pastikan user ID disimpan di SharedPreferences
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        await pref.setBool("hasLoggedIn", true);
+        await pref.setString("userId", currentUser.uid);
+
+        // Update ID di controller jadwal
+        Get.find<JadwalkuliahController>().updateAuthData(currentUser);
+      } else {
+        // Jika tidak ada user di Firebase, coba load dari SharedPreferences
+        await loadUserFromPreferences();
+      }
+
+      // Subscribe to auth state changes untuk selanjutnya
+      _auth.authStateChanges().listen((User? firebaseUser) {
+        if (firebaseUser != null &&
+            (_user.value == null || _user.value?.uid != firebaseUser.uid)) {
+          _user.value = firebaseUser;
+          print("Auth state changed: user = ${firebaseUser.uid}");
+
+          // Simpan user ID ke SharedPreferences setiap kali auth state berubah
+          _saveUserToPreferences(firebaseUser);
+
+          // Update jadwal controller
+          Get.find<JadwalkuliahController>().updateAuthData(firebaseUser);
+        } else if (firebaseUser == null && _user.value != null) {
+          _user.value = null;
+          print("Auth state changed: user logged out");
+        }
+      });
+
+      // Tandai inisialisasi selesai
+      _initialized.value = true;
+    } catch (e) {
+      print("Error initializing auth: $e");
+      _initialized.value = true; // Tandai selesai meskipun error
     }
-    notifyListeners();
   }
 
-  Future<void> signUp(
-      String email, String password, Jadwalkuliah jadwalKuliah) async {
+  // Helper method untuk menyimpan user ke preferences
+  Future<void> _saveUserToPreferences(User user) async {
+    try {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      await pref.setBool("hasLoggedIn", true);
+      await pref.setString("userId", user.uid);
+      print("User saved to preferences: ${user.uid}");
+    } catch (e) {
+      print("Error saving user to preferences: $e");
+    }
+  }
+
+
+  Future<void> loadUserFromPreferences() async {
+    try {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      bool hasLoggedIn = pref.getBool("hasLoggedIn") ?? false;
+      String? userId = pref.getString("userId");
+
+      if (hasLoggedIn && userId != null) {
+        // If Firebase auth already has the user, just make sure controllers are updated
+        if (_auth.currentUser != null) {
+          _user.value = _auth.currentUser;
+          // Update the user ID in JadwalkuliahController
+          Get.find<JadwalkuliahController>().updateAuthData(_user.value);
+          print("User loaded from Firebase Auth: ${_user.value?.uid}");
+        }
+        // If no Firebase auth but we have userId in preferences, try to recover the session
+        else {
+          print("Trying to recover session for userId: $userId");
+          // You could implement additional recovery logic here if needed
+        }
+      } else {
+        print("No logged in user found in preferences");
+      }
+    } catch (e) {
+      print("Error loading user from preferences: $e");
+    }
+  }
+
+  Future<void> signUp(String email, String password,
+      JadwalkuliahController jadwalKuliah) async {
     try {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -38,13 +119,11 @@ class Auth with ChangeNotifier {
         "uid": userCredential.user!.uid,
       });
 
-      _user = userCredential.user;
-      print("$email & $password");
+      _user.value = userCredential.user;
       // jadwalKuliah.updateAuthData(_user);
-      _auth.signOut();
-      notifyListeners();
+      _user.value = userCredential.user;
+      await _auth.signOut();
     } on FirebaseAuthException catch (error) {
-      print(error.code);
       String errorMessage;
 
       switch (error.code) {
@@ -68,21 +147,26 @@ class Auth with ChangeNotifier {
     }
   }
 
-  Future<void> signIn(
-      String email, String password, Jadwalkuliah jadwalKuliah) async {
+  Future<void> signIn(String email, String password,
+      JadwalkuliahController jadwalKuliah) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
 
-      _user = userCredential.user;
+      _user.value = userCredential.user;
+
+      // Update user ID in jadwalKuliah controller
+      jadwalKuliah.updateAuthData(_user.value);
+
+      // Save user information to SharedPreferences
       SharedPreferences pref = await SharedPreferences.getInstance();
       await pref.setBool("hasLoggedIn", true);
-      print("sign in berhasil");
-      // jadwalKuliah.updateAuthData(_user);
-      notifyListeners();
+      if (_user.value != null) {
+        await pref.setString("userId", _user.value!.uid);
+        print("User ID saved to preferences: ${_user.value!.uid}");
+      }
     } on FirebaseAuthException catch (error) {
       String errorMessage;
-      print(error.code);
 
       //mapping kode error ke pesan custom
       switch (error.code) {
@@ -121,35 +205,38 @@ class Auth with ChangeNotifier {
 
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
-      _user = userCredential.user;
+      _user.value = userCredential.user;
 
-      if (_user != null) {
+      if (_user.value != null) {
+        // Update user ID in jadwalKuliah controller
+        Get.find<JadwalkuliahController>().updateAuthData(_user.value);
+
         SharedPreferences pref = await SharedPreferences.getInstance();
-        await pref.setString("userId", _user!.uid);
+        await pref.setString("userId", _user.value!.uid);
       }
-      notifyListeners();
     } catch (error) {
       throw "Gagal login dengan google: $error";
     }
   }
 
-  Future<void> signOut(Jadwalkuliah jadwalKuliah) async {
+  Future<void> signOut(JadwalkuliahController jadwalKuliah) async {
     try {
       await _auth.signOut();
       await _googleSignIn.signOut();
-      _user = null;
+      _user.value = null;
 
       await jadwalKuliah.cancelSubscription();
       jadwalKuliah.clearData();
       jadwalKuliah.updateAuthData(null);
 
+      // Clear all auth-related preferences
       SharedPreferences pref = await SharedPreferences.getInstance();
       await pref.setBool("hasLoggedIn", false);
-
-      notifyListeners();
+      await pref.remove("userId");
+      print("User logged out and preferences cleared");
     } catch (error, stackTrace) {
-      print("error saat logout: $error");
-      print("stacktrace: $stackTrace");
+      debugPrint("error saat logout: $error");
+      debugPrint("stacktrace: $stackTrace");
     }
   }
 
@@ -165,7 +252,6 @@ class Auth with ChangeNotifier {
       }
 
       await _auth.sendPasswordResetEmail(email: email);
-      print("berhasil kirim mail");
     } on FirebaseAuthException catch (error) {
       throw error.message ??
           "Terjadi kesalahan saat mengirim email reset password.";

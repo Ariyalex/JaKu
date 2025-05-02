@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/add_matkul_c.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
-import 'package:provider/provider.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
@@ -46,24 +45,23 @@ class _AddMatkulState extends State<AddMatkul> {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Provider.of<Jadwalkuliah>(context, listen: false);
+    final allMatkulProvider = Get.find<JadwalkuliahController>();
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     void addJadwal() {
       allMatkulProvider
           .addMatkuls(
               addMatkulC.matkulC.text,
-              addMatkulC.kelas.toString(),
-              addMatkulC.jamAwal.value!,
-              addMatkulC.jamAkhir.toString(),
+              addMatkulC.kelas.value ?? "",
+              addMatkulC.jamAwal.value ?? "",
+              addMatkulC.jamAkhir.value ?? "",
               addMatkulC.dosen1C.text,
               addMatkulC.dosen2C.text,
               addMatkulC.ruanganC.text,
-              addMatkulC.jamAkhir.value!)
+              addMatkulC.hari.value ?? "")
           .then(
         (response) {
-          Provider.of<JadwalKuliahDay>(context, listen: false)
-              .groupByDay(allMatkulProvider);
+          Get.find<DayKuliahController>().groupByDay(allMatkulProvider);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text("Berhasil ditambahkan"),
@@ -81,6 +79,7 @@ class _AddMatkulState extends State<AddMatkul> {
             addMatkulC.kelas.value = null;
             addMatkulC.jamAkhir.value = null;
             addMatkulC.jamAwal.value = null;
+            addMatkulC.hari.value = null;
           });
         },
       );

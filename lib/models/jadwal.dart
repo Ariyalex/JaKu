@@ -1,5 +1,3 @@
-// import 'package:jaku/provider/jadwal_kuliah.dart';
-
 class HariKuliah {
   String? matkulId;
   String? day;
