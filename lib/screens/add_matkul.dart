@@ -62,12 +62,8 @@ class _AddMatkulState extends State<AddMatkul> {
           .then(
         (response) {
           Get.find<DayKuliahController>().groupByDay(allMatkulProvider);
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Berhasil ditambahkan"),
-              duration: Duration(seconds: 1),
-            ));
-          }
+          Get.snackbar("Success", "Jadwal berhasil ditambahkan",
+              backgroundColor: Colors.green.shade400);
         },
       ).then(
         (value) {
@@ -93,63 +89,31 @@ class _AddMatkulState extends State<AddMatkul> {
         actions: [
           IconButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text(
-                      "Peringatan!!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    content: const Text(
-                      "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
-                      textAlign: TextAlign.center,
-                    ),
-                    actions: [
-                      OutlinedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: const Text("Ga jadi")),
-                      FilledButton(
-                          onPressed: () {
-                            Get.back();
-                            Get.toNamed(RouteNamed.pdfParsing);
-                          },
-                          child: const Text("Ok Bang"))
-                    ],
+                Get.defaultDialog(
+                  title: "Peringatan!!",
+                  titlePadding: EdgeInsets.only(top: 20),
+                  titleStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
+                  content: const Text(
+                    "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                    textAlign: TextAlign.center,
+                  ),
+                  contentPadding: EdgeInsets.all(10),
+                  confirm: FilledButton(
+                      onPressed: () {
+                        Get.back();
+                        Get.toNamed(RouteNamed.pdfParsing);
+                      },
+                      child: const Text("Ok Bang")),
+                  cancel: OutlinedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: const Text("Ga jadi")),
                 );
               },
               icon: const Icon(Icons.picture_as_pdf)),
-          IconButton(
-              onPressed: () {
-                if (addMatkulC.matkulC.text.isNotEmpty &&
-                    addMatkulC.hari.value != null &&
-                    addMatkulC.jamAwal.value != null) {
-                  addJadwal();
-                } else {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Form tidak lengkap"),
-                      content: const Text("Harap Isi Matkul, Hari, dan Jam"),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: const Text(
-                            "OK",
-                            style: TextStyle(fontSize: 17),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.save)),
         ],
       ),
       body: SingleChildScrollView(
@@ -368,32 +332,27 @@ class _AddMatkulState extends State<AddMatkul> {
                       fixedSize: WidgetStatePropertyAll(
                           Size.fromWidth(mediaQueryWidth * 1 / 3))),
                   onPressed: () {
-                    print(addMatkulC.matkulC.value);
-                    print(addMatkulC.hari.value);
-                    print(addMatkulC.jamAwal.value);
                     if (addMatkulC.matkulC.text.isNotEmpty &&
                         addMatkulC.hari.value != null &&
                         addMatkulC.jamAwal.value != null) {
                       addJadwal();
                     } else {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text("Form tidak lengkap"),
-                          content:
-                              const Text("Harap Isi Matkul, Hari, dan Jam"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: const Text(
-                                "ok",
-                                style: TextStyle(fontSize: 17),
-                              ),
-                            )
-                          ],
-                        ),
+                      Get.defaultDialog(
+                        contentPadding: EdgeInsets.all(10),
+                        titlePadding: EdgeInsets.only(top: 20),
+                        title: "Form tidak lengkap",
+                        content: const Text("Harap Isi Matkul, Hari, dan Jam"),
+                        actions: [
+                          FilledButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            child: const Text(
+                              "OK",
+                              style: TextStyle(fontSize: 17),
+                            ),
+                          )
+                        ],
                       );
                     }
                   },

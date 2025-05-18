@@ -178,8 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Get.snackbar(
                     'Gagal',
                     'Terjadi kesalahan saat menghapus data: $e',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.red.shade400,
                     colorText: Colors.white,
                   );
                 }
@@ -303,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(
                           width: 5,
                         ),
-                        Icon(Icons.add_task),
+                        Icon(Icons.add),
                       ],
                     ),
                   ),

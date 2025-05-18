@@ -37,15 +37,15 @@ class _AddMatkulState extends State<DetailMatkul> {
 
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final matkulId = ModalRoute.of(context)?.settings.arguments as String;
-    final selectedMatkul = allMatkulProvider.selectById(matkulId);
+    final selectedMatkul = allMatkulProvider.selectById(matkulId)!;
 
     if (editC.matkulC.text.isEmpty) {
-      editC.matkulC.text = selectedMatkul!.matkul!;
-      editC.dosen1C.text = selectedMatkul.dosen1!;
-      editC.dosen2C.text = selectedMatkul.dosen2!;
-      editC.ruanganC.text = selectedMatkul.room!;
+      editC.matkulC.text = selectedMatkul.matkul!;
+      editC.dosen1C.text = selectedMatkul.dosen1 ?? "";
+      editC.dosen2C.text = selectedMatkul.dosen2 ?? "";
+      editC.ruanganC.text = selectedMatkul.room ?? "";
       editC.kelas.value = selectedMatkul.kelas;
-      editC.hari.value = selectedMatkul.day;
+      editC.hari.value = selectedMatkul.day!;
       editC.jamAwal.value = selectedMatkul.formattedJamAwal!;
       editC.jamAkhir.value = selectedMatkul.formattedJamAkhir!;
     }
@@ -55,22 +55,18 @@ class _AddMatkulState extends State<DetailMatkul> {
           .updateMatkul(
               matkulId,
               editC.matkulC.text,
-              editC.kelas.value.toString(),
-              editC.jamAwal.value!,
-              editC.jamAkhir.value.toString(),
+              editC.kelas.value ?? "",
+              editC.jamAwal.value ?? "",
+              editC.jamAkhir.value ?? "",
               editC.dosen1C.text,
               editC.dosen2C.text,
               editC.ruanganC.text,
-              editC.hari.value!)
+              editC.hari.value ?? "")
           .then(
         (response) {
           dayKuliahController.groupByDay(allMatkulProvider);
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Berhasil diedit"),
-              duration: Duration(seconds: 1),
-            ));
-          }
+          Get.snackbar("Success", "Jadwal berhasil diedit",
+              backgroundColor: Colors.green.shade400);
         },
       ).then(
         (value) {
@@ -100,36 +96,6 @@ class _AddMatkulState extends State<DetailMatkul> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Matkul"),
-        actions: [
-          IconButton(
-              onPressed: () {
-                if (editC.matkulC.text.isNotEmpty &&
-                    editC.hari.value != null &&
-                    editC.jamAwal.value != null) {
-                  editJadwal();
-                } else {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Form tidak lengkap"),
-                      content: const Text("Harap Isi Matkul, Hari, dan Jam"),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: const Text(
-                            "ok",
-                            style: TextStyle(fontSize: 17),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.save))
-        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -140,7 +106,7 @@ class _AddMatkulState extends State<DetailMatkul> {
               TextField(
                 decoration: const InputDecoration(
                     labelStyle:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                     hintText: "Ex: Basis Data",
                     labelText: "Matkul",
                     alignLabelWithHint: true),
@@ -156,7 +122,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 decoration: const InputDecoration(
                   labelText: "Dosen1",
                   labelStyle:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                      TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                   hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
                 ),
                 autocorrect: false,
@@ -170,7 +136,7 @@ class _AddMatkulState extends State<DetailMatkul> {
               TextField(
                 decoration: const InputDecoration(
                     labelStyle:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                     hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
                     labelText: "Dosen2",
                     alignLabelWithHint: true),
@@ -185,7 +151,7 @@ class _AddMatkulState extends State<DetailMatkul> {
               TextField(
                 decoration: const InputDecoration(
                     labelStyle:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                     hintText: "Ex: fst-404",
                     labelText: "Ruang kelas",
                     alignLabelWithHint: true),
@@ -331,7 +297,6 @@ class _AddMatkulState extends State<DetailMatkul> {
                               editC.jamAkhir.value = "";
                             }
                           });
-                          print(editC.jamAwal.value);
                         },
                       );
                     },
@@ -356,24 +321,22 @@ class _AddMatkulState extends State<DetailMatkul> {
                         editC.jamAwal.value != "null:null") {
                       editJadwal();
                     } else {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text("Form tidak lengkap"),
-                          content:
-                              const Text("Harap Isi Matkul, Hari, dan Jam"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: const Text(
-                                "ok",
-                                style: TextStyle(fontSize: 17),
-                              ),
-                            )
-                          ],
-                        ),
+                      Get.defaultDialog(
+                        contentPadding: EdgeInsets.all(10),
+                        titlePadding: EdgeInsets.only(top: 20),
+                        title: "Form tidak lengkap",
+                        content: const Text("Harap Isi Matkul, Hari, dan Jam"),
+                        actions: [
+                          FilledButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            child: const Text(
+                              "OK",
+                              style: TextStyle(fontSize: 17),
+                            ),
+                          )
+                        ],
                       );
                     }
                   },
