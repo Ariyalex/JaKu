@@ -26,28 +26,11 @@ class _RecoveryPassState extends State<RecoveryPass> {
       await Get.find<aut.AuthController>().resetPassword(email);
 
       Get.back();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(milliseconds: 1200),
-          content: Text(
-            "Mail telah dikirim ke email!",
-            style: TextStyle(color: Colors.black),
-          ),
-        ),
-      );
+      Get.snackbar("Success", "Mail telah dikirm ke email!",
+          backgroundColor: Colors.green.shade400);
     } catch (error) {
-      if (!mounted) return null;
-      print(error.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(milliseconds: 1300),
-          content: Text(
-            (error.toString()),
-            style: const TextStyle(color: Colors.black),
-          ),
-          backgroundColor: const Color(0xFFCF6679),
-        ),
-      );
+      Get.snackbar("Error!", error.toString(),
+          backgroundColor: Colors.red.shade400);
     } finally {
       if (mounted) {
         setState(() {

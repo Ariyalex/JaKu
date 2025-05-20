@@ -34,26 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       )..catchError(
           (err) {
-            if (mounted) {
-              print(err);
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text("Error Occured"),
-                    content: Text(err.toString()),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        child: const Text("Okay"),
-                      ),
-                    ],
-                  );
+            Get.defaultDialog(
+              title: "Error Occured",
+              content: Text(err.toString()),
+              confirm: TextButton(
+                onPressed: () {
+                  Get.back();
                 },
-              );
-            }
+                child: const Text("Okay"),
+              ),
+            );
           },
         );
       isInit = false;
@@ -66,127 +56,115 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   static void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("LogOut"),
-        content: const Text("Yakin LogOut dari account?"),
-        actions: [
-          TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text("Tidak")),
-          FilledButton(
-              onPressed: () async {
-                // Tutup dialog konfirmasi
+    Get.defaultDialog(
+        title: "Log Out",
+        content: Text("Yakin Log Out dari account"),
+        cancel: TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text("Tidak"),
+        ),
+        confirm: FilledButton(
+            onPressed: () async {
+              // Tutup dialog konfirmasi
+              Get.back();
+
+              // Tampilkan indikator loading
+              Get.dialog(
+                const Center(child: CircularProgressIndicator()),
+                barrierDismissible: false,
+              );
+
+              try {
+                // Dapatkan controller yang diperlukan
+                var matkuls = Get.find<JadwalkuliahController>();
+                var auth = Get.find<AuthController>();
+
+                // Lakukan proses logout
+                await auth.signOut(matkuls);
+
+                // Tutup loading dialog
                 Get.back();
 
-                // Tampilkan indikator loading
-                Get.dialog(
-                  const Center(child: CircularProgressIndicator()),
-                  barrierDismissible: false,
+                // Navigasi ke halaman login dengan menghapus semua halaman sebelumnya
+                Get.offAllNamed(RouteNamed.signInScreen);
+              } catch (e) {
+                // Tutup loading dialog jika terjadi error
+                Get.back();
+
+                // Tampilkan pesan error
+                Get.snackbar(
+                  'Gagal Logout',
+                  'Terjadi kesalahan: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
                 );
-
-                try {
-                  // Dapatkan controller yang diperlukan
-                  var matkuls = Get.find<JadwalkuliahController>();
-                  var auth = Get.find<AuthController>();
-
-                  // Lakukan proses logout
-                  await auth.signOut(matkuls);
-                  print("logout selesai");
-
-                  // Tutup loading dialog
-                  Get.back();
-
-                  // Navigasi ke halaman login dengan menghapus semua halaman sebelumnya
-                  Get.offAllNamed(RouteNamed.signInScreen);
-                } catch (e) {
-                  // Tutup loading dialog jika terjadi error
-                  Get.back();
-
-                  // Tampilkan pesan error
-                  Get.snackbar(
-                    'Gagal Logout',
-                    'Terjadi kesalahan: $e',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                }
-              },
-              child: const Text("Ya"))
-        ],
-      ),
-    );
+              }
+            },
+            child: const Text("Ya")));
   }
 
   static void clearAllData(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Hapus Semua Data"),
-        content: const Text("Yakin ingin menghapus semua data?"),
-        actions: [
-          OutlinedButton(
-              onPressed: () {
+    Get.defaultDialog(
+        title: "Hapus semua data",
+        content: Text("Yakin ingin menghapus semua data?"),
+        cancel: OutlinedButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text("Tidak")),
+        confirm: FilledButton(
+            onPressed: () async {
+              Get.back(); // Tutup dialog konfirmasi
+              // Menunjukkan loading indicator
+              Get.dialog(
+                const Center(child: CircularProgressIndicator()),
+                barrierDismissible: false,
+              );
+
+              try {
+                // Dapatkan controller yang diperlukan
+                final jadwalController = Get.find<JadwalkuliahController>();
+                final dayController = Get.find<DayKuliahController>();
+                final pdfBack = Get.find<PdfBack>();
+
+                // Hapus data dari Firebase
+                await pdfBack.clearUserData();
+
+                // Hapus data lokal
+                jadwalController.clearData();
+                dayController.clearAllDays();
+
+                // Tutup dialog loading
                 Get.back();
-              },
-              child: const Text("Tidak")),
-          FilledButton(
-              onPressed: () async {
-                Get.back(); // Tutup dialog konfirmasi
-                // Menunjukkan loading indicator
-                Get.dialog(
-                  const Center(child: CircularProgressIndicator()),
-                  barrierDismissible: false,
+
+                // Force refresh dengan navigasi
+                Get.offAllNamed(RouteNamed.homePage);
+
+                // Tampilkan notifikasi sukses
+                Get.snackbar(
+                  'Berhasil',
+                  'Semua data berhasil dihapus',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
                 );
+              } catch (e) {
+                // Tutup dialog loading
+                Get.back();
 
-                try {
-                  // Dapatkan controller yang diperlukan
-                  final jadwalController = Get.find<JadwalkuliahController>();
-                  final dayController = Get.find<DayKuliahController>();
-                  final pdfBack = Get.find<PdfBack>();
-
-                  // Hapus data dari Firebase
-                  await pdfBack.clearUserData();
-
-                  // Hapus data lokal
-                  jadwalController.clearData();
-                  dayController.clearAllDays();
-
-                  // Tutup dialog loading
-                  Get.back();
-
-                  // Force refresh dengan navigasi
-                  Get.offAllNamed(RouteNamed.homePage);
-
-                  // Tampilkan notifikasi sukses
-                  Get.snackbar(
-                    'Berhasil',
-                    'Semua data berhasil dihapus',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.green,
-                    colorText: Colors.white,
-                  );
-                } catch (e) {
-                  // Tutup dialog loading
-                  Get.back();
-
-                  // Tampilkan pesan error
-                  Get.snackbar(
-                    'Gagal',
-                    'Terjadi kesalahan saat menghapus data: $e',
-                    backgroundColor: Colors.red.shade400,
-                    colorText: Colors.white,
-                  );
-                }
-              },
-              child: const Text("Ya"))
-        ],
-      ),
-    );
+                // Tampilkan pesan error
+                Get.snackbar(
+                  'Gagal',
+                  'Terjadi kesalahan saat menghapus data: $e',
+                  backgroundColor: Colors.red.shade400,
+                  colorText: Colors.white,
+                );
+              }
+            },
+            child: const Text("Ya")));
   }
 
   Drawer howTo = const Drawer(
@@ -260,99 +238,93 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else if (allMatkulProvider.allMatkul.isEmpty) {
-            return Container(
-              margin: const EdgeInsets.only(top: 50),
-              width: mediaQueryWidth,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Column(
-                    children: [
-                      const Text(
-                        "Jadwal Kosong??!!!",
-                        style: TextStyle(fontSize: 25),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SizedBox(
-                          width: mediaQueryWidth * 5 / 7,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: Image.asset(
-                              "images/bochi.jpg",
-                            ),
-                          )),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  FilledButton(
-                    onPressed: () {
-                      Get.toNamed(RouteNamed.addMatkul);
-                    },
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
+            return SingleChildScrollView(
+              child: Container(
+                margin: const EdgeInsets.only(top: 50),
+                width: mediaQueryWidth,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Column(
                       children: [
-                        Text(
-                          "Add Matkul",
-                          style: TextStyle(fontSize: 17),
+                        const Text(
+                          "Jadwal Kosong??!!!",
+                          style: TextStyle(fontSize: 25),
+                        ),
+                        const SizedBox(
+                          height: 10,
                         ),
                         SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.add),
+                            width: mediaQueryWidth * 5 / 7,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                "images/bochi.jpg",
+                              ),
+                            )),
                       ],
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  FilledButton(
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    FilledButton(
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text(
-                              "Peringatan!!",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            content: const Text(
-                              "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
-                              textAlign: TextAlign.center,
-                            ),
-                            actions: [
-                              OutlinedButton(
-                                  onPressed: () {
-                                    Get.back();
-                                  },
-                                  child: const Text("Ga jadi")),
-                              FilledButton(
-                                  onPressed: () {
-                                    Get.back();
-                                    Get.toNamed(RouteNamed.pdfParsing);
-                                  },
-                                  child: const Text("Ok Bang"))
-                            ],
-                          ),
-                        );
+                        Get.toNamed(RouteNamed.addMatkul);
                       },
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "PDF Otomation",
+                            "Add Matkul",
                             style: TextStyle(fontSize: 17),
                           ),
                           SizedBox(
                             width: 5,
                           ),
-                          Icon(Icons.picture_as_pdf),
+                          Icon(Icons.add),
                         ],
-                      )),
-                ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    FilledButton(
+                        onPressed: () {
+                          Get.defaultDialog(
+                            title: "Peringatan!!",
+                            content: const Text(
+                              "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                              textAlign: TextAlign.center,
+                            ),
+                            cancel: OutlinedButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text("Ga jadi")),
+                            confirm: FilledButton(
+                              onPressed: () {
+                                Get.back();
+                                Get.toNamed(RouteNamed.pdfParsing);
+                              },
+                              child: const Text("Ok Bang"),
+                            ),
+                          );
+                        },
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "PDF Otomation",
+                              style: TextStyle(fontSize: 17),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Icon(Icons.picture_as_pdf),
+                          ],
+                        )),
+                  ],
+                ),
               ),
             );
           } else {

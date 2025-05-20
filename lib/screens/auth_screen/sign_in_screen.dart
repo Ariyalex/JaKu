@@ -56,18 +56,8 @@ class _SignInState extends State<SignIn> {
         //jika berhasil login, langsung navigasi
         Get.offNamed(RouteNamed.homePage);
       } catch (error) {
-        if (!mounted) return null;
-        print(error.toString());
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: const Duration(milliseconds: 1300),
-            content: Text(
-              (error.toString()),
-              style: const TextStyle(color: Colors.black),
-            ),
-            backgroundColor: const Color(0xFFCF6679),
-          ),
-        );
+        Get.snackbar("Error!", error.toString(),
+            backgroundColor: Colors.red.shade400);
       } finally {
         if (mounted) {
           setState(() {
@@ -217,18 +207,9 @@ class _SignInState extends State<SignIn> {
                         if (!mounted) return;
 
                         Get.offNamed(RouteNamed.homePage);
-                      } catch (e) {
-                        if (!mounted) return;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            duration: const Duration(milliseconds: 1300),
-                            content: Text(
-                              e.toString(),
-                            ),
-                            backgroundColor: const Color(0xFFCF6679),
-                          ),
-                        );
+                      } catch (error) {
+                        Get.snackbar("Error!", error.toString(),
+                            backgroundColor: Colors.red.shade400);
                       } finally {
                         if (mounted) {
                           setState(() {

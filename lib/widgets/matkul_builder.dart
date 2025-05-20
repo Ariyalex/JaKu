@@ -46,28 +46,22 @@ class MatkulBuilder extends StatelessWidget {
                 Get.toNamed(RouteNamed.editMatkul, arguments: id);
               },
               onLongPress: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Hapus Item"),
-                    content: const Text("Yakin hapus matkul?"),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: const Text("No")),
-                      OutlinedButton(
+                Get.defaultDialog(
+                    title: "Hapus Item",
+                    content: Text("Yakin hapus matkul ini?"),
+                    cancel: TextButton(
                         onPressed: () {
-                          allMatkulProvider.deleteMatkuls(
-                              id!, dayKuliahController);
                           Get.back();
                         },
-                        child: const Text("Yes"),
-                      )
-                    ],
-                  ),
-                );
+                        child: const Text("No")),
+                    confirm: OutlinedButton(
+                      onPressed: () {
+                        allMatkulProvider.deleteMatkuls(
+                            id!, dayKuliahController);
+                        Get.back();
+                      },
+                      child: const Text("Yes"),
+                    ));
               },
               titleTextStyle: const TextStyle(
                 fontSize: 17,

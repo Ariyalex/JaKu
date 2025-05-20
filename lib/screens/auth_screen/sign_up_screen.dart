@@ -60,29 +60,12 @@ class _SignUpState extends State<SignUp> {
             confirmPassController.text.trim(), jadwalProvider);
 
         if (!mounted) return null;
-
         Get.offNamed(RouteNamed.signInScreen);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(milliseconds: 1200),
-            content: Text(
-              "Sign up berhasil!",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-        );
+        Get.snackbar("Success!", "Sign up berhasil!",
+            backgroundColor: Colors.red.shade400);
       } catch (error) {
-        if (!mounted) return null;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: const Duration(milliseconds: 1200),
-            content: Text(
-              (error.toString()),
-              style: const TextStyle(color: Colors.black),
-            ),
-            backgroundColor: const Color(0xFFCF6679),
-          ),
-        );
+        Get.snackbar("Error!", error.toString(),
+            backgroundColor: Colors.red.shade400);
       } finally {
         if (mounted) {
           setState(() {
