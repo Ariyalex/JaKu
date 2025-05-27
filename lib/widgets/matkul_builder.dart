@@ -74,14 +74,14 @@ class MatkulBuilder extends StatelessWidget {
                 (matkul.kelas == null ||
                         matkul.kelas == "" ||
                         matkul.kelas == "null")
-                    ? "${matkul.matkul}"
+                    ? matkul.matkul
                     : "${matkul.matkul} (${matkul.kelas})",
                 textAlign: TextAlign.center,
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text((matkul.formattedJamAwal == null)
+                  Text((matkul.formattedJamAwal.isEmpty)
                       ? "Jam belum ditambahkan"
                       : "${matkul.formattedJamAwal}${divider(matkul.formattedJamAkhir)}${matkul.formattedJamAkhir}"),
                   Text("Ruang ${matkul.room}"),

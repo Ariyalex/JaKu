@@ -19,36 +19,38 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool isInit = true;
-  late Future<void> _futureMatkul;
+
+  final Rx<Future<void>?> _futureMatkul = Rx<Future<void>?>(null);
 
   @override
-  void didChangeDependencies() {
-    if (isInit) {
-      final jadwalProvider = Get.find<JadwalkuliahController>();
-      final jadwalHariProvider = Get.find<DayKuliahController>();
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadData();
+  }
 
-      _futureMatkul = jadwalProvider.getOnce().then(
-        (_) {
-          jadwalHariProvider.groupByDay(jadwalProvider);
-        },
-      )..catchError(
-          (err) {
-            Get.defaultDialog(
-              title: "Error Occured",
-              content: Text(err.toString()),
-              confirm: TextButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text("Okay"),
-              ),
-            );
-          },
+  void loadData() {
+    final jadwalProvider = Get.find<JadwalkuliahController>();
+    final jadwalHariProvider = Get.find<DayKuliahController>();
+
+    _futureMatkul.value = jadwalProvider.getOnce().then(
+      (_) {
+        jadwalHariProvider.groupByDay(jadwalProvider);
+      },
+    ).catchError(
+      (err) {
+        Get.defaultDialog(
+          title: "Error Occured",
+          content: Text(err.toString()),
+          confirm: TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text("Okay"),
+          ),
         );
-      isInit = false;
-    }
-    super.didChangeDependencies();
+      },
+    );
   }
 
   void _showInfoDialog(BuildContext context) {
@@ -230,118 +232,122 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: howTo,
-      body: FutureBuilder(
-        future: _futureMatkul,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (allMatkulProvider.allMatkul.isEmpty) {
-            return SingleChildScrollView(
-              child: Container(
-                margin: const EdgeInsets.only(top: 50),
-                width: mediaQueryWidth,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Column(
-                      children: [
-                        const Text(
-                          "Jadwal Kosong??!!!",
-                          style: TextStyle(fontSize: 25),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                            width: mediaQueryWidth * 5 / 7,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.asset(
-                                "images/bochi.jpg",
-                              ),
-                            )),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    FilledButton(
-                      onPressed: () {
-                        Get.toNamed(RouteNamed.addMatkul);
-                      },
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
+      body: Obx(() {
+        final _ = allMatkulProvider.allMatkul;
+
+        return FutureBuilder(
+          future: _futureMatkul.value,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            } else if (allMatkulProvider.allMatkul.isEmpty) {
+              return SingleChildScrollView(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 50),
+                  width: mediaQueryWidth,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Column(
                         children: [
-                          Text(
-                            "Add Matkul",
-                            style: TextStyle(fontSize: 17),
+                          const Text(
+                            "Jadwal Kosong??!!!",
+                            style: TextStyle(fontSize: 25),
+                          ),
+                          const SizedBox(
+                            height: 10,
                           ),
                           SizedBox(
-                            width: 5,
-                          ),
-                          Icon(Icons.add),
+                              width: mediaQueryWidth * 5 / 7,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.asset(
+                                  "images/bochi.jpg",
+                                ),
+                              )),
                         ],
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    FilledButton(
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      FilledButton(
                         onPressed: () {
-                          Get.defaultDialog(
-                            title: "Peringatan!!",
-                            content: const Text(
-                              "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
-                              textAlign: TextAlign.center,
-                            ),
-                            cancel: OutlinedButton(
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                child: const Text("Ga jadi")),
-                            confirm: FilledButton(
-                              onPressed: () {
-                                Get.back();
-                                Get.toNamed(RouteNamed.pdfParsing);
-                              },
-                              child: const Text("Ok Bang"),
-                            ),
-                          );
+                          Get.toNamed(RouteNamed.addMatkul);
                         },
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "PDF Otomation",
+                              "Add Matkul",
                               style: TextStyle(fontSize: 17),
                             ),
                             SizedBox(
                               width: 5,
                             ),
-                            Icon(Icons.picture_as_pdf),
+                            Icon(Icons.add),
                           ],
-                        )),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Flex(
-              direction: Axis.vertical,
-              children: [
-                Expanded(
-                  child: DayCardBuilder(
-                    jadwalKuliahDayProvider: jadwalKuliahDayProvider,
-                    allMatkulProvider: allMatkulProvider,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      FilledButton(
+                          onPressed: () {
+                            Get.defaultDialog(
+                              title: "Peringatan!!",
+                              content: const Text(
+                                "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                                textAlign: TextAlign.center,
+                              ),
+                              cancel: OutlinedButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  child: const Text("Ga jadi")),
+                              confirm: FilledButton(
+                                onPressed: () {
+                                  Get.back();
+                                  Get.toNamed(RouteNamed.pdfParsing);
+                                },
+                                child: const Text("Ok Bang"),
+                              ),
+                            );
+                          },
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "PDF Otomation",
+                                style: TextStyle(fontSize: 17),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Icon(Icons.picture_as_pdf),
+                            ],
+                          )),
+                    ],
                   ),
-                )
-              ],
-            );
-          }
-        },
-      ),
+                ),
+              );
+            } else {
+              return Flex(
+                direction: Axis.vertical,
+                children: [
+                  Expanded(
+                    child: DayCardBuilder(
+                      jadwalKuliahDayProvider: jadwalKuliahDayProvider,
+                      allMatkulProvider: allMatkulProvider,
+                    ),
+                  )
+                ],
+              );
+            }
+          },
+        );
+      }),
     );
   }
 }

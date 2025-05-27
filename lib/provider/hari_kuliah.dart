@@ -42,8 +42,8 @@ class DayKuliahController extends GetxController {
     Map<String, List<Matkul>> groupedMatkul = {};
 
     for (var matkul in jadwalKuliah.allMatkul) {
-      if (matkul.day != null) {
-        groupedMatkul.putIfAbsent(matkul.day!, () => []).add(matkul);
+      if (matkul.day.isNotEmpty) {
+        groupedMatkul.putIfAbsent(matkul.day, () => []).add(matkul);
       }
     }
 
@@ -75,7 +75,7 @@ class DayKuliahController extends GetxController {
 
   void cleanupEmptyDays(JadwalkuliahController jadwalKuliah) {
     Set<String> reminingDays =
-        jadwalKuliah.allMatkul.map((matkul) => matkul.day!).toSet();
+        jadwalKuliah.allMatkul.map((matkul) => matkul.day).toSet();
     print(reminingDays);
 
     //hapus hari yg tidak ada di reminingDays

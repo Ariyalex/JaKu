@@ -1,22 +1,48 @@
-class HariKuliah {
-  String? matkulId;
-  String? day;
+import 'package:hive/hive.dart';
 
-  HariKuliah({this.matkulId, this.day});
+@HiveType(typeId: 1)
+class HariKuliah extends HiveObject {
+  @HiveField(0)
+  String? matkulId;
+
+  @HiveField(1)
+  String day;
+
+  HariKuliah({this.matkulId, required this.day});
 }
 
-class Matkul extends HariKuliah {
-  String? matkul,
-      dosen1,
-      dosen2,
-      kelas,
-      room,
-      formattedJamAwal,
-      formattedJamAkhir;
+@HiveType(typeId: 0)
+class Matkul extends HiveObject {
+  @HiveField(0)
+  String? matkulId;
+
+  @HiveField(1)
+  String day;
+
+  @HiveField(2)
+  String matkul;
+
+  @HiveField(3)
+  String? dosen1;
+
+  @HiveField(4)
+  String? dosen2;
+
+  @HiveField(5)
+  String? kelas;
+
+  @HiveField(6)
+  String? room;
+
+  @HiveField(7)
+  String formattedJamAwal;
+
+  @HiveField(8)
+  String? formattedJamAkhir;
 
   Matkul({
-    required super.day,
-    super.matkulId,
+    required this.day,
+    this.matkulId,
     required this.matkul,
     this.dosen1,
     this.dosen2,

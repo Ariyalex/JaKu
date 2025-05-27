@@ -173,14 +173,14 @@ class PdfBack extends GetxController {
         // Upload each matkul using the existing provider function
         for (var matkul in _allMatkul) {
           await jadwalProvider.addMatkuls(
-            matkul.matkul ?? "",
+            matkul.matkul,
             matkul.kelas ?? "",
-            matkul.formattedJamAwal ?? "",
+            matkul.formattedJamAwal,
             matkul.formattedJamAkhir ?? "",
             matkul.dosen1 ?? "",
             matkul.dosen2 ?? "",
             matkul.room ?? "",
-            matkul.day ?? "",
+            matkul.day,
           );
         }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jaku/controllers/edit_matkul_c.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:jaku/routes/route_named.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
 
@@ -40,49 +41,72 @@ class _AddMatkulState extends State<DetailMatkul> {
     final selectedMatkul = allMatkulProvider.selectById(matkulId)!;
 
     if (editC.matkulC.text.isEmpty) {
-      editC.matkulC.text = selectedMatkul.matkul!;
+      editC.matkulC.text = selectedMatkul.matkul;
       editC.dosen1C.text = selectedMatkul.dosen1 ?? "";
       editC.dosen2C.text = selectedMatkul.dosen2 ?? "";
       editC.ruanganC.text = selectedMatkul.room ?? "";
       editC.kelas.value = selectedMatkul.kelas;
-      editC.hari.value = selectedMatkul.day!;
-      editC.jamAwal.value = selectedMatkul.formattedJamAwal!;
+      editC.hari.value = selectedMatkul.day;
+      editC.jamAwal.value = selectedMatkul.formattedJamAwal;
       editC.jamAkhir.value = selectedMatkul.formattedJamAkhir!;
     }
-
-    void editJadwal() {
-      allMatkulProvider
-          .updateMatkul(
-              matkulId,
-              editC.matkulC.text,
-              editC.kelas.value ?? "",
-              editC.jamAwal.value ?? "",
-              editC.jamAkhir.value ?? "",
-              editC.dosen1C.text,
-              editC.dosen2C.text,
-              editC.ruanganC.text,
-              editC.hari.value ?? "")
-          .then(
-        (response) {
-          dayKuliahController.groupByDay(allMatkulProvider);
-          Get.snackbar("Success", "Jadwal berhasil diedit",
-              backgroundColor: Colors.green.shade400);
-        },
-      ).then(
-        (value) {
-          setState(() {
-            editC.matkulC.clear();
-            editC.dosen1C.clear();
-            editC.dosen2C.clear();
-            editC.ruanganC.clear();
-            editC.kelas.value = null;
-            editC.jamAkhir.value = null;
-            editC.jamAwal.value = null;
-            editC.hari.value = null;
-          });
-        },
+    void editJadwal() async {
+      // Show loading dialog
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
       );
-      Get.back();
+
+      try {
+        // Wait for the update to complete
+        await allMatkulProvider.updateMatkul(
+          matkulId,
+          editC.matkulC.text,
+          editC.kelas.value ?? "",
+          editC.jamAwal.value ?? "",
+          editC.jamAkhir.value ?? "",
+          editC.dosen1C.text,
+          editC.dosen2C.text,
+          editC.ruanganC.text,
+          editC.hari.value ?? "",
+        );
+
+        // Close loading dialog
+        Get.back();
+
+        // Update grouped data
+        dayKuliahController.groupByDay(allMatkulProvider);
+
+        // Show success message
+        Get.snackbar(
+          "Success",
+          "Jadwal berhasil diedit",
+          backgroundColor: Colors.green.shade400,
+        );
+
+        // Clear form fields
+        editC.matkulC.clear();
+        editC.dosen1C.clear();
+        editC.dosen2C.clear();
+        editC.ruanganC.clear();
+        editC.kelas.value = null;
+        editC.jamAkhir.value = null;
+        editC.jamAwal.value = null;
+        editC.hari.value = null;
+
+        // Return to previous screen
+        Get.toNamed(RouteNamed.homePage);
+      } catch (e) {
+        // Close loading dialog
+        Get.back();
+
+        // Show error message
+        Get.snackbar(
+          "Error",
+          "Gagal mengedit jadwal: ${e.toString()}",
+          backgroundColor: Colors.red.shade400,
+        );
+      }
     }
 
     String divider(String formattedJamAkhir) {

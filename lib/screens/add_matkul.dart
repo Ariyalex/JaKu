@@ -49,36 +49,50 @@ class _AddMatkulState extends State<AddMatkul> {
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     void addJadwal() {
-      allMatkulProvider
-          .addMatkuls(
-              addMatkulC.matkulC.text,
-              addMatkulC.kelas.value ?? "",
-              addMatkulC.jamAwal.value ?? "",
-              addMatkulC.jamAkhir.value ?? "",
-              addMatkulC.dosen1C.text,
-              addMatkulC.dosen2C.text,
-              addMatkulC.ruanganC.text,
-              addMatkulC.hari.value ?? "")
-          .then(
-        (response) {
-          Get.find<DayKuliahController>().groupByDay(allMatkulProvider);
-          Get.snackbar("Success", "Jadwal berhasil ditambahkan",
-              backgroundColor: Colors.green.shade400);
-        },
-      ).then(
-        (value) {
-          setState(() {
-            addMatkulC.matkulC.clear();
-            addMatkulC.dosen1C.clear();
-            addMatkulC.dosen2C.clear();
-            addMatkulC.ruanganC.clear();
-            addMatkulC.kelas.value = null;
-            addMatkulC.jamAkhir.value = null;
-            addMatkulC.jamAwal.value = null;
-            addMatkulC.hari.value = null;
-          });
-        },
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
       );
+
+      try {
+        allMatkulProvider
+            .addMatkuls(
+                addMatkulC.matkulC.text,
+                addMatkulC.kelas.value ?? "",
+                addMatkulC.jamAwal.value ?? "",
+                addMatkulC.jamAkhir.value ?? "",
+                addMatkulC.dosen1C.text,
+                addMatkulC.dosen2C.text,
+                addMatkulC.ruanganC.text,
+                addMatkulC.hari.value ?? "")
+            .then(
+          (response) {
+            Get.back();
+            Get.find<DayKuliahController>().groupByDay(allMatkulProvider);
+            Get.snackbar("Success", "Jadwal berhasil ditambahkan",
+                backgroundColor: Colors.green.shade400);
+          },
+        );
+
+        addMatkulC.matkulC.clear();
+        addMatkulC.dosen1C.clear();
+        addMatkulC.dosen2C.clear();
+        addMatkulC.ruanganC.clear();
+        addMatkulC.kelas.value = null;
+        addMatkulC.jamAkhir.value = null;
+        addMatkulC.jamAwal.value = null;
+        addMatkulC.hari.value = null;
+      } catch (error) {
+        // Close loading dialog
+        Get.back();
+
+        // Show error message
+        Get.snackbar(
+          "Error",
+          "Gagal menambahkan jadwal: ${error.toString()}",
+          backgroundColor: Colors.red.shade400,
+        );
+      }
     }
 
     return Scaffold(
@@ -281,15 +295,25 @@ class _AddMatkulState extends State<AddMatkul> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    (addMatkulC.jamAwal.value == null ||
-                            addMatkulC.jamAwal.value == "null:null")
-                        ? "Jam Kuliah"
-                        : addMatkulC.jamAwal.value! +
-                            divider(addMatkulC.jamAkhir.value!) +
-                            addMatkulC.jamAkhir.value!,
-                    style: const TextStyle(fontSize: 18),
-                  ),
+                  Obx(() {
+                    String displayText = "Jam Kuliah";
+
+                    if (addMatkulC.jamAwal.value != null &&
+                        addMatkulC.jamAwal.value != "null:null") {
+                      //format jam awal
+                      displayText = addMatkulC.jamAwal.value!;
+
+                      //jika jam akhir ada
+                      if (addMatkulC.jamAkhir.value != null &&
+                          addMatkulC.jamAkhir.value!.isNotEmpty) {
+                        displayText += " - ${addMatkulC.jamAkhir.value!}";
+                      }
+                    }
+                    return Text(
+                      displayText,
+                      style: const TextStyle(fontSize: 18),
+                    );
+                  }),
                   TextButton(
                     style: const ButtonStyle(
                         padding: WidgetStatePropertyAll(

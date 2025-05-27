@@ -22,7 +22,6 @@ class DayCardBuilder extends StatelessWidget {
 
     return Obx(() {
       // Jika tidak ada jadwal hari, kembalikan widget kosong
-      Get.back();
       if (jadwalKuliahDayProvider.jadwalHari.isEmpty) {
         return SingleChildScrollView(
           child: Container(

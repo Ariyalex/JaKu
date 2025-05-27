@@ -95,7 +95,7 @@ class JadwalkuliahController extends GetxController {
       data.sort(
         (a, b) {
           //1. urutkan berdasarkan hari
-          int dayCompare = getDayIndex(a.day!).compareTo(getDayIndex(b.day!));
+          int dayCompare = getDayIndex(a.day).compareTo(getDayIndex(b.day));
           if (dayCompare != 0) return dayCompare;
 
           //2. jam string ke waktu
