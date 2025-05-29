@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/firebase_options.dart';
+import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/page_route.dart';
@@ -15,7 +16,12 @@ import './theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  //inisialisasi firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  //inisialisasi hive
+  await JadwalKuliahLocal.initL();
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
   Get.put(AuthController(), permanent: true);

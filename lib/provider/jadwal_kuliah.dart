@@ -158,15 +158,6 @@ class JadwalkuliahController extends GetxController {
         room: room,
         day: day,
       ));
-
-      // Perbarui daftar hari unik setelah menambahkan matkul
-      try {
-        final dayController = Get.find<DayKuliahController>();
-        dayController.getUniqueDays(this);
-      } catch (e) {
-        print("Tidak dapat memperbarui daftar hari: $e");
-      }
-
       print(allMatkul);
       print("matkul berhasil ditambah");
     } catch (error) {
@@ -215,14 +206,6 @@ class JadwalkuliahController extends GetxController {
           room: room,
           day: day,
         );
-
-        // Perbarui daftar hari unik setelah memperbarui matkul
-        try {
-          final dayController = Get.find<DayKuliahController>();
-          dayController.getUniqueDays(this);
-        } catch (e) {
-          print("Tidak dapat memperbarui daftar hari: $e");
-        }
       }
     } catch (error) {
       print("error updating product: $error");
@@ -230,7 +213,7 @@ class JadwalkuliahController extends GetxController {
   }
 
   Future<void> deleteMatkuls(
-      String id, DayKuliahController dayKuliahController) async {
+      String id, DayKuliahController JadwalKuliahDay) async {
     try {
       if (_userid == null) {
         return;
@@ -241,9 +224,6 @@ class JadwalkuliahController extends GetxController {
       allMatkul.removeWhere(
         (product) => product.matkulId == id,
       );
-
-      // Perbarui daftar hari unik setelah menghapus matkul
-      dayKuliahController.getUniqueDays(this);
     } catch (error) {
       print("error deleting product: $error");
     }
