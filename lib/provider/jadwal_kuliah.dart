@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/route_named.dart';
@@ -16,6 +17,9 @@ class JadwalkuliahController extends GetxController {
   final RxList<Matkul> allMatkul = <Matkul>[].obs;
 
   StreamSubscription? _matkulSubscription;
+
+  //flag untuk menentukan apakah offline
+  final RxBool isOffline = false.obs;
 
   String? _userid;
 
@@ -65,6 +69,13 @@ class JadwalkuliahController extends GetxController {
   }
 
   @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    JadwalKuliahLocal.initL();
+  }
+
+  @override
   void onClose() {
     cancelSubscription();
     super.onClose();
@@ -73,51 +84,92 @@ class JadwalkuliahController extends GetxController {
   Future<void> getOnce() async {
     try {
       if (_userid == null) {
+        _loadFromLocalStorage();
         return;
       }
 
-      QuerySnapshot snapshot =
-          await _matkulCollection.where("userId", isEqualTo: _userid).get();
+      try {
+        QuerySnapshot snapshot =
+            await _matkulCollection.where("userId", isEqualTo: _userid).get();
 
-      List<Matkul> data = snapshot.docs
-          .map(
-            (doc) =>
-                Matkul.fromJson(doc.id, doc.data() as Map<String, dynamic>),
-          )
-          .toList();
+        List<Matkul> data = snapshot.docs
+            .map(
+              (doc) =>
+                  Matkul.fromJson(doc.id, doc.data() as Map<String, dynamic>),
+            )
+            .toList();
 
-      data.sort(
-        (a, b) {
-          //1. urutkan berdasarkan hari
-          int dayCompare = getDayIndex(a.day).compareTo(getDayIndex(b.day));
-          if (dayCompare != 0) return dayCompare;
+        data.sort((a, b) => _compareMatkul(a, b));
 
-          //2. jam string ke waktu
-          TimeOfDay parseTime(String? time) {
-            if (time == null || time.isEmpty) {
-              return const TimeOfDay(hour: 23, minute: 59); //default jika null
-            }
-            List<String> parts = time.split(":");
-            return TimeOfDay(
-                hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-          }
+        // Update the observable list with data from Firestore
+        allMatkul.clear();
+        allMatkul.addAll(data);
 
-          TimeOfDay jamAwalA = parseTime(a.formattedJamAwal);
-          TimeOfDay jamAwalB = parseTime(b.formattedJamAwal);
+        //simpan data ke local storage
+        await JadwalKuliahLocal.saveAllMatkulL(data);
+        isOffline.value = false;
 
-          //3. urutkan berdasarkan jam
-          return (jamAwalA.hour * 60 + jamAwalA.minute)
-              .compareTo(jamAwalB.hour * 60 + jamAwalB.minute);
-        },
-      );
-
-      // Update the observable list with data from Firestore
-      allMatkul.clear();
-      allMatkul.addAll(data);
-
-      Get.find<DayKuliahController>().getUniqueDays(this);
+        Get.find<DayKuliahController>().getUniqueDays(this);
+      } catch (e) {
+        print("errror fetching from firebase: $e");
+        _loadFromLocalStorage();
+        isOffline.value = true;
+      }
     } catch (error) {
       print("Error fetching products once: $error");
+      _loadFromLocalStorage();
+      isOffline.value = true;
+    }
+  }
+
+  //fungsi mebandingkan dua matkul saat sorting
+  int _compareMatkul(Matkul a, Matkul b) {
+    // 1. urutkan berdasarkan hari
+    int dayCompare = getDayIndex(a.day).compareTo(getDayIndex(b.day));
+    if (dayCompare != 0) return dayCompare;
+
+    //2. jam string ke waktu
+    TimeOfDay parseTime(String? time) {
+      if (time == null || time.isEmpty) {
+        return const TimeOfDay(hour: 23, minute: 59);
+      }
+      List<String> parts = time.split(":");
+      return TimeOfDay(
+        hour: int.parse(parts[0]),
+        minute: int.parse(parts[1]),
+      );
+    }
+
+    TimeOfDay jamAwalA = parseTime(a.formattedJamAwal);
+    TimeOfDay jamAwalB = parseTime(b.formattedJamAwal);
+
+    //urutkan berdasarkan jam
+    return (jamAwalA.hour * 60 + jamAwalA.minute)
+        .compareTo(jamAwalB.hour * 60 + jamAwalB.minute);
+  }
+
+  //fungsi untuk memuad data dari local storage
+  void _loadFromLocalStorage() {
+    try {
+      List<Matkul> localData = JadwalKuliahLocal.getAllMatkulsL();
+
+      if (localData.isNotEmpty) {
+        localData.sort((a, b) => _compareMatkul(a, b));
+        allMatkul.clear();
+        allMatkul.addAll(localData);
+
+        Get.find<DayKuliahController>().getUniqueDays(this);
+
+        Get.snackbar(
+          "Mode Offline",
+          "JaKU menggunakan data yang tersimpan di perangkat",
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } catch (e) {
+      print("error loading from local storage: $e");
     }
   }
 
@@ -132,9 +184,16 @@ class JadwalkuliahController extends GetxController {
       String day) async {
     try {
       if (_userid == null) {
+        Get.snackbar(
+          "Error",
+          "Anda harus login terlebih dahulu",
+          backgroundColor: Colors.red.shade400,
+          colorText: Colors.white,
+        );
         return;
       }
 
+      //menambahkan ke firebase
       DocumentReference docRef = await _matkulCollection.add({
         "matkul": matkul,
         "kelas": kelas,
@@ -147,7 +206,8 @@ class JadwalkuliahController extends GetxController {
         "userId": _userid,
       });
 
-      allMatkul.add(Matkul(
+//buat objek matkul baru
+      Matkul newMatkul = Matkul(
         matkulId: docRef.id,
         matkul: matkul,
         kelas: kelas,
@@ -157,11 +217,33 @@ class JadwalkuliahController extends GetxController {
         dosen2: dosen2,
         room: room,
         day: day,
-      ));
-      print(allMatkul);
+      );
+
+      //update list lokal
+      allMatkul.add(newMatkul);
+
+      //simpan ke local storage
+      await JadwalKuliahLocal.saveMatkulL(newMatkul);
+
+      // Perbarui daftar hari unik setelah menambahkan matkul
+      try {
+        final dayController = Get.find<DayKuliahController>();
+        dayController.getUniqueDays(this);
+      } catch (e) {
+        print("Tidak dapat memperbarui daftar hari: $e");
+      }
+
       print("matkul berhasil ditambah");
     } catch (error) {
       print("error adding product: $error");
+
+      Get.snackbar(
+        'Error',
+        'Gagal menambahkan mata kuliah: $error',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade400,
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -191,41 +273,79 @@ class JadwalkuliahController extends GetxController {
         "day": day,
       });
 
+      //buat objek matkul baru dengan data yang diudate
+      Matkul updatedMatkul = Matkul(
+        matkulId: id,
+        matkul: matkul,
+        kelas: kelas,
+        formattedJamAwal: formattedJamAwal,
+        formattedJamAkhir: formattedJamAkhir,
+        dosen1: dosen1,
+        dosen2: dosen2,
+        room: room,
+        day: day,
+      );
+
       int index = allMatkul.indexWhere(
         (matkul) => matkul.matkulId == id,
       );
       if (index != -1) {
-        allMatkul[index] = Matkul(
-          matkulId: id,
-          matkul: matkul,
-          kelas: kelas,
-          formattedJamAwal: formattedJamAwal,
-          formattedJamAkhir: formattedJamAkhir,
-          dosen1: dosen1,
-          dosen2: dosen2,
-          room: room,
-          day: day,
-        );
+        allMatkul[index] = updatedMatkul;
+
+        //update di local storage
+        await JadwalKuliahLocal.saveMatkulL(updatedMatkul);
+
+        // Perbarui daftar hari unik setelah memperbarui matkul
+        try {
+          final dayController = Get.find<DayKuliahController>();
+          dayController.getUniqueDays(this);
+        } catch (e) {
+          print("Tidak dapat memperbarui daftar hari: $e");
+        }
       }
     } catch (error) {
       print("error updating product: $error");
+
+      Get.snackbar(
+        'Error',
+        'Gagal memperbarui mata kuliah: $error',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade400,
+        colorText: Colors.white,
+      );
     }
   }
 
   Future<void> deleteMatkuls(
-      String id, DayKuliahController JadwalKuliahDay) async {
+      String id, DayKuliahController dayKuliahController) async {
     try {
       if (_userid == null) {
         return;
       }
 
+      //hapus matkul dari firebase
       await _matkulCollection.doc(id).delete();
 
+      //hapus dari list local
       allMatkul.removeWhere(
         (product) => product.matkulId == id,
       );
+
+      //hapus dari local storage
+      await JadwalKuliahLocal.deleteMatkulL(id);
+
+      // Perbarui daftar hari unik setelah menghapus matkul
+      dayKuliahController.getUniqueDays(this);
     } catch (error) {
       print("error deleting product: $error");
+
+      Get.snackbar(
+        'Error',
+        'Gagal menghapus mata kuliah: $error',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade400,
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -249,6 +369,9 @@ class JadwalkuliahController extends GetxController {
 
       // Hapus data pada controller jadwal
       clearData();
+
+      //hapus data dari local storage
+      await JadwalKuliahLocal.deleteAllMatkulL();
 
       // Perbarui tampilan hari
       hariKuliahProvider.clearAllDays();
@@ -277,6 +400,72 @@ class JadwalkuliahController extends GetxController {
         'Terjadi kesalahan saat menghapus data: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> syncWithFirebase() async {
+    try {
+      if (_userid == null) {
+        Get.snackbar(
+          "Error",
+          "Anda harus login dulu",
+          backgroundColor: Colors.red.shade400,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      //tampilkan loading indicator
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+        barrierDismissible: false,
+      );
+
+      QuerySnapshot snapshot =
+          await _matkulCollection.where("userId", isEqualTo: _userid).get();
+
+      List<Matkul> firebaseData = snapshot.docs
+          .map((doc) =>
+              Matkul.fromJson(doc.id, doc.data() as Map<String, dynamic>))
+          .toList();
+
+      //sinkron dengan local storage
+      await JadwalKuliahLocal.syncWithFirebaseL(firebaseData);
+
+      //update data di controller
+      allMatkul.clear();
+      allMatkul.addAll(firebaseData);
+      allMatkul.sort((a, b) => _compareMatkul(a, b));
+
+      //perbarui tampilan hari
+      final dayController = Get.find<DayKuliahController>();
+      dayController.getUniqueDays(this);
+
+      isOffline.value = false;
+
+      //tutup dialog
+      Get.back();
+
+      Get.snackbar(
+        'Berhasil',
+        'Data berhasil disinkronkan',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green.shade400,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      //tutup loading jika error
+      Get.back();
+
+      Get.snackbar(
+        'Gagal',
+        'Terjadi kesalahan saat sinkronisasi: $e',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.shade400,
         colorText: Colors.white,
       );
     }
