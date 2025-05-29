@@ -17,8 +17,6 @@ class JadwalkuliahController extends GetxController {
 
   StreamSubscription? _matkulSubscription;
 
-  final DayKuliahController _jadwalKuliahDay = DayKuliahController();
-
   String? _userid;
 
   int get jumlahMatkul => allMatkul.length;
@@ -46,10 +44,6 @@ class JadwalkuliahController extends GetxController {
       "Minggu",
     ];
     return hariList.indexOf(day);
-  }
-
-  void cleanupDays() {
-    _jadwalKuliahDay.cleanupEmptyDays(this);
   }
 
   //gunakan firebase
@@ -121,7 +115,7 @@ class JadwalkuliahController extends GetxController {
       allMatkul.clear();
       allMatkul.addAll(data);
 
-      Get.find<DayKuliahController>().groupByDay(this);
+      Get.find<DayKuliahController>().getUniqueDays(this);
     } catch (error) {
       print("Error fetching products once: $error");
     }
@@ -164,6 +158,15 @@ class JadwalkuliahController extends GetxController {
         room: room,
         day: day,
       ));
+
+      // Perbarui daftar hari unik setelah menambahkan matkul
+      try {
+        final dayController = Get.find<DayKuliahController>();
+        dayController.getUniqueDays(this);
+      } catch (e) {
+        print("Tidak dapat memperbarui daftar hari: $e");
+      }
+
       print(allMatkul);
       print("matkul berhasil ditambah");
     } catch (error) {
@@ -212,6 +215,14 @@ class JadwalkuliahController extends GetxController {
           room: room,
           day: day,
         );
+
+        // Perbarui daftar hari unik setelah memperbarui matkul
+        try {
+          final dayController = Get.find<DayKuliahController>();
+          dayController.getUniqueDays(this);
+        } catch (e) {
+          print("Tidak dapat memperbarui daftar hari: $e");
+        }
       }
     } catch (error) {
       print("error updating product: $error");
@@ -219,7 +230,7 @@ class JadwalkuliahController extends GetxController {
   }
 
   Future<void> deleteMatkuls(
-      String id, DayKuliahController JadwalKuliahDay) async {
+      String id, DayKuliahController dayKuliahController) async {
     try {
       if (_userid == null) {
         return;
@@ -231,7 +242,8 @@ class JadwalkuliahController extends GetxController {
         (product) => product.matkulId == id,
       );
 
-      JadwalKuliahDay.cleanupEmptyDays(this);
+      // Perbarui daftar hari unik setelah menghapus matkul
+      dayKuliahController.getUniqueDays(this);
     } catch (error) {
       print("error deleting product: $error");
     }

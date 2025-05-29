@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _futureMatkul.value = jadwalProvider.getOnce().then(
       (_) {
-        jadwalHariProvider.groupByDay(jadwalProvider);
+        jadwalHariProvider.getUniqueDays(jadwalProvider);
       },
     ).catchError(
       (err) {

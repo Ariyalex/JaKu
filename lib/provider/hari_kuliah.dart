@@ -33,31 +33,29 @@ class DayKuliahController extends GetxController {
     return hariList[todayIndex];
   }
 
-  //mengelompokkan mata kuliah berdasarkan hari
-  void groupByDay(JadwalkuliahController jadwalKuliah) {
-    //bershikan data sebelumnya
+  // Mengambil hari-hari unik dari jadwal mata kuliah
+  void getUniqueDays(JadwalkuliahController jadwalKuliah) {
+    // Bersihkan data sebelumnya
     jadwalHari.clear();
 
-    //buat map untuk mengelompokkan berdasarkan hari
-    Map<String, List<Matkul>> groupedMatkul = {};
+    // Ambil hari-hari unik dari matkul
+    Set<String> uniqueDays = {};
 
     for (var matkul in jadwalKuliah.allMatkul) {
       if (matkul.day.isNotEmpty) {
-        groupedMatkul.putIfAbsent(matkul.day, () => []).add(matkul);
+        uniqueDays.add(matkul.day);
       }
     }
 
-    //masukkan hasil ke dalam _jadwalHari
-    groupedMatkul.forEach(
-      (day, matkulList) {
-        jadwalHari.add(HariKuliah(
-          matkulId: day, //gunakan nama hari sebagai ID unik
-          day: day,
-        ));
-      },
-    );
+    // Tambahkan hari unik ke jadwalHari
+    for (var day in uniqueDays) {
+      jadwalHari.add(HariKuliah(
+        matkulId: day,
+        day: day,
+      ));
+    }
 
-    //urutkan berdasar index hari
+    // Urutkan berdasarkan indeks hari
     jadwalHari.sort(
       (a, b) => getDayIndex(a.day.toString())
           .compareTo(getDayIndex(b.day.toString())),
@@ -71,17 +69,6 @@ class DayKuliahController extends GetxController {
       ...jadwalHari
           .where((hari) => getDayIndex(hari.day.toString()) < todayIndex),
     ];
-  }
-
-  void cleanupEmptyDays(JadwalkuliahController jadwalKuliah) {
-    Set<String> reminingDays =
-        jadwalKuliah.allMatkul.map((matkul) => matkul.day).toSet();
-    print(reminingDays);
-
-    //hapus hari yg tidak ada di reminingDays
-    jadwalHari.removeWhere(
-      (hari) => !reminingDays.contains(hari.day),
-    );
   }
 
   // Membersihkan semua data hari

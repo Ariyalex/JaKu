@@ -75,7 +75,7 @@ class _AddMatkulState extends State<DetailMatkul> {
         Get.back();
 
         // Update grouped data
-        dayKuliahController.groupByDay(allMatkulProvider);
+        dayKuliahController.getUniqueDays(allMatkulProvider);
 
         // Show success message
         Get.snackbar(
