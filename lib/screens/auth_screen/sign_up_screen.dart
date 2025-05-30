@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/auth_c.dart';
 
 import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
@@ -13,16 +14,13 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  final authC = Get.find<AuthC>();
   bool _obscurePswdText = true;
   bool _obscureConfirm = true;
   bool _isLoading = false;
 
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmFocus = FocusNode();
-
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPassController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,23 +39,23 @@ class _SignUpState extends State<SignUp> {
       });
 
       debugPrint(
-          "email: ${emailController.text}, password: ${passwordController.text}, confirm: ${confirmPassController.text}");
+          "email: ${authC.emailC.text}, password: ${authC.passwordC.text}, confirm: ${authC.confirmPassC.text}");
 
       try {
-        if (emailController.text.trim().isEmpty ||
-            passwordController.text.trim().isEmpty) {
+        if (authC.emailC.text.trim().isEmpty ||
+            authC.passwordC.text.trim().isEmpty) {
           throw "Email dan Password tidak boleh kosong";
-        } else if (confirmPassController.text.trim() !=
-            passwordController.text.trim()) {
+        } else if (authC.confirmPassC.text.trim() !=
+            authC.passwordC.text.trim()) {
           throw "Confirm password tidak sama dengan new password";
-        } else if (confirmPassController.text.trim().isEmpty) {
+        } else if (authC.confirmPassC.text.trim().isEmpty) {
           throw "Confirm password tidak boleh kosong";
-        } else if (confirmPassController.text.trim().length < 6) {
+        } else if (authC.confirmPassC.text.trim().length < 6) {
           throw ("password harus lebih dari 6 karakter");
         }
 
-        await Get.find<AuthController>().signUp(emailController.text.trim(),
-            confirmPassController.text.trim(), jadwalProvider);
+        await Get.find<AuthController>().signUp(authC.emailC.text.trim(),
+            authC.confirmPassC.text.trim(), jadwalProvider);
 
         if (!mounted) return null;
         Get.offNamed(RouteNamed.signInScreen);
@@ -115,7 +113,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                     TextField(
                       textInputAction: TextInputAction.next,
-                      controller: emailController,
+                      controller: authC.emailC,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(
                               borderRadius:
@@ -131,7 +129,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                     TextField(
                       focusNode: _passwordFocus,
-                      controller: passwordController,
+                      controller: authC.passwordC,
                       obscureText: _obscurePswdText,
                       onSubmitted: (value) =>
                           FocusScope.of(context).requestFocus(_confirmFocus),
@@ -161,7 +159,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                     TextField(
                       focusNode: _confirmFocus,
-                      controller: confirmPassController,
+                      controller: authC.confirmPassC,
                       obscureText: _obscureConfirm,
                       onSubmitted: (value) => signUpUser(),
                       decoration: InputDecoration(

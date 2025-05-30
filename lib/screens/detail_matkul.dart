@@ -78,11 +78,9 @@ class _AddMatkulState extends State<DetailMatkul> {
         dayKuliahController.getUniqueDays(allMatkulProvider);
 
         // Show success message
-        Get.snackbar(
-          "Success",
-          "Jadwal berhasil diedit",
-          backgroundColor: Colors.green.shade400,
-        );
+        Get.snackbar("Success", "Jadwal berhasil diedit",
+            backgroundColor: Colors.green.shade400,
+            snackPosition: SnackPosition.BOTTOM);
 
         // Clear form fields
         editC.matkulC.clear();

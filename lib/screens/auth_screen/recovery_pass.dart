@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/auth_c.dart';
 import '../../provider/auth.dart' as aut;
 
 class RecoveryPass extends StatefulWidget {
@@ -10,6 +11,7 @@ class RecoveryPass extends StatefulWidget {
 }
 
 class _RecoveryPassState extends State<RecoveryPass> {
+  final authC = Get.find<AuthC>();
   bool _isLoading = false;
 
   Future<String?> _recoverPassword(String email) async {
@@ -19,7 +21,7 @@ class _RecoveryPassState extends State<RecoveryPass> {
 
     debugPrint('Name: $email');
     try {
-      if (recoveryController.text.isEmpty) {
+      if (authC.emailC.text.isEmpty) {
         throw "Email recovery harus diisi!";
       }
 
@@ -40,8 +42,6 @@ class _RecoveryPassState extends State<RecoveryPass> {
     }
     return null;
   }
-
-  final TextEditingController recoveryController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,7 @@ class _RecoveryPassState extends State<RecoveryPass> {
                       ),
                     ),
                     TextField(
-                      controller: recoveryController,
+                      controller: authC.emailC,
                       onSubmitted: (value) => _recoverPassword,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(
@@ -122,8 +122,7 @@ class _RecoveryPassState extends State<RecoveryPass> {
                           onPressed: _isLoading
                               ? null
                               : () {
-                                  _recoverPassword(
-                                      recoveryController.text.trim());
+                                  _recoverPassword(authC.emailC.text.trim());
                                 },
                           child: _isLoading
                               ? const SizedBox(

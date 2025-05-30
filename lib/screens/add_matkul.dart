@@ -70,7 +70,8 @@ class _AddMatkulState extends State<AddMatkul> {
             Get.back();
             Get.find<DayKuliahController>().getUniqueDays(allMatkulProvider);
             Get.snackbar("Success", "Jadwal berhasil ditambahkan",
-                backgroundColor: Colors.green.shade400);
+                backgroundColor: Colors.green.shade400,
+                snackPosition: SnackPosition.BOTTOM);
           },
         );
 
@@ -383,7 +384,10 @@ class _AddMatkulState extends State<AddMatkul> {
                   // onPressed: addJadwal,
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [Text("Simpan"), Icon(Icons.save)],
+                    children: [
+                      Text("Simpan"),
+                      Icon(Icons.save),
+                    ],
                   ))
             ],
           ),

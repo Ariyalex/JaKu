@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
-import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:get/get.dart';
 
@@ -120,51 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
         confirm: FilledButton(
             onPressed: () async {
               Get.back(); // Tutup dialog konfirmasi
-              // Menunjukkan loading indicator
-              Get.dialog(
-                const Center(child: CircularProgressIndicator()),
-                barrierDismissible: false,
-              );
+              final allMatkulProvider = Get.find<JadwalkuliahController>();
 
-              try {
-                // Dapatkan controller yang diperlukan
-                final jadwalController = Get.find<JadwalkuliahController>();
-                final dayController = Get.find<DayKuliahController>();
-                final pdfBack = Get.find<PdfBack>();
-
-                // Hapus data dari Firebase
-                await pdfBack.clearUserData();
-
-                // Hapus data lokal
-                jadwalController.clearData();
-                dayController.clearAllDays();
-
-                // Tutup dialog loading
-                Get.back();
-
-                // Force refresh dengan navigasi
-                Get.offAllNamed(RouteNamed.homePage);
-
-                // Tampilkan notifikasi sukses
-                Get.snackbar(
-                  'Berhasil',
-                  'Semua data berhasil dihapus',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.green,
-                  colorText: Colors.white,
-                );
-              } catch (e) {
-                // Tutup dialog loading
-                Get.back();
-
-                // Tampilkan pesan error
-                Get.snackbar(
-                  'Gagal',
-                  'Terjadi kesalahan saat menghapus data: $e',
-                  backgroundColor: Colors.red.shade400,
-                  colorText: Colors.white,
-                );
-              }
+              allMatkulProvider.clearAllData();
             },
             child: const Text("Ya")));
   }

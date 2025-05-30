@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/auth_c.dart';
 
 import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
@@ -14,12 +15,10 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  final authC = Get.put(AuthC());
   bool _obscureText = true;
   bool _isLoading = false;
   bool _isLoadingGoogle = false;
-
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,22 +38,23 @@ class _SignInState extends State<SignIn> {
       });
 
       debugPrint(
-          'Name: ${emailController.text}, Password: ${passwordController.text}');
+          'Name: ${authC.emailC.text}, Password: ${authC.passwordC.text}');
 
       try {
         //cek email or password kosong
-        if (emailController.text.trim().isEmpty ||
-            passwordController.text.trim().isEmpty) {
+        if (authC.emailC.text.trim().isEmpty ||
+            authC.passwordC.text.trim().isEmpty) {
           throw "Email dan Password tidak boleh kosong";
         }
 
-        await authController.signIn(emailController.text.trim(),
-            passwordController.text.trim(), jadwalProvider);
+        await authController.signIn(authC.emailC.text.trim(),
+            authC.passwordC.text.trim(), jadwalProvider);
 
         if (!mounted) return null;
 
         //jika berhasil login, langsung navigasi
         Get.offNamed(RouteNamed.homePage);
+        Get.delete<AuthC>();
       } catch (error) {
         Get.snackbar("Error!", error.toString(),
             backgroundColor: Colors.red.shade400);
@@ -106,7 +106,7 @@ class _SignInState extends State<SignIn> {
                       ),
                     ),
                     TextField(
-                      controller: emailController,
+                      controller: authC.emailC,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(
@@ -122,7 +122,7 @@ class _SignInState extends State<SignIn> {
                       height: 20,
                     ),
                     TextField(
-                      controller: passwordController,
+                      controller: authC.passwordC,
                       obscureText: _obscureText,
                       onSubmitted: (value) => authUser(),
                       decoration: InputDecoration(
