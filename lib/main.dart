@@ -57,7 +57,9 @@ class MyApp extends StatelessWidget {
                 : const SignIn();
           } else {
             print("offlen ini kontol");
-            return const HomeScreen();
+            return authController.isLoggedIn
+                ? const HomeScreen()
+                : const SignIn();
           }
         },
       ),

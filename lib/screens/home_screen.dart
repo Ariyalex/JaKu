@@ -19,12 +19,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final connectionStatus = Get.find<InternetCheck>().isOnline;
+  final allMatkulProvider = Get.find<JadwalkuliahController>();
+  final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
 
   final Rx<Future<void>?> _futureMatkul = Rx<Future<void>?>(null);
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -33,12 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void loadData() {
-    final jadwalProvider = Get.find<JadwalkuliahController>();
-    final jadwalHariProvider = Get.find<DayKuliahController>();
-
-    _futureMatkul.value = jadwalProvider.getOnce().then(
+    _futureMatkul.value = allMatkulProvider.getOnce().then(
       (_) {
-        jadwalHariProvider.getUniqueDays(jadwalProvider);
+        jadwalKuliahDayProvider.getUniqueDays(allMatkulProvider);
       },
     ).catchError(
       (err) {
@@ -131,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void checkConnectionStatus() {
-    final connectionStatus = Get.find<InternetCheck>().isOnline;
     if (connectionStatus.value == false) {
       Get.snackbar(
         "Mode Offline",
@@ -149,15 +147,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Get.find<JadwalkuliahController>();
-    final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
-
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("Jaku"),
+        title: Row(
+          children: [
+            const Text("Jaku"),
+            Obx(
+              () {
+                if (connectionStatus.value == false) {
+                  return Text(" Offline mode");
+                } else {
+                  return SizedBox.shrink();
+                }
+              },
+            )
+          ],
+        ),
         leading: Builder(
           builder: (context) => PopupMenuButton<String>(
             icon: const Icon(Icons.menu), // Burger Icon

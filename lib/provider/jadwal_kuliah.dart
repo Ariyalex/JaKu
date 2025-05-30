@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/jadwal.dart';
+
+var uuid = const Uuid();
 
 class JadwalkuliahController extends GetxController {
   final CollectionReference _matkulCollection =
@@ -17,9 +21,6 @@ class JadwalkuliahController extends GetxController {
   final RxList<Matkul> allMatkul = <Matkul>[].obs;
 
   StreamSubscription? _matkulSubscription;
-
-  //flag untuk menentukan apakah offline
-  final RxBool isOffline = false.obs;
 
   String? _userid;
 
@@ -107,18 +108,15 @@ class JadwalkuliahController extends GetxController {
 
         //simpan data ke local storage
         await JadwalKuliahLocal.saveAllMatkulL(data);
-        isOffline.value = false;
 
         Get.find<DayKuliahController>().getUniqueDays(this);
       } catch (e) {
         print("errror fetching from firebase: $e");
         _loadFromLocalStorage();
-        isOffline.value = true;
       }
     } catch (error) {
       print("Error fetching products once: $error");
       _loadFromLocalStorage();
-      isOffline.value = true;
     }
   }
 
@@ -175,49 +173,65 @@ class JadwalkuliahController extends GetxController {
       String room,
       String day) async {
     try {
-      if (_userid == null) {
-        Get.snackbar(
-          "Error",
-          "Anda harus login terlebih dahulu",
-          backgroundColor: Colors.red.shade400,
-          colorText: Colors.white,
-        );
-        return;
-      }
+      final internetCheck = Get.find<InternetCheck>();
+      final isCurrentlyOnline = internetCheck.isOnline.value;
 
       //menambahkan ke firebase
-      DocumentReference docRef = await _matkulCollection.add({
-        "matkul": matkul,
-        "kelas": kelas,
-        "formattedJamAwal": formattedJamAwal,
-        "formattedJamAkhir": formattedJamAkhir,
-        "dosen1": dosen1,
-        "dosen2": dosen2,
-        "room": room,
-        "day": day,
-        "userId": _userid,
-      });
+      if (isCurrentlyOnline == true) {
+        if (_userid == null) {
+          return;
+        }
 
-//buat objek matkul baru
-      Matkul newMatkul = Matkul(
-        matkulId: docRef.id,
-        matkul: matkul,
-        kelas: kelas,
-        formattedJamAwal: formattedJamAwal,
-        formattedJamAkhir: formattedJamAkhir,
-        dosen1: dosen1,
-        dosen2: dosen2,
-        room: room,
-        day: day,
-      );
+        print("onlen mode add");
+        DocumentReference docRef = await _matkulCollection.add({
+          "matkul": matkul,
+          "kelas": kelas,
+          "formattedJamAwal": formattedJamAwal,
+          "formattedJamAkhir": formattedJamAkhir,
+          "dosen1": dosen1,
+          "dosen2": dosen2,
+          "room": room,
+          "day": day,
+          "userId": _userid,
+        });
 
-      //update list lokal
-      allMatkul.add(newMatkul);
+        Matkul newMatkul = Matkul(
+          matkulId: docRef.id,
+          matkul: matkul,
+          kelas: kelas,
+          formattedJamAwal: formattedJamAwal,
+          formattedJamAkhir: formattedJamAkhir,
+          dosen1: dosen1,
+          dosen2: dosen2,
+          room: room,
+          day: day,
+        );
 
-      //simpan ke local storage
-      await JadwalKuliahLocal.saveMatkulL(newMatkul);
+        //update list lokal
+        allMatkul.add(newMatkul);
 
-      // Perbarui daftar hari unik setelah menambahkan matkul
+        //simpan ke local storage
+        await JadwalKuliahLocal.saveMatkulL(newMatkul);
+      } else {
+        Matkul newMatkul = Matkul(
+          matkulId: uuid.v4(),
+          matkul: matkul,
+          kelas: kelas,
+          formattedJamAwal: formattedJamAwal,
+          formattedJamAkhir: formattedJamAkhir,
+          dosen1: dosen1,
+          dosen2: dosen2,
+          room: room,
+          day: day,
+        );
+
+        //update list lokal
+        allMatkul.add(newMatkul);
+
+        //simpan ke local storage
+        await JadwalKuliahLocal.saveMatkulL(newMatkul);
+        print("disimpan secara lokal");
+      }
       try {
         final dayController = Get.find<DayKuliahController>();
         dayController.getUniqueDays(this);
@@ -436,8 +450,6 @@ class JadwalkuliahController extends GetxController {
       //perbarui tampilan hari
       final dayController = Get.find<DayKuliahController>();
       dayController.getUniqueDays(this);
-
-      isOffline.value = false;
 
       //tutup dialog
       Get.back();
