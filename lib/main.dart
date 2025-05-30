@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/auth.dart';
+import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/home_screen.dart';
@@ -28,6 +29,7 @@ void main() async {
   Get.put(JadwalkuliahController(), permanent: true);
   Get.put(DayKuliahController(), permanent: true);
   Get.put(PdfBack(), permanent: true);
+  Get.put(InternetCheck());
 
   // Pastikan data login dimuat sebelum menampilkan UI
   await Get.find<AuthController>().initializeAuth();
@@ -46,9 +48,17 @@ class MyApp extends StatelessWidget {
       home: Obx(
         () {
           final authController = Get.find<AuthController>();
-          return authController.isLoggedIn
-              ? const HomeScreen()
-              : const SignIn();
+          final internetStatus = Get.find<InternetCheck>().isOnline;
+
+          if (internetStatus.value == true) {
+            print("ternyata onlen");
+            return authController.isLoggedIn
+                ? const HomeScreen()
+                : const SignIn();
+          } else {
+            print("offlen ini kontol");
+            return const HomeScreen();
+          }
         },
       ),
       getPages: AppPage.pages,

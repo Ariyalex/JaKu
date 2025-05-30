@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
+import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:get/get.dart';
 
@@ -26,6 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkConnectionStatus();
+    });
   }
 
   void loadData() {
@@ -124,6 +128,19 @@ class _HomeScreenState extends State<HomeScreen> {
               allMatkulProvider.clearAllData();
             },
             child: const Text("Ya")));
+  }
+
+  void checkConnectionStatus() {
+    final connectionStatus = Get.find<InternetCheck>().isOnline;
+    if (connectionStatus.value == false) {
+      Get.snackbar(
+        "Mode Offline",
+        "JaKU menggunakan data yang tersimpan di perangkat",
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 
   Drawer howTo = const Drawer(

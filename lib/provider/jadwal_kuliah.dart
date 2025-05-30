@@ -159,14 +159,6 @@ class JadwalkuliahController extends GetxController {
         allMatkul.addAll(localData);
 
         Get.find<DayKuliahController>().getUniqueDays(this);
-
-        Get.snackbar(
-          "Mode Offline",
-          "JaKU menggunakan data yang tersimpan di perangkat",
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
       }
     } catch (e) {
       print("error loading from local storage: $e");
