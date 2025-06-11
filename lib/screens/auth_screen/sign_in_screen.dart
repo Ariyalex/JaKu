@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/auth_c.dart';
-import 'package:jaku/provider/internet_check.dart';
 
 import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
@@ -25,7 +24,6 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     final jadwalProvider = Get.find<JadwalkuliahController>();
     final authController = Get.find<aut.AuthController>();
-    final connectionStatus = Get.find<InternetCheck>().isOnline;
 
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final mediaQueryHeight = MediaQuery.of(context).size.height;
@@ -265,17 +263,6 @@ class _SignInState extends State<SignIn> {
                   ],
                 ),
               ),
-              Obx(
-                () {
-                  if (connectionStatus.value == false) {
-                    return OutlinedButton(
-                        onPressed: () => Get.toNamed(RouteNamed.homePage),
-                        child: Text("Offline Mode?"));
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-              )
             ],
           ),
         ),

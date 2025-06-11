@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final connectionStatus = Get.find<InternetCheck>().isOnline;
   final allMatkulProvider = Get.find<JadwalkuliahController>();
   final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
+  final authController = Get.find<AuthController>();
 
   final Rx<Future<void>?> _futureMatkul = Rx<Future<void>?>(null);
 
@@ -29,9 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     loadData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkConnectionStatus();
-    });
   }
 
   void loadData() {
@@ -129,88 +127,111 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text("Ya")));
   }
 
-  void checkConnectionStatus() {
-    if (connectionStatus.value == false) {
-      Get.snackbar(
-        "Mode Offline",
-        "JaKU menggunakan data yang tersimpan di perangkat",
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-    }
-  }
-
   Drawer howTo = const Drawer(
     child: DrawerGuide(),
   );
 
   @override
   Widget build(BuildContext context) {
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: Row(
           children: [
-            const Text("Jaku"),
             Obx(
               () {
                 if (connectionStatus.value == false) {
-                  return Text(" Offline mode");
+                  return const Text("Jaku Offline mode");
                 } else {
-                  return SizedBox.shrink();
+                  return const Text("Jaku");
                 }
               },
             )
           ],
         ),
-        leading: Builder(
-          builder: (context) => PopupMenuButton<String>(
-            icon: const Icon(Icons.menu), // Burger Icon
-            onSelected: (value) {
-              if (value == "info") {
-                _showInfoDialog(context);
-              } else if (value == "logout") {
-                _logout(context);
-              } else if (value == "clear") {
-                clearAllData(context);
-              }
-            },
-            position: PopupMenuPosition.under,
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: "clear",
-                child: ListTile(
-                  leading: Icon(Icons.delete_sweep),
-                  title: Text("Clear All Data"),
-                ),
+        leading: Obx(() {
+          if (connectionStatus.value == true) {
+            return Builder(
+              builder: (context) => PopupMenuButton<String>(
+                icon: const Icon(Icons.menu), // Burger Icon
+                onSelected: (value) {
+                  if (value == "info") {
+                    _showInfoDialog(context);
+                  } else if (value == "logout") {
+                    _logout(context);
+                  } else if (value == "clear") {
+                    clearAllData(context);
+                  }
+                },
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: "clear",
+                    child: ListTile(
+                      leading: Icon(Icons.delete_sweep),
+                      title: Text("Clear All Data"),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: "info",
+                    child: ListTile(
+                      leading: Icon(Icons.info),
+                      title: Text("Info"),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: "logout",
+                    child: ListTile(
+                      leading: Icon(Icons.logout),
+                      title: Text("Logout"),
+                    ),
+                  ),
+                ],
               ),
-              const PopupMenuItem<String>(
-                value: "info",
-                child: ListTile(
-                  leading: Icon(Icons.info),
-                  title: Text("Info"),
-                ),
+            );
+          } else {
+            return Builder(
+              builder: (context) => PopupMenuButton<String>(
+                icon: const Icon(Icons.menu), // Burger Icon
+                onSelected: (value) {
+                  if (value == "info") {
+                    _showInfoDialog(context);
+                  }
+                },
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: "info",
+                    child: ListTile(
+                      leading: Icon(Icons.info),
+                      title: Text("Info"),
+                    ),
+                  ),
+                ],
               ),
-              const PopupMenuItem<String>(
-                value: "logout",
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text("Logout"),
-                ),
-              ),
-            ],
-          ),
-        ),
+            );
+          }
+        }),
         actions: [
-          IconButton(
-            onPressed: () {
-              Get.toNamed(RouteNamed.addMatkul);
-            },
-            icon: const Icon(Icons.add),
-          ),
+          Obx(() {
+            if (connectionStatus.value == true && authController.isLoggedIn) {
+              return IconButton(
+                onPressed: () {
+                  Get.toNamed(RouteNamed.addMatkul);
+                },
+                icon: const Icon(Icons.add),
+              );
+            } else if (authController.isLoggedIn &&
+                connectionStatus.value == false) {
+              return const SizedBox.shrink();
+            } else {
+              return IconButton(
+                  onPressed: () {
+                    Get.offNamed(RouteNamed.signInScreen);
+                  },
+                  icon: const Icon(Icons.login));
+            }
+          }),
         ],
       ),
       drawer: howTo,
@@ -224,96 +245,6 @@ class _HomeScreenState extends State<HomeScreen> {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text("Error: ${snapshot.error}"));
-            } else if (allMatkulProvider.allMatkul.isEmpty) {
-              return SingleChildScrollView(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 50),
-                  width: mediaQueryWidth,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Column(
-                        children: [
-                          const Text(
-                            "Jadwal Kosong??!!!",
-                            style: TextStyle(fontSize: 25),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          SizedBox(
-                              width: mediaQueryWidth * 5 / 7,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: Image.asset(
-                                  "images/bochi.jpg",
-                                ),
-                              )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      FilledButton(
-                        onPressed: () {
-                          Get.toNamed(RouteNamed.addMatkul);
-                        },
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "Add Matkul",
-                              style: TextStyle(fontSize: 17),
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Icon(Icons.add),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      FilledButton(
-                          onPressed: () {
-                            Get.defaultDialog(
-                              title: "Peringatan!!",
-                              content: const Text(
-                                "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
-                                textAlign: TextAlign.center,
-                              ),
-                              cancel: OutlinedButton(
-                                  onPressed: () {
-                                    Get.back();
-                                  },
-                                  child: const Text("Ga jadi")),
-                              confirm: FilledButton(
-                                onPressed: () {
-                                  Get.back();
-                                  Get.toNamed(RouteNamed.pdfParsing);
-                                },
-                                child: const Text("Ok Bang"),
-                              ),
-                            );
-                          },
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "PDF Otomation",
-                                style: TextStyle(fontSize: 17),
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Icon(Icons.picture_as_pdf),
-                            ],
-                          )),
-                    ],
-                  ),
-                ),
-              );
             } else {
               return Flex(
                 direction: Axis.vertical,
