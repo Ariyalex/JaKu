@@ -4,6 +4,7 @@ import './jadwal_kuliah.dart';
 
 class DayKuliahController extends GetxController {
   final RxList<HariKuliah> jadwalHari = <HariKuliah>[].obs;
+  final RxList<HariKuliah> jadwalHariTerurut = <HariKuliah>[].obs;
 
   int getDayIndex(String day) {
     List<String> hariList = [
@@ -37,6 +38,7 @@ class DayKuliahController extends GetxController {
   void getUniqueDays(JadwalkuliahController jadwalKuliah) {
     // Bersihkan data sebelumnya
     jadwalHari.clear();
+    jadwalHariTerurut.clear();
 
     // Ambil hari-hari unik dari matkul
     Set<String> uniqueDays = {};
@@ -49,11 +51,18 @@ class DayKuliahController extends GetxController {
 
     // Tambahkan hari unik ke jadwalHari
     for (var day in uniqueDays) {
-      jadwalHari.add(HariKuliah(
+      var hariData = HariKuliah(
         matkulId: day,
         day: day,
-      ));
+      );
+      jadwalHari.add(hariData);
+      jadwalHariTerurut.add(hariData);
     }
+
+    jadwalHariTerurut.sort(
+      (a, b) => getDayIndex(a.day.toString())
+          .compareTo(getDayIndex(b.day.toString())),
+    );
 
     // Urutkan berdasarkan indeks hari
     jadwalHari.sort(
@@ -71,8 +80,13 @@ class DayKuliahController extends GetxController {
     ];
   }
 
+  List<HariKuliah> getOrderedDays() {
+    return jadwalHariTerurut;
+  }
+
   // Membersihkan semua data hari
   void clearAllDays() {
     jadwalHari.clear();
+    jadwalHariTerurut.clear();
   }
 }

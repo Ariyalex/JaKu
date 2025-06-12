@@ -92,6 +92,9 @@ class _AddMatkulState extends State<DetailMatkul> {
         editC.jamAwal.value = null;
         editC.hari.value = null;
 
+        //delete controller
+        Get.delete<EditMatkulC>();
+
         // Return to previous screen
         Get.toNamed(RouteNamed.homePage);
       } catch (e) {

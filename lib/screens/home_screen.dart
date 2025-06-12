@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/internet_check.dart';
+import 'package:jaku/widgets/card_view.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:get/get.dart';
+import 'package:jaku/widgets/table_view.dart';
 
 import '../provider/hari_kuliah.dart';
 import '../provider/jadwal_kuliah.dart';
-import '../widgets/day_card_builder.dart';
 import '../routes/route_named.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,9 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Tutup loading dialog
                 Get.back();
-
-                // Navigasi ke halaman login dengan menghapus semua halaman sebelumnya
-                Get.offAllNamed(RouteNamed.signInScreen);
               } catch (e) {
                 // Tutup loading dialog jika terjadi error
                 Get.back();
@@ -235,32 +233,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: howTo,
-      body: Obx(() {
-        final _ = allMatkulProvider.allMatkul;
-
-        return FutureBuilder(
-          future: _futureMatkul.value,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            } else {
-              return Flex(
-                direction: Axis.vertical,
-                children: [
-                  Expanded(
-                    child: DayCardBuilder(
-                      jadwalKuliahDayProvider: jadwalKuliahDayProvider,
-                      allMatkulProvider: allMatkulProvider,
-                    ),
-                  )
-                ],
-              );
-            }
-          },
-        );
-      }),
+      // body: CardView(futureMatkul: _futureMatkul),
+      body: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: TableView(),
+      ),
     );
   }
 }

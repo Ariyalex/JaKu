@@ -15,10 +15,24 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  final authC = Get.put(AuthC());
+  late AuthC authC;
   bool _obscureText = true;
   bool _isLoading = false;
   bool _isLoadingGoogle = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cek apakah controller sudah terdaftar
+    if (!Get.isRegistered<AuthC>()) {
+      authC = Get.put(AuthC());
+    } else {
+      // Gunakan yang sudah ada dan reset field-nya
+      authC = Get.find<AuthC>();
+      authC.emailC.clear();
+      authC.passwordC.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +61,13 @@ class _SignInState extends State<SignIn> {
           throw "Email dan Password tidak boleh kosong";
         }
 
-        await authController.signIn(authC.emailC.text.trim(),
-            authC.passwordC.text.trim(), jadwalProvider);
+        await authController.signIn(
+          authC.emailC.text.trim(),
+          authC.passwordC.text.trim(),
+          jadwalProvider,
+        );
 
         if (!mounted) return null;
-
-        //jika berhasil login, langsung navigasi
-        Get.offNamed(RouteNamed.homePage);
-        Get.delete<AuthC>();
       } catch (error) {
         Get.snackbar("Error!", error.toString(),
             backgroundColor: Colors.red.shade400);

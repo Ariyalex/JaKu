@@ -197,99 +197,99 @@ class _AddMatkulState extends State<AddMatkul> {
               const SizedBox(
                 height: 12,
               ),
-              DropdownSearch<String>(
-                selectedItem: addMatkulC.hari.value,
-                decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintStyle: const TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 17),
-                      hintText: "Pilih hari..."),
-                ),
-                suffixProps: const DropdownSuffixProps(
-                  dropdownButtonProps: DropdownButtonProps(
-                    iconOpened: Icon(Icons.keyboard_arrow_up),
-                    iconClosed: Icon(Icons.keyboard_arrow_down),
-                  ),
-                ),
-                popupProps: PopupProps.menu(
-                  itemBuilder: (context, item, isDisabled, isSelected) {
-                    return Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Text(
-                        item,
-                      ),
-                    );
-                  },
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  menuProps: const MenuProps(
-                    backgroundColor: Color(0xFF151515),
-                    margin: EdgeInsets.only(top: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(12),
+              Obx(() => DropdownSearch<String>(
+                    selectedItem: addMatkulC.hari.value,
+                    decoratorProps: DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          hintStyle: const TextStyle(
+                              fontWeight: FontWeight.normal, fontSize: 17),
+                          hintText: "Pilih hari..."),
+                    ),
+                    suffixProps: const DropdownSuffixProps(
+                      dropdownButtonProps: DropdownButtonProps(
+                        iconOpened: Icon(Icons.keyboard_arrow_up),
+                        iconClosed: Icon(Icons.keyboard_arrow_down),
                       ),
                     ),
-                  ),
-                ),
-                items: (filter, loadProps) => hari.toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    addMatkulC.hari.value = value;
-                  } else {
-                    addMatkulC.hari.value = "";
-                  }
-                },
-              ),
+                    popupProps: PopupProps.menu(
+                      itemBuilder: (context, item, isDisabled, isSelected) {
+                        return Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Text(
+                            item,
+                          ),
+                        );
+                      },
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      menuProps: const MenuProps(
+                        backgroundColor: Color(0xFF151515),
+                        margin: EdgeInsets.only(top: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    items: (filter, loadProps) => hari.toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        addMatkulC.hari.value = value;
+                      } else {
+                        addMatkulC.hari.value = "";
+                      }
+                    },
+                  )),
               const SizedBox(
                 height: 12,
               ),
-              DropdownSearch<String>(
-                selectedItem: addMatkulC.kelas.value,
-                decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintStyle: const TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 17),
-                      hintText: "Pilih kelas..."),
-                ),
-                suffixProps: const DropdownSuffixProps(
-                  dropdownButtonProps: DropdownButtonProps(
-                    iconOpened: Icon(Icons.keyboard_arrow_up),
-                    iconClosed: Icon(Icons.keyboard_arrow_down),
-                  ),
-                ),
-                popupProps: PopupProps.menu(
-                  itemBuilder: (context, item, isDisabled, isSelected) {
-                    return Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Text(item),
-                    );
-                  },
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  menuProps: const MenuProps(
-                    backgroundColor: Color(0xFF151515),
-                    margin: EdgeInsets.only(top: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(12),
+              Obx(() => DropdownSearch<String>(
+                    selectedItem: addMatkulC.kelas.value,
+                    decoratorProps: DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          hintStyle: const TextStyle(
+                              fontWeight: FontWeight.normal, fontSize: 17),
+                          hintText: "Pilih kelas..."),
+                    ),
+                    suffixProps: const DropdownSuffixProps(
+                      dropdownButtonProps: DropdownButtonProps(
+                        iconOpened: Icon(Icons.keyboard_arrow_up),
+                        iconClosed: Icon(Icons.keyboard_arrow_down),
                       ),
                     ),
-                  ),
-                ),
-                items: (filter, loadProps) => kelas.toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    addMatkulC.kelas.value = value;
-                  } else if (value == null || value == "") {
-                    addMatkulC.kelas.value = null;
-                  }
-                },
-              ),
+                    popupProps: PopupProps.menu(
+                      itemBuilder: (context, item, isDisabled, isSelected) {
+                        return Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Text(item),
+                        );
+                      },
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      menuProps: const MenuProps(
+                        backgroundColor: Color(0xFF151515),
+                        margin: EdgeInsets.only(top: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    items: (filter, loadProps) => kelas.toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        addMatkulC.kelas.value = value;
+                      } else if (value == null || value == "") {
+                        addMatkulC.kelas.value = null;
+                      }
+                    },
+                  )),
               const SizedBox(
                 height: 12,
               ),
