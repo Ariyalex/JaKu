@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/theme/theme.dart';
 
 class TableView extends StatelessWidget {
   const TableView({super.key});
@@ -11,6 +12,12 @@ class TableView extends StatelessWidget {
   Widget build(BuildContext context) {
     final allMatkulProvider = Get.find<JadwalkuliahController>();
     final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
+
+    final String todayDay = jadwalKuliahDayProvider.getCurrentDay();
+
+    //color
+    final primaryColor = Theme.of(context).primaryColor;
+    final accentColor = AppTheme.dark.colorScheme.secondary;
 
     return Obx(() {
       final allJadwal = allMatkulProvider.allMatkul;
@@ -52,13 +59,16 @@ class TableView extends StatelessWidget {
                 jadwal.formattedJamAkhir == jamPair['jamAkhir'])
             .toList();
 
+        final isToday = hari == todayDay;
+
         if (matchingMatkul.isNotEmpty) {
-          return Container(
-            padding: EdgeInsets.all(0),
+          return FractionallySizedBox(
+            widthFactor: 1,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: matchingMatkul
-                  .map((matkul) => GestureDetector(
+                  .map((matkul) => InkWell(
                         onTap: () {
                           Get.toNamed(RouteNamed.editMatkul,
                               arguments: matkul.matkulId);
@@ -87,7 +97,12 @@ class TableView extends StatelessWidget {
                           padding: EdgeInsets.all(8),
                           child: Text(
                             matkul.matkul,
-                            style: TextStyle(fontSize: 15),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight:
+                                  isToday ? FontWeight.bold : FontWeight.normal,
+                              color: isToday ? accentColor : null,
+                            ),
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.visible,
                           ),
@@ -99,8 +114,8 @@ class TableView extends StatelessWidget {
         }
 
         return Container(
-          padding: EdgeInsets.all(8),
-          child: Text(""),
+          padding: const EdgeInsets.all(8),
+          child: const Text(""),
         );
       }
 
@@ -109,20 +124,30 @@ class TableView extends StatelessWidget {
         child: Table(
           border: TableBorder.all(color: Colors.white, width: 0.5),
           defaultColumnWidth: FixedColumnWidth(120.0),
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
             TableRow(
               children: [
                 Container(
                   child: Container(
-                    child: Text("Jam"),
+                    child: Text(
+                      "Jam",
+                      textAlign: TextAlign.center,
+                    ),
                     padding: EdgeInsets.all(8),
                   ),
                 ),
                 ...hari.map((h) => Container(
                       padding: EdgeInsets.all(8),
+                      color: h.day == todayDay
+                          ? primaryColor.withOpacity(0.3)
+                          : null,
                       child: Text(
                         h.day,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ))
               ],
@@ -134,6 +159,7 @@ class TableView extends StatelessWidget {
                     padding: EdgeInsets.all(8),
                     child: Text(
                       "${jamPair['jamAwal']} - ${jamPair['jamAkhir']}",
+                      textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 15),
                     ),
                   ),
