@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
-import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/route_named.dart';
-import 'package:uuid/uuid.dart';
+// import 'package:uuid/uuid.dart';
 
 import '../models/jadwal.dart';
 
-var uuid = const Uuid();
+// var uuid = const Uuid();
 
 class JadwalkuliahController extends GetxController {
   final CollectionReference _matkulCollection =
@@ -173,65 +172,41 @@ class JadwalkuliahController extends GetxController {
       String room,
       String day) async {
     try {
-      final internetCheck = Get.find<InternetCheck>();
-      final isCurrentlyOnline = internetCheck.isOnline.value;
-
       //menambahkan ke firebase
-      if (isCurrentlyOnline == true) {
-        if (_userid == null) {
-          return;
-        }
-
-        print("onlen mode add");
-        DocumentReference docRef = await _matkulCollection.add({
-          "matkul": matkul,
-          "kelas": kelas,
-          "formattedJamAwal": formattedJamAwal,
-          "formattedJamAkhir": formattedJamAkhir,
-          "dosen1": dosen1,
-          "dosen2": dosen2,
-          "room": room,
-          "day": day,
-          "userId": _userid,
-        });
-
-        Matkul newMatkul = Matkul(
-          matkulId: docRef.id,
-          matkul: matkul,
-          kelas: kelas,
-          formattedJamAwal: formattedJamAwal,
-          formattedJamAkhir: formattedJamAkhir,
-          dosen1: dosen1,
-          dosen2: dosen2,
-          room: room,
-          day: day,
-        );
-
-        //update list lokal
-        allMatkul.add(newMatkul);
-
-        //simpan ke local storage
-        await JadwalKuliahLocal.saveMatkulL(newMatkul);
-      } else {
-        Matkul newMatkul = Matkul(
-          matkulId: uuid.v4(),
-          matkul: matkul,
-          kelas: kelas,
-          formattedJamAwal: formattedJamAwal,
-          formattedJamAkhir: formattedJamAkhir,
-          dosen1: dosen1,
-          dosen2: dosen2,
-          room: room,
-          day: day,
-        );
-
-        //update list lokal
-        allMatkul.add(newMatkul);
-
-        //simpan ke local storage
-        await JadwalKuliahLocal.saveMatkulL(newMatkul);
-        print("disimpan secara lokal");
+      if (_userid == null) {
+        return;
       }
+
+      DocumentReference docRef = await _matkulCollection.add({
+        "matkul": matkul,
+        "kelas": kelas,
+        "formattedJamAwal": formattedJamAwal,
+        "formattedJamAkhir": formattedJamAkhir,
+        "dosen1": dosen1,
+        "dosen2": dosen2,
+        "room": room,
+        "day": day,
+        "userId": _userid,
+      });
+
+      Matkul newMatkul = Matkul(
+        matkulId: docRef.id,
+        matkul: matkul,
+        kelas: kelas,
+        formattedJamAwal: formattedJamAwal,
+        formattedJamAkhir: formattedJamAkhir,
+        dosen1: dosen1,
+        dosen2: dosen2,
+        room: room,
+        day: day,
+      );
+
+      //update list lokal
+      allMatkul.add(newMatkul);
+
+      //simpan ke local storage
+      await JadwalKuliahLocal.saveMatkulL(newMatkul);
+
       try {
         final dayController = Get.find<DayKuliahController>();
         dayController.getUniqueDays(this);

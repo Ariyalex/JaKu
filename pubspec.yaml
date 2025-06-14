@@ -43,7 +43,7 @@ dependencies:
   simple_time_range_picker: ^0.0.6
   adaptive_theme: ^3.6.0
   shared_preferences: ^2.5.2
-  flex_color_scheme: ^8.0.2
+  flex_color_scheme: ^8.1.0
   dropdown_button2: ^2.3.9
   dropdown_search: ^6.0.2
   flutter_login: ^5.0.0
@@ -63,7 +63,6 @@ dependencies:
   hive_generator: ^2.0.1
   connectivity_plus: ^6.1.4
   internet_connection_checker: ^3.0.1
-  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
