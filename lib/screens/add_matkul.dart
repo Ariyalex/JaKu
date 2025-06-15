@@ -106,6 +106,8 @@ class _AddMatkulState extends State<AddMatkul> {
               onPressed: () {
                 Get.defaultDialog(
                   title: "Peringatan!!",
+                  backgroundColor:
+                      Theme.of(context).dialogTheme.backgroundColor,
                   titlePadding: EdgeInsets.only(top: 20),
                   titleStyle: TextStyle(
                     fontWeight: FontWeight.bold,

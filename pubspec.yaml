@@ -1,5 +1,5 @@
 name: jaku
-description: "A new Flutter project."
+description: "Aplikasi matkul viewer."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -63,6 +63,7 @@ dependencies:
   hive_generator: ^2.0.1
   connectivity_plus: ^6.1.4
   internet_connection_checker: ^3.0.1
+  data_table_2: ^2.6.0
 
 dev_dependencies:
   flutter_test:

@@ -52,6 +52,8 @@ class MatkulBuilder extends StatelessWidget {
                     },
                     onLongPress: () {
                       Get.defaultDialog(
+                          backgroundColor:
+                              Theme.of(context).dialogTheme.backgroundColor,
                           title: "Hapus Item",
                           content: Text("Yakin hapus matkul ini?"),
                           cancel: TextButton(

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/internet_check.dart';
+import 'package:jaku/theme/theme.dart';
+import 'package:jaku/widgets/card_view.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:get/get.dart';
-import 'package:jaku/widgets/table_view.dart';
+import 'package:jaku/widgets/table_view1.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../provider/hari_kuliah.dart';
 import '../provider/jadwal_kuliah.dart';
@@ -24,12 +27,27 @@ class _HomeScreenState extends State<HomeScreen> {
   final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
   final authController = Get.find<AuthController>();
 
+  RxBool isCardView = true.obs;
+
   final Rx<Future<void>?> _futureMatkul = Rx<Future<void>?>(null);
 
   @override
   void initState() {
     super.initState();
     loadData();
+    loadViewValue();
+    jadwalKuliahDayProvider.getOrderedDays();
+  }
+
+  Future<void> loadViewValue() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final hasil = pref.getBool("cardView");
+    isCardView.value = hasil ?? true;
+  }
+
+  Future<void> saveViewValue(bool value) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setBool("cardView", value);
   }
 
   void loadData() {
@@ -60,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static void _logout(BuildContext context) {
     Get.defaultDialog(
         title: "Log Out",
+        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
         content: Text("Yakin Log Out dari account"),
         cancel: TextButton(
           onPressed: () {
@@ -108,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
         title: "Hapus semua data",
+        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
         content: Text("Yakin ingin menghapus semua data?"),
         cancel: OutlinedButton(
             onPressed: () {
@@ -130,113 +150,159 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorTheme = AppTheme.dark.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Obx(
-              () {
-                if (connectionStatus.value == false) {
-                  return const Text("Jaku Offline mode");
-                } else {
-                  return const Text("Jaku");
-                }
-              },
-            )
-          ],
-        ),
-        leading: Obx(() {
-          if (connectionStatus.value == true) {
-            return Builder(
-              builder: (context) => PopupMenuButton<String>(
-                icon: const Icon(Icons.menu), // Burger Icon
-                onSelected: (value) {
-                  if (value == "info") {
-                    _showInfoDialog(context);
-                  } else if (value == "logout") {
-                    _logout(context);
-                  } else if (value == "clear") {
-                    clearAllData(context);
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Row(
+            children: [
+              Obx(
+                () {
+                  if (connectionStatus.value == false) {
+                    return const Text("Jaku Offline mode");
+                  } else {
+                    return const Text("Jaku");
                   }
                 },
-                position: PopupMenuPosition.under,
-                itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
-                    value: "clear",
-                    child: ListTile(
-                      leading: Icon(Icons.delete_sweep),
-                      title: Text("Clear All Data"),
-                    ),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: "info",
-                    child: ListTile(
-                      leading: Icon(Icons.info),
-                      title: Text("Info"),
-                    ),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: "logout",
-                    child: ListTile(
-                      leading: Icon(Icons.logout),
-                      title: Text("Logout"),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            return Builder(
-              builder: (context) => PopupMenuButton<String>(
-                icon: const Icon(Icons.menu), // Burger Icon
-                onSelected: (value) {
-                  if (value == "info") {
-                    _showInfoDialog(context);
-                  }
-                },
-                position: PopupMenuPosition.under,
-                itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
-                    value: "info",
-                    child: ListTile(
-                      leading: Icon(Icons.info),
-                      title: Text("Info"),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-        }),
-        actions: [
-          Obx(() {
-            if (connectionStatus.value == true && authController.isLoggedIn) {
-              return IconButton(
-                onPressed: () {
-                  Get.toNamed(RouteNamed.addMatkul);
-                },
-                icon: const Icon(Icons.add),
-              );
-            } else if (authController.isLoggedIn &&
-                connectionStatus.value == false) {
-              return const SizedBox.shrink();
-            } else {
-              return IconButton(
-                  onPressed: () {
-                    Get.offNamed(RouteNamed.signInScreen);
+              )
+            ],
+          ),
+          leading: Obx(() {
+            if (connectionStatus.value == true) {
+              return Builder(
+                builder: (context) => PopupMenuButton<String>(
+                  icon: const Icon(Icons.menu), // Burger Icon
+                  onSelected: (value) {
+                    if (value == "info") {
+                      _showInfoDialog(context);
+                    } else if (value == "logout") {
+                      _logout(context);
+                    } else if (value == "clear") {
+                      clearAllData(context);
+                    }
                   },
-                  icon: const Icon(Icons.login));
+
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem<String>(
+                      value: "info",
+                      child: ListTile(
+                        leading: Icon(Icons.info),
+                        title: Text("Info"),
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: "clear",
+                      child: ListTile(
+                        leading: Icon(Icons.delete_sweep),
+                        title: Text("Clear All Data"),
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: "logout",
+                      child: ListTile(
+                        leading: Icon(Icons.logout),
+                        title: Text("Logout"),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Builder(
+                builder: (context) => PopupMenuButton<String>(
+                  icon: const Icon(Icons.menu), // Burger Icon
+                  onSelected: (value) {
+                    if (value == "info") {
+                      _showInfoDialog(context);
+                    }
+                  },
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem<String>(
+                      value: "info",
+                      child: ListTile(
+                        leading: Icon(Icons.info),
+                        title: Text("Info"),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
           }),
-        ],
-      ),
-      drawer: howTo,
-      // body: CardView(futureMatkul: _futureMatkul),
-      body: const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: TableView(),
-      ),
-    );
+          actions: [
+            Obx(
+              () => TextButton.icon(
+                onPressed: () {
+                  isCardView.value = !isCardView.value;
+                  saveViewValue(isCardView.value);
+                },
+                label: isCardView.value
+                    ? Text("Card view",
+                        style: textTheme.bodyMedium!
+                            .copyWith(color: colorTheme.primary))
+                    : Text("Table view",
+                        style: textTheme.bodyMedium!
+                            .copyWith(color: colorTheme.onPrimary)),
+                icon: isCardView.value
+                    ? Icon(Icons.view_agenda_outlined)
+                    : Icon(Icons.table_chart),
+                style: ButtonStyle(
+                    backgroundColor: isCardView.value
+                        ? null
+                        : WidgetStatePropertyAll(colorTheme.primary),
+                    iconColor: isCardView.value
+                        ? null
+                        : WidgetStatePropertyAll(colorTheme.onPrimary),
+                    side: WidgetStatePropertyAll(
+                        BorderSide(width: 1, color: colorTheme.primary))),
+              ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            Obx(() {
+              if (connectionStatus.value == true && authController.isLoggedIn) {
+                return IconButton(
+                  onPressed: () {
+                    Get.toNamed(RouteNamed.addMatkul);
+                  },
+                  icon: const Icon(
+                    Icons.add,
+                  ),
+                );
+              } else if (authController.isLoggedIn &&
+                  connectionStatus.value == false) {
+                return const SizedBox.shrink();
+              } else {
+                return IconButton(
+                    onPressed: () {
+                      Get.offNamed(RouteNamed.signInScreen);
+                    },
+                    icon: const Icon(Icons.login));
+              }
+            }),
+          ],
+        ),
+        drawer: howTo,
+        body: Obx(
+          () {
+            return isCardView.value
+                ? Container(
+                    padding: EdgeInsets.only(bottom: 40),
+                    child: CardView(futureMatkul: _futureMatkul),
+                  )
+                : Container(
+                    padding:
+                        EdgeInsets.only(right: 8, left: 8, top: 8, bottom: 40),
+                    child: TableView1(
+                      futureMatkul: _futureMatkul,
+                    ),
+                  );
+          },
+        ));
   }
 }

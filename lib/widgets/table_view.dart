@@ -6,23 +6,32 @@ import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 
 class TableView extends StatelessWidget {
-  const TableView({super.key});
+  const TableView({
+    super.key,
+    required Rx<Future<void>?> futureMatkul,
+  }) : _futureMatkul = futureMatkul;
+
+  final Rx<Future<void>?> _futureMatkul;
 
   @override
   Widget build(BuildContext context) {
     final allMatkulProvider = Get.find<JadwalkuliahController>();
     final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
 
+    //get hari saat ini untuk highlight
     final String todayDay = jadwalKuliahDayProvider.getCurrentDay();
 
     //color
     final primaryColor = Theme.of(context).primaryColor;
     final accentColor = AppTheme.dark.colorScheme.secondary;
 
+    final textTheme = Theme.of(context).textTheme;
+
     return Obx(() {
       final allJadwal = allMatkulProvider.allMatkul;
       final hari = jadwalKuliahDayProvider.jadwalHariTerurut;
 
+      //fungsi mendapatkanJam
       List<Map<String, String>> getJam() {
         final jamPairSet = <String>{};
 
@@ -42,7 +51,24 @@ class TableView extends StatelessWidget {
         }).toList();
 
         //mengurutkan berdasarkan jam awal
-        jamPairList.sort((a, b) => a['jamAwal']!.compareTo(b['jamAwal']!));
+        jamPairList.sort((a, b) {
+          int timeToMinutes(String timeStr) {
+            final parts = timeStr.split(":");
+            if (parts.length != 2) return 0;
+
+            try {
+              final hours = int.parse(parts[0]);
+              final minutes = int.parse(parts[1]);
+              return hours * 60 + minutes;
+            } catch (e) {
+              return 0;
+            }
+          }
+
+          final aMinutes = timeToMinutes(a['jamAwal']!);
+          final bMinutes = timeToMinutes(b['jamAwal']!);
+          return aMinutes.compareTo(bMinutes);
+        });
 
         return jamPairList;
       }
@@ -75,8 +101,10 @@ class TableView extends StatelessWidget {
                         },
                         onLongPress: () {
                           Get.defaultDialog(
+                              backgroundColor:
+                                  Theme.of(context).dialogTheme.backgroundColor,
                               title: "Hapus Item",
-                              content: Text("Yakin hapus matkul ini?"),
+                              content: const Text("Yakin hapus matkul ini?"),
                               cancel: TextButton(
                                   onPressed: () {
                                     Get.back();
@@ -97,12 +125,10 @@ class TableView extends StatelessWidget {
                           padding: EdgeInsets.all(8),
                           child: Text(
                             matkul.matkul,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight:
-                                  isToday ? FontWeight.bold : FontWeight.normal,
-                              color: isToday ? accentColor : null,
-                            ),
+                            style: isToday
+                                ? textTheme.bodyLarge
+                                    ?.copyWith(color: accentColor)
+                                : textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.visible,
                           ),
@@ -119,56 +145,73 @@ class TableView extends StatelessWidget {
         );
       }
 
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Table(
-          border: TableBorder.all(color: Colors.white, width: 0.5),
-          defaultColumnWidth: FixedColumnWidth(120.0),
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            TableRow(
-              children: [
-                Container(
-                  child: Container(
-                    child: Text(
-                      "Jam",
-                      textAlign: TextAlign.center,
-                    ),
-                    padding: EdgeInsets.all(8),
-                  ),
-                ),
-                ...hari.map((h) => Container(
-                      padding: EdgeInsets.all(8),
-                      color: h.day == todayDay
-                          ? primaryColor.withOpacity(0.3)
-                          : null,
-                      child: Text(
-                        h.day,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+      //main code
+      return FutureBuilder(
+        future: _futureMatkul.value,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Obx(() => Table(
+                    border: TableBorder.all(color: Colors.white, width: 0.5),
+                    defaultColumnWidth: FixedColumnWidth(120.0),
+                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                    children: [
+                      TableRow(
+                        children: [
+                          //header jam
+                          Container(
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                "Jam",
+                                textAlign: TextAlign.center,
+                                style: textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                          //header hari
+                          ...hari.map((h) => Container(
+                                padding: const EdgeInsets.all(8),
+                                color: h.day == todayDay
+                                    ? primaryColor.withValues(alpha: 0.5)
+                                    : null,
+                                child: Text(
+                                  h.day,
+                                  textAlign: TextAlign.center,
+                                  style: textTheme.bodyLarge,
+                                ),
+                              ))
+                        ],
                       ),
-                    ))
-              ],
-            ),
-            ...jam.map(
-              (jamPair) => TableRow(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    child: Text(
-                      "${jamPair['jamAwal']} - ${jamPair['jamAkhir']}",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15),
-                    ),
-                  ),
-                  ...hari.map((h) => getMatkulCell(h.day, jamPair))
-                ],
-              ),
-            )
-          ],
-        ),
+                      //list jam di column jam
+                      ...jam.map(
+                        (jamPair) => TableRow(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                jamPair['jamAkhir']!.isNotEmpty
+                                    ? "${jamPair['jamAwal']} - ${jamPair['jamAkhir']}"
+                                    : jamPair['jamAwal']!,
+                                textAlign: TextAlign.center,
+                                style: textTheme.bodyMedium,
+                              ),
+                            ),
+                            //list matkul di column hari
+                            ...hari.map((h) => getMatkulCell(h.day, jamPair))
+                          ],
+                        ),
+                      )
+                    ],
+                  )),
+            );
+          }
+        },
       );
     });
   }
