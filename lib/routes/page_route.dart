@@ -5,7 +5,8 @@ import 'package:jaku/screens/auth_screen/recovery_pass.dart';
 import 'package:jaku/screens/auth_screen/sign_in_screen.dart';
 import 'package:jaku/screens/auth_screen/sign_up_screen.dart';
 import 'package:jaku/screens/detail_matkul.dart';
-import 'package:jaku/screens/guide_pdf.dart';
+import 'package:jaku/screens/guide/guide_general.dart';
+import 'package:jaku/screens/guide/guide_pdf.dart';
 import 'package:jaku/screens/home_screen.dart';
 import 'package:jaku/screens/pdf_parsing.dart';
 
@@ -42,6 +43,10 @@ class AppPage {
     GetPage(
       name: RouteNamed.guidePdf,
       page: () => const GuidePdf(),
+    ),
+    GetPage(
+      name: RouteNamed.guideGeneral,
+      page: () => const GuideGeneral(),
     ),
   ];
 }

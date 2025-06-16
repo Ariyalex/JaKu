@@ -3,7 +3,6 @@ import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:jaku/widgets/card_view/card_view.dart';
-import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:get/get.dart';
 import 'package:jaku/widgets/table_view/table_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,10 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-  }
-
-  void _showInfoDialog(BuildContext context) {
-    _scaffoldKey.currentState?.openDrawer();
   }
 
   static void _logout(BuildContext context) {
@@ -144,10 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text("Ya")));
   }
 
-  Drawer howTo = const Drawer(
-    child: DrawerGuide(),
-  );
-
   @override
   Widget build(BuildContext context) {
     final colorTheme = AppTheme.dark.colorScheme;
@@ -176,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.menu), // Burger Icon
                   onSelected: (value) {
                     if (value == "info") {
-                      _showInfoDialog(context);
+                      Get.toNamed(RouteNamed.guideGeneral);
                     } else if (value == "logout") {
                       _logout(context);
                     } else if (value == "clear") {
@@ -216,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.menu), // Burger Icon
                   onSelected: (value) {
                     if (value == "info") {
-                      _showInfoDialog(context);
+                      Get.toNamed(RouteNamed.guideGeneral);
                     }
                   },
                   position: PopupMenuPosition.under,
@@ -287,7 +278,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }),
           ],
         ),
-        drawer: howTo,
         body: Obx(
           () {
             return isCardView.value

@@ -1,17 +1,5 @@
 import 'package:flutter/material.dart';
-
-// Model for tutorial steps
-class TutorialStep {
-  final String title;
-  final String description;
-  final IconData? icon;
-
-  TutorialStep({
-    required this.title,
-    required this.description,
-    this.icon,
-  });
-}
+import 'package:jaku/models/tutorial_step.dart';
 
 class GuidePdf extends StatelessWidget {
   static const routeNamed = '/guide-pdf';

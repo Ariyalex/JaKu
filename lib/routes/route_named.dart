@@ -7,4 +7,5 @@ abstract class RouteNamed {
   static const recoveryPass = '/recovery_pass';
   static const pdfParsing = '/pdf_parsing';
   static const guidePdf = '/guide_pdf';
+  static const guideGeneral = '/guide_general';
 }
