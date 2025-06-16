@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/theme/theme.dart';
-import 'package:jaku/widgets/card_view.dart';
+import 'package:jaku/widgets/card_view/card_view.dart';
 import 'package:jaku/widgets/drawer_guide.dart';
 import 'package:get/get.dart';
-import 'package:jaku/widgets/table_view1.dart';
+import 'package:jaku/widgets/table_view/table_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../provider/hari_kuliah.dart';
@@ -292,13 +292,13 @@ class _HomeScreenState extends State<HomeScreen> {
           () {
             return isCardView.value
                 ? Container(
-                    padding: EdgeInsets.only(bottom: 40),
+                    padding: const EdgeInsets.only(bottom: 40, top: 8),
                     child: CardView(futureMatkul: _futureMatkul),
                   )
                 : Container(
-                    padding:
-                        EdgeInsets.only(right: 8, left: 8, top: 8, bottom: 40),
-                    child: TableView1(
+                    padding: const EdgeInsets.only(
+                        right: 8, left: 8, top: 8, bottom: 40),
+                    child: TableView(
                       futureMatkul: _futureMatkul,
                     ),
                   );

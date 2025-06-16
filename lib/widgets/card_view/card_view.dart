@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
-import 'package:jaku/widgets/day_card_builder.dart';
+import 'package:jaku/widgets/card_view/day_card_builder.dart';
 
 class CardView extends StatelessWidget {
   const CardView({

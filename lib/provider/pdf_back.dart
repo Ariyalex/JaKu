@@ -14,7 +14,7 @@ class PdfBack extends GetxController {
   final RxList<Matkul> _allMatkul = <Matkul>[].obs;
   List<Matkul> get allMatkul => _allMatkul;
 
-  final String baseUrl = 'https://pdfparsejaku-production.up.railway.app';
+  final String baseUrl = 'https://ariyalexx.pythonanywhere.com/';
   Rx<File?> selectedFile = Rx<File?>(null);
   RxString responseMessage = RxString('');
   RxBool isLoading = false.obs;

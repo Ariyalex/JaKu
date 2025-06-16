@@ -3,9 +3,9 @@ import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:get/get.dart';
 import 'package:jaku/provider/internet_check.dart';
 
-import '../models/jadwal.dart';
-import '../provider/jadwal_kuliah.dart';
-import '../routes/route_named.dart';
+import '../../models/jadwal.dart';
+import '../../provider/jadwal_kuliah.dart';
+import '../../routes/route_named.dart';
 
 class MatkulBuilder extends StatelessWidget {
   const MatkulBuilder({

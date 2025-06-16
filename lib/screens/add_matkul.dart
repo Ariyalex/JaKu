@@ -144,7 +144,7 @@ class _AddMatkulState extends State<AddMatkul> {
                     labelStyle:
                         TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                     hintText: "Ex: Basis Data",
-                    labelText: "Matkul",
+                    labelText: "Matkul*",
                     alignLabelWithHint: true),
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
@@ -208,7 +208,7 @@ class _AddMatkulState extends State<AddMatkul> {
                           ),
                           hintStyle: const TextStyle(
                               fontWeight: FontWeight.normal, fontSize: 17),
-                          hintText: "Pilih hari..."),
+                          hintText: "Pilih hari*"),
                     ),
                     suffixProps: const DropdownSuffixProps(
                       dropdownButtonProps: DropdownButtonProps(
@@ -257,7 +257,7 @@ class _AddMatkulState extends State<AddMatkul> {
                           ),
                           hintStyle: const TextStyle(
                               fontWeight: FontWeight.normal, fontSize: 17),
-                          hintText: "Pilih kelas..."),
+                          hintText: "Pilih kelas"),
                     ),
                     suffixProps: const DropdownSuffixProps(
                       dropdownButtonProps: DropdownButtonProps(
@@ -344,7 +344,7 @@ class _AddMatkulState extends State<AddMatkul> {
                       );
                     },
                     child: const Text(
-                      "Select Time",
+                      "Select Time*",
                       style: TextStyle(fontSize: 20),
                     ),
                   ),

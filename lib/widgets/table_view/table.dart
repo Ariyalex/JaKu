@@ -7,18 +7,16 @@ import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
+import 'package:jaku/widgets/jadwal_kosong.dart';
 
-class TableView1 extends StatefulWidget {
-  const TableView1({super.key, required Rx<Future<void>?> futureMatkul})
-      : _futureMatkul = futureMatkul;
-
-  final Rx<Future<void>?> _futureMatkul;
+class Table extends StatefulWidget {
+  const Table({super.key});
 
   @override
-  State<TableView1> createState() => _TableView1State();
+  State<Table> createState() => _TableState();
 }
 
-class _TableView1State extends State<TableView1> {
+class _TableState extends State<Table> {
   final ScrollController _horizontalScrollController = ScrollController();
   final allMatkulProvider = Get.find<JadwalkuliahController>();
   final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
@@ -27,13 +25,14 @@ class _TableView1State extends State<TableView1> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Tunggu sampai daftar hari diisi
+      //panggil fungsi tunggu data lalu scroll
       _waitForDataAndScrollToToday();
     });
   }
 
   @override
   void dispose() {
+    //dispose scroll controller
     _horizontalScrollController.dispose();
     super.dispose();
   }
@@ -60,8 +59,6 @@ class _TableView1State extends State<TableView1> {
     // Cari indeks hari dengan nama "Kamis"
     int targetIndex = -1;
     for (int i = 0; i < hariList.length; i++) {
-      // Asumsikan HariKuliah memiliki properti 'nama' atau 'namaHari'
-      // Sesuaikan dengan struktur objek HariKuliah sebenarnya
       final namaHari =
           hariList[i].day; // atau hariList[i].namaHari atau properti lainnya
       debugPrint("Hari ke-$i: $namaHari");
@@ -80,7 +77,7 @@ class _TableView1State extends State<TableView1> {
     }
 
     // Lebar setiap kolom
-    final double columnWidth = 225.0;
+    const double columnWidth = 225.0;
     final double scrollPosition = targetIndex * columnWidth;
 
     debugPrint("Posisi scroll target: $scrollPosition");
@@ -104,6 +101,7 @@ class _TableView1State extends State<TableView1> {
     });
   }
 
+  //tunggu data lalu scroll
   Future<void> _waitForDataAndScrollToToday() async {
     final dayController = Get.find<DayKuliahController>();
 
@@ -143,6 +141,7 @@ class _TableView1State extends State<TableView1> {
     final primaryColor = Theme.of(context).primaryColor;
     final colorTheme = AppTheme.dark.colorScheme;
 
+    //text theme
     final textTheme = Theme.of(context).textTheme;
 
     return Obx(() {
@@ -193,6 +192,7 @@ class _TableView1State extends State<TableView1> {
 
       final jam = getJam();
 
+      //datacell matkul
       DataCell getMatkulCell(String hari, Map<String, String> jamPair) {
         //filter jadwal sesuai dengan hari dan jam
         final matchingMatkul = allJadwal.where((jadwal) =>
@@ -248,86 +248,80 @@ class _TableView1State extends State<TableView1> {
         );
       }
 
-      return FutureBuilder(
-          future: widget._futureMatkul.value,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            } else {
-              return DataTable2(
-                  horizontalMargin: 0,
-                  columnSpacing: 0,
-                  bottomMargin: 20,
-                  dataRowHeight: 100,
-                  fixedLeftColumns: 1,
-                  headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                    (Set<WidgetState> states) {
-                      return primaryColor.withValues(alpha: 0.4);
-                    },
-                  ),
-                  isHorizontalScrollBarVisible: false,
-                  isVerticalScrollBarVisible: false,
-                  horizontalScrollController: _horizontalScrollController,
-                  border:
-                      TableBorder.all(width: 1, color: colorTheme.onPrimary),
-                  minWidth: 1800,
-                  columns: [
-                    DataColumn2(
-                      headingRowAlignment: MainAxisAlignment.center,
-                      fixedWidth: 75,
-                      label: Text(
-                        "Jam",
+      //jika jadwal empty
+      if (jadwalKuliahDayProvider.jadwalHari.isEmpty) {
+        return const jadwalKosong();
+      }
+
+      //main code
+      return DataTable2(
+          horizontalMargin: 0,
+          columnSpacing: 0,
+          bottomMargin: 20,
+          dataRowHeight: 100,
+          fixedLeftColumns: 1,
+          headingRowColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              return primaryColor.withValues(alpha: 0.4);
+            },
+          ),
+          isHorizontalScrollBarVisible: false,
+          isVerticalScrollBarVisible: false,
+          horizontalScrollController: _horizontalScrollController,
+          border: TableBorder.all(width: 1, color: colorTheme.onPrimary),
+          minWidth: 1800,
+          columns: [
+            DataColumn2(
+              headingRowAlignment: MainAxisAlignment.center,
+              fixedWidth: 75,
+              label: Text(
+                "Jam",
+                style: textTheme.bodyLarge,
+              ),
+              size: ColumnSize.S,
+            ),
+            ...List<DataColumn2>.generate(
+              hari.length,
+              (index) => DataColumn2(
+                fixedWidth: 225.0,
+                headingRowAlignment: MainAxisAlignment.center,
+                label: Text(
+                  hari[index].day,
+                  style: textTheme.bodyLarge,
+                ),
+              ),
+            ),
+          ],
+          rows: [
+            ...List<DataRow2>.generate(
+              jam.length,
+              (index) => DataRow2(
+                cells: [
+                  DataCell(
+                    Container(
+                      decoration: BoxDecoration(
+                          color: colorTheme.primary.withValues(alpha: 0.4)),
+                      alignment: AlignmentDirectional.center,
+                      child: Text(
+                        jam[index]['jamAkhir']!.isNotEmpty
+                            ? '${jam[index]['jamAwal']}\n - \n${jam[index]['jamAkhir']}'
+                            : '${jam[index]['jamAwal']}',
+                        textAlign: TextAlign.center,
                         style: textTheme.bodyLarge,
                       ),
-                      size: ColumnSize.S,
                     ),
-                    ...List<DataColumn2>.generate(
-                      hari.length,
-                      (index) => DataColumn2(
-                        fixedWidth: 225.0,
-                        headingRowAlignment: MainAxisAlignment.center,
-                        label: Text(
-                          hari[index].day,
-                          style: textTheme.bodyLarge,
-                        ),
-                      ),
-                    ),
-                  ],
-                  rows: [
-                    ...List<DataRow2>.generate(
-                      jam.length,
-                      (index) => DataRow2(
-                        cells: [
-                          DataCell(
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: colorTheme.primary
-                                      .withValues(alpha: 0.4)),
-                              alignment: AlignmentDirectional.center,
-                              child: Text(
-                                jam[index]['jamAkhir']!.isNotEmpty
-                                    ? '${jam[index]['jamAwal']}\n - \n${jam[index]['jamAkhir']}'
-                                    : '${jam[index]['jamAwal']}',
-                                textAlign: TextAlign.center,
-                                style: textTheme.bodyLarge,
-                              ),
-                            ),
-                          ),
-                          ...List<DataCell>.generate(
-                            hari.length,
-                            (hariIndex) => getMatkulCell(
-                              hari[hariIndex].day,
-                              jam[index],
-                            ), // DataCell langsung dari getMatkulCell
-                          ),
-                        ],
-                      ),
-                    ),
-                  ]);
-            }
-          });
+                  ),
+                  ...List<DataCell>.generate(
+                    hari.length,
+                    (hariIndex) => getMatkulCell(
+                      hari[hariIndex].day,
+                      jam[index],
+                    ), // DataCell langsung dari getMatkulCell
+                  ),
+                ],
+              ),
+            ),
+          ]);
     });
   }
 }
