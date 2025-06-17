@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/internet_check.dart';
+import 'package:jaku/provider/version_control.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:jaku/widgets/card_view/card_view.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final allMatkulProvider = Get.find<JadwalkuliahController>();
   final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
   final authController = Get.find<AuthController>();
+  final versionControl = Get.put(VersionControl());
+
+  final color = AppTheme.dark;
 
   RxBool isCardView = true.obs;
 
@@ -71,9 +75,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   static void _logout(BuildContext context) {
+    final color = AppTheme.dark;
     Get.defaultDialog(
         title: "Log Out",
-        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+        backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
         content: Text("Yakin Log Out dari account"),
         cancel: TextButton(
           onPressed: () {
@@ -111,8 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   'Gagal Logout',
                   'Terjadi kesalahan: $e',
                   snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
+                  backgroundColor: color.colorScheme.error,
+                  colorText: color.colorScheme.onError,
                 );
               }
             },
@@ -122,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
         title: "Hapus semua data",
-        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+        backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
         content: Text("Yakin ingin menghapus semua data?"),
         cancel: OutlinedButton(
             onPressed: () {
@@ -142,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colorTheme = AppTheme.dark.colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final textTheme = AppTheme.dark.textTheme;
 
     return Scaffold(
         key: _scaffoldKey,

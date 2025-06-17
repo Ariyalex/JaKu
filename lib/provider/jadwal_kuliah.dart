@@ -7,6 +7,7 @@ import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/theme/theme.dart';
 // import 'package:uuid/uuid.dart';
 
 import '../models/jadwal.dart';
@@ -14,6 +15,8 @@ import '../models/jadwal.dart';
 // var uuid = const Uuid();
 
 class JadwalkuliahController extends GetxController {
+  final color = AppTheme.dark;
+
   final CollectionReference _matkulCollection =
       FirebaseFirestore.instance.collection('matkuls');
 
@@ -222,8 +225,8 @@ class JadwalkuliahController extends GetxController {
         'Error',
         'Gagal menambahkan mata kuliah: $error',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade400,
-        colorText: Colors.white,
+        backgroundColor: color.colorScheme.error,
+        colorText: color.colorScheme.onError,
       );
     }
   }
@@ -291,8 +294,8 @@ class JadwalkuliahController extends GetxController {
         'Error',
         'Gagal memperbarui mata kuliah: $error',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade400,
-        colorText: Colors.white,
+        backgroundColor: color.colorScheme.error,
+        colorText: color.colorScheme.onError,
       );
     }
   }
@@ -324,8 +327,8 @@ class JadwalkuliahController extends GetxController {
         'Error',
         'Gagal menghapus mata kuliah: $error',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade400,
-        colorText: Colors.white,
+        backgroundColor: color.colorScheme.error,
+        colorText: color.colorScheme.onError,
       );
     }
   }
@@ -380,8 +383,8 @@ class JadwalkuliahController extends GetxController {
         'Gagal',
         'Terjadi kesalahan saat menghapus data: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: color.colorScheme.error,
+        colorText: color.colorScheme.onError,
       );
     }
   }

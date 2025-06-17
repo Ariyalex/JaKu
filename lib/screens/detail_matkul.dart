@@ -3,6 +3,7 @@ import 'package:jaku/controllers/edit_matkul_c.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +19,7 @@ class DetailMatkul extends StatefulWidget {
 }
 
 class _AddMatkulState extends State<DetailMatkul> {
+  final color = AppTheme.dark;
   final Set<String> hari = {
     "Senin",
     "Selasa",
@@ -105,7 +107,8 @@ class _AddMatkulState extends State<DetailMatkul> {
         Get.snackbar(
           "Error",
           "Gagal mengedit jadwal: ${e.toString()}",
-          backgroundColor: Colors.red.shade400,
+          backgroundColor: color.colorScheme.error,
+          colorText: color.colorScheme.onError,
         );
       }
     }

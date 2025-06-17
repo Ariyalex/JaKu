@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jaku/provider/jadwal_kuliah.dart';
 import 'package:jaku/provider/pdf_back.dart';
 import 'package:get/get.dart';
+import 'package:jaku/theme/theme.dart';
 
 import '../routes/route_named.dart';
 
@@ -14,6 +15,8 @@ class PdfParsing extends StatelessWidget {
     final pdfback = Get.find<PdfBack>();
     final jadwalProvider = Get.find<JadwalkuliahController>();
     final mediaQueryWidth = MediaQuery.of(context).size.width;
+
+    final color = AppTheme.dark;
 
     return Scaffold(
         appBar: AppBar(
@@ -63,7 +66,7 @@ class PdfParsing extends StatelessWidget {
                       pdfback.responseMessage.value,
                       style: TextStyle(
                         color: pdfback.responseMessage.value.contains('Error')
-                            ? const Color(0xFFCF6679)
+                            ? color.colorScheme.error
                             : Colors.green,
                       ),
                     ),
@@ -79,7 +82,7 @@ class PdfParsing extends StatelessWidget {
                       backgroundColor: WidgetStateProperty.resolveWith<Color>(
                         (Set<WidgetState> states) {
                           if (states.contains(WidgetState.disabled)) {
-                            return Colors.grey.shade500;
+                            return color.disabledColor;
                           }
                           return Colors.green;
                         },

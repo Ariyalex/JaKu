@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
 import 'package:get/get.dart';
 import 'package:jaku/provider/internet_check.dart';
+import 'package:jaku/theme/theme.dart';
 
 import '../../models/jadwal.dart';
 import '../../provider/jadwal_kuliah.dart';
@@ -53,7 +54,7 @@ class MatkulBuilder extends StatelessWidget {
                     onLongPress: () {
                       Get.defaultDialog(
                           backgroundColor:
-                              Theme.of(context).dialogTheme.backgroundColor,
+                              AppTheme.dark.dialogTheme.backgroundColor,
                           title: "Hapus Item",
                           content: Text("Yakin hapus matkul ini?"),
                           cancel: TextButton(

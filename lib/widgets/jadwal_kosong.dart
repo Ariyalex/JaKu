@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaku/provider/auth.dart';
 import 'package:jaku/provider/internet_check.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/theme/theme.dart';
 
 class jadwalKosong extends StatelessWidget {
   const jadwalKosong({
@@ -77,7 +78,7 @@ class jadwalKosong extends StatelessWidget {
                         onPressed: () {
                           Get.defaultDialog(
                             backgroundColor:
-                                Theme.of(context).drawerTheme.backgroundColor,
+                                AppTheme.dark.drawerTheme.backgroundColor,
                             title: "Peringatan!!",
                             content: const Text(
                               "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",

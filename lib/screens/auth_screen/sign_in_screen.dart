@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/auth_c.dart';
+import 'package:jaku/theme/theme.dart';
 
 import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
@@ -46,6 +47,8 @@ class _SignInState extends State<SignIn> {
     const TextStyle subtitleStyle = TextStyle(fontSize: 18);
     const TextStyle normalText = TextStyle(fontSize: 15);
 
+    final color = AppTheme.dark;
+
     Future<String?> authUser() async {
       setState(() {
         _isLoading = true;
@@ -69,8 +72,12 @@ class _SignInState extends State<SignIn> {
 
         if (!mounted) return null;
       } catch (error) {
-        Get.snackbar("Error!", error.toString(),
-            backgroundColor: Colors.red.shade400);
+        Get.snackbar(
+          "Error!",
+          error.toString(),
+          backgroundColor: color.colorScheme.error,
+          colorText: color.colorScheme.onError,
+        );
       } finally {
         if (mounted) {
           setState(() {
@@ -221,8 +228,12 @@ class _SignInState extends State<SignIn> {
 
                         Get.offNamed(RouteNamed.homePage);
                       } catch (error) {
-                        Get.snackbar("Error!", error.toString(),
-                            backgroundColor: Colors.red.shade400);
+                        Get.snackbar(
+                          "Error!",
+                          error.toString(),
+                          backgroundColor: color.colorScheme.error,
+                          colorText: color.colorScheme.onError,
+                        );
                       } finally {
                         if (mounted) {
                           setState(() {

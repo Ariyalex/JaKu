@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/add_matkul_c.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ class AddMatkul extends StatefulWidget {
 
 class _AddMatkulState extends State<AddMatkul> {
   final addMatkulC = Get.put(AddMatkulC());
+  final color = AppTheme.dark;
   final Set<String> hari = {
     "Senin",
     "Selasa",
@@ -91,7 +93,8 @@ class _AddMatkulState extends State<AddMatkul> {
         Get.snackbar(
           "Error",
           "Gagal menambahkan jadwal: ${error.toString()}",
-          backgroundColor: Colors.red.shade400,
+          backgroundColor: color.colorScheme.error,
+          colorText: color.colorScheme.onError,
         );
       }
     }
@@ -106,8 +109,7 @@ class _AddMatkulState extends State<AddMatkul> {
               onPressed: () {
                 Get.defaultDialog(
                   title: "Peringatan!!",
-                  backgroundColor:
-                      Theme.of(context).dialogTheme.backgroundColor,
+                  backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
                   titlePadding: EdgeInsets.only(top: 20),
                   titleStyle: TextStyle(
                     fontWeight: FontWeight.bold,

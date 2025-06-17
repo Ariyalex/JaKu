@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/auth_c.dart';
+import 'package:jaku/theme/theme.dart';
 import '../../provider/auth.dart' as aut;
 
 class RecoveryPass extends StatefulWidget {
@@ -13,6 +14,8 @@ class RecoveryPass extends StatefulWidget {
 class _RecoveryPassState extends State<RecoveryPass> {
   final authC = Get.find<AuthC>();
   bool _isLoading = false;
+
+  final color = AppTheme.dark;
 
   Future<String?> _recoverPassword(String email) async {
     setState(() {
@@ -31,8 +34,12 @@ class _RecoveryPassState extends State<RecoveryPass> {
       Get.snackbar("Success", "Mail telah dikirm ke email!",
           backgroundColor: Colors.green.shade400);
     } catch (error) {
-      Get.snackbar("Error!", error.toString(),
-          backgroundColor: Colors.red.shade400);
+      Get.snackbar(
+        "Error!",
+        error.toString(),
+        backgroundColor: color.colorScheme.error,
+        colorText: color.colorScheme.onError,
+      );
     } finally {
       if (mounted) {
         setState(() {

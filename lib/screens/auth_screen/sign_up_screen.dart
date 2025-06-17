@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/auth_c.dart';
+import 'package:jaku/theme/theme.dart';
 
 import '../../routes/route_named.dart';
 import '../../provider/jadwal_kuliah.dart';
@@ -33,6 +34,8 @@ class _SignUpState extends State<SignUp> {
     const TextStyle subtitleStyle = TextStyle(fontSize: 18);
     const TextStyle normalText = TextStyle(fontSize: 15);
 
+    final color = AppTheme.dark;
+
     Future<String?> signUpUser() async {
       setState(() {
         _isLoading = true;
@@ -59,11 +62,19 @@ class _SignUpState extends State<SignUp> {
 
         if (!mounted) return null;
         Get.offNamed(RouteNamed.signInScreen);
-        Get.snackbar("Success!", "Sign up berhasil!",
-            backgroundColor: Colors.red.shade400);
+        Get.snackbar(
+          "Success!",
+          "Sign up berhasil!",
+          backgroundColor: color.colorScheme.error,
+          colorText: color.colorScheme.onError,
+        );
       } catch (error) {
-        Get.snackbar("Error!", error.toString(),
-            backgroundColor: Colors.red.shade400);
+        Get.snackbar(
+          "Error!",
+          error.toString(),
+          backgroundColor: color.colorScheme.error,
+          colorText: color.colorScheme.onError,
+        );
       } finally {
         if (mounted) {
           setState(() {

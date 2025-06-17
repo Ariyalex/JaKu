@@ -138,11 +138,11 @@ class _TableState extends State<Table> {
     final String todayDay = jadwalKuliahDayProvider.getCurrentDay();
 
     //color
-    final primaryColor = Theme.of(context).primaryColor;
+    final primaryColor = AppTheme.dark.primaryColor;
     final colorTheme = AppTheme.dark.colorScheme;
 
     //text theme
-    final textTheme = Theme.of(context).textTheme;
+    final textTheme = AppTheme.dark.textTheme;
 
     return Obx(() {
       final allJadwal = allMatkulProvider.allMatkul;
@@ -226,7 +226,7 @@ class _TableState extends State<Table> {
           },
           onLongPress: () {
             Get.defaultDialog(
-                backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+                backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
                 title: "Hapus Item",
                 content: const Text("Yakin hapus matkul ini?"),
                 cancel: TextButton(
