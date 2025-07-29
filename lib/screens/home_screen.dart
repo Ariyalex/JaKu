@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/provider/auth.dart';
-import 'package:jaku/provider/internet_check.dart';
-import 'package:jaku/provider/version_control.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:jaku/widgets/card_view/card_view.dart';
 import 'package:get/get.dart';
@@ -22,11 +19,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final connectionStatus = Get.find<InternetCheck>().isOnline;
   final allMatkulProvider = Get.find<JadwalkuliahController>();
   final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
-  final authController = Get.find<AuthController>();
-  final versionControl = Get.put(VersionControl());
 
   final color = AppTheme.dark;
 
@@ -54,12 +48,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void loadData() {
-    _futureMatkul.value = allMatkulProvider.getOnce().then(
-      (_) {
+    _futureMatkul.value = Future(() async {
+      try {
+        allMatkulProvider.loadFromLocalStorage();
         jadwalKuliahDayProvider.getUniqueDays(allMatkulProvider);
-      },
-    ).catchError(
-      (err) {
+      } catch (err) {
         Get.defaultDialog(
           title: "Error Occured",
           content: Text(err.toString()),
@@ -70,58 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text("Okay"),
           ),
         );
-      },
-    );
-  }
-
-  static void _logout(BuildContext context) {
-    final color = AppTheme.dark;
-    Get.defaultDialog(
-        title: "Log Out",
-        backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
-        content: Text("Yakin Log Out dari account"),
-        cancel: TextButton(
-          onPressed: () {
-            Get.back();
-          },
-          child: const Text("Tidak"),
-        ),
-        confirm: FilledButton(
-            onPressed: () async {
-              // Tutup dialog konfirmasi
-              Get.back();
-
-              // Tampilkan indikator loading
-              Get.dialog(
-                const Center(child: CircularProgressIndicator()),
-                barrierDismissible: false,
-              );
-
-              try {
-                // Dapatkan controller yang diperlukan
-                var matkuls = Get.find<JadwalkuliahController>();
-                var auth = Get.find<AuthController>();
-
-                // Lakukan proses logout
-                await auth.signOut(matkuls);
-
-                // Tutup loading dialog
-                Get.back();
-              } catch (e) {
-                // Tutup loading dialog jika terjadi error
-                Get.back();
-
-                // Tampilkan pesan error
-                Get.snackbar(
-                  'Gagal Logout',
-                  'Terjadi kesalahan: $e',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: color.colorScheme.error,
-                  colorText: color.colorScheme.onError,
-                );
-              }
-            },
-            child: const Text("Ya")));
+      }
+    });
   }
 
   static void clearAllData(BuildContext context) {
@@ -152,83 +95,37 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Row(
-            children: [
-              Obx(
-                () {
-                  if (connectionStatus.value == false) {
-                    return const Text("Jaku Offline mode");
-                  } else {
-                    return const Text("Jaku");
-                  }
-                },
-              )
-            ],
-          ),
-          leading: Obx(() {
-            if (connectionStatus.value == true) {
-              return Builder(
-                builder: (context) => PopupMenuButton<String>(
-                  icon: const Icon(Icons.menu), // Burger Icon
-                  onSelected: (value) {
-                    if (value == "info") {
-                      Get.toNamed(RouteNamed.guideGeneral);
-                    } else if (value == "logout") {
-                      _logout(context);
-                    } else if (value == "clear") {
-                      clearAllData(context);
-                    }
-                  },
+          title: const Text("Jaku"),
+          leading: Builder(
+            builder: (context) => PopupMenuButton<String>(
+              icon: const Icon(Icons.menu), // Burger Icon
+              onSelected: (value) {
+                if (value == "info") {
+                  Get.toNamed(RouteNamed.guideGeneral);
+                } else if (value == "clear") {
+                  clearAllData(context);
+                }
+              },
 
-                  position: PopupMenuPosition.under,
-                  itemBuilder: (BuildContext context) => [
-                    const PopupMenuItem<String>(
-                      value: "info",
-                      child: ListTile(
-                        leading: Icon(Icons.info),
-                        title: Text("Info"),
-                      ),
-                    ),
-                    const PopupMenuItem<String>(
-                      value: "clear",
-                      child: ListTile(
-                        leading: Icon(Icons.delete_sweep),
-                        title: Text("Clear All Data"),
-                      ),
-                    ),
-                    const PopupMenuItem<String>(
-                      value: "logout",
-                      child: ListTile(
-                        leading: Icon(Icons.logout),
-                        title: Text("Logout"),
-                      ),
-                    ),
-                  ],
+              position: PopupMenuPosition.under,
+              itemBuilder: (BuildContext context) => [
+                const PopupMenuItem<String>(
+                  value: "info",
+                  child: ListTile(
+                    leading: Icon(Icons.info),
+                    title: Text("Info"),
+                  ),
                 ),
-              );
-            } else {
-              return Builder(
-                builder: (context) => PopupMenuButton<String>(
-                  icon: const Icon(Icons.menu), // Burger Icon
-                  onSelected: (value) {
-                    if (value == "info") {
-                      Get.toNamed(RouteNamed.guideGeneral);
-                    }
-                  },
-                  position: PopupMenuPosition.under,
-                  itemBuilder: (BuildContext context) => [
-                    const PopupMenuItem<String>(
-                      value: "info",
-                      child: ListTile(
-                        leading: Icon(Icons.info),
-                        title: Text("Info"),
-                      ),
-                    ),
-                  ],
+                const PopupMenuItem<String>(
+                  value: "clear",
+                  child: ListTile(
+                    leading: Icon(Icons.delete_sweep),
+                    title: Text("Clear All Data"),
+                  ),
                 ),
-              );
-            }
-          }),
+              ],
+            ),
+          ),
           actions: [
             Obx(
               () => TextButton.icon(
@@ -260,27 +157,14 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(
               width: 15,
             ),
-            Obx(() {
-              if (connectionStatus.value == true && authController.isLoggedIn) {
-                return IconButton(
-                  onPressed: () {
-                    Get.toNamed(RouteNamed.addMatkul);
-                  },
-                  icon: const Icon(
-                    Icons.add,
-                  ),
-                );
-              } else if (authController.isLoggedIn &&
-                  connectionStatus.value == false) {
-                return const SizedBox.shrink();
-              } else {
-                return IconButton(
-                    onPressed: () {
-                      Get.offNamed(RouteNamed.signInScreen);
-                    },
-                    icon: const Icon(Icons.login));
-              }
-            }),
+            IconButton(
+              onPressed: () {
+                Get.toNamed(RouteNamed.addMatkul);
+              },
+              icon: const Icon(
+                Icons.add,
+              ),
+            ),
           ],
         ),
         body: Obx(

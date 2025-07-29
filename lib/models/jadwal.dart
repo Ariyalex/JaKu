@@ -64,20 +64,6 @@ class Matkul extends HiveObject {
       "room": room,
     };
   }
-
-  factory Matkul.fromJson(String matkulId, Map<String, dynamic> json) {
-    return Matkul(
-      matkulId: matkulId,
-      day: json["day"],
-      matkul: json["matkul"],
-      dosen1: json["dosen1"],
-      dosen2: json["dosen2"],
-      kelas: json["kelas"],
-      formattedJamAwal: json["formattedJamAwal"],
-      formattedJamAkhir: json["formattedJamAkhir"],
-      room: json["room"],
-    );
-  }
 }
 
 //adapter matkul

@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
 import 'package:jaku/provider/hari_kuliah.dart';
-import 'package:jaku/provider/pdf_back.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
+import 'package:uuid/uuid.dart';
 // import 'package:uuid/uuid.dart';
 
 import '../models/jadwal.dart';
@@ -17,14 +15,9 @@ import '../models/jadwal.dart';
 class JadwalkuliahController extends GetxController {
   final color = AppTheme.dark;
 
-  final CollectionReference _matkulCollection =
-      FirebaseFirestore.instance.collection('matkuls');
+  var uuid = const Uuid();
 
   final RxList<Matkul> allMatkul = <Matkul>[].obs;
-
-  StreamSubscription? _matkulSubscription;
-
-  String? _userid;
 
   int get jumlahMatkul => allMatkul.length;
 
@@ -53,73 +46,14 @@ class JadwalkuliahController extends GetxController {
     return hariList.indexOf(day);
   }
 
-  //gunakan firebase
   void clearData() {
     allMatkul.clear();
   }
 
-  Future<void> cancelSubscription() async {
-    await _matkulSubscription?.cancel();
-    _matkulSubscription = null;
-  }
-
-  void updateAuthData(User? user) async {
-    if (user != null) {
-      _userid = user.uid;
-    } else {
-      _userid = null;
-    }
-  }
-
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     JadwalKuliahLocal.initL();
-  }
-
-  @override
-  void onClose() {
-    cancelSubscription();
-    super.onClose();
-  }
-
-  Future<void> getOnce() async {
-    try {
-      if (_userid == null) {
-        _loadFromLocalStorage();
-        return;
-      }
-
-      try {
-        QuerySnapshot snapshot =
-            await _matkulCollection.where("userId", isEqualTo: _userid).get();
-
-        List<Matkul> data = snapshot.docs
-            .map(
-              (doc) =>
-                  Matkul.fromJson(doc.id, doc.data() as Map<String, dynamic>),
-            )
-            .toList();
-
-        data.sort((a, b) => _compareMatkul(a, b));
-
-        // Update the observable list with data from Firestore
-        allMatkul.clear();
-        allMatkul.addAll(data);
-
-        //simpan data ke local storage
-        await JadwalKuliahLocal.saveAllMatkulL(data);
-
-        Get.find<DayKuliahController>().getUniqueDays(this);
-      } catch (e) {
-        print("errror fetching from firebase: $e");
-        _loadFromLocalStorage();
-      }
-    } catch (error) {
-      print("Error fetching products once: $error");
-      _loadFromLocalStorage();
-    }
   }
 
   //fungsi mebandingkan dua matkul saat sorting
@@ -149,7 +83,7 @@ class JadwalkuliahController extends GetxController {
   }
 
   //fungsi untuk memuad data dari local storage
-  void _loadFromLocalStorage() {
+  void loadFromLocalStorage() {
     try {
       List<Matkul> localData = JadwalKuliahLocal.getAllMatkulsL();
 
@@ -175,25 +109,8 @@ class JadwalkuliahController extends GetxController {
       String room,
       String day) async {
     try {
-      //menambahkan ke firebase
-      if (_userid == null) {
-        return;
-      }
-
-      DocumentReference docRef = await _matkulCollection.add({
-        "matkul": matkul,
-        "kelas": kelas,
-        "formattedJamAwal": formattedJamAwal,
-        "formattedJamAkhir": formattedJamAkhir,
-        "dosen1": dosen1,
-        "dosen2": dosen2,
-        "room": room,
-        "day": day,
-        "userId": _userid,
-      });
-
       Matkul newMatkul = Matkul(
-        matkulId: docRef.id,
+        matkulId: uuid.v4(),
         matkul: matkul,
         kelas: kelas,
         formattedJamAwal: formattedJamAwal,
@@ -242,21 +159,6 @@ class JadwalkuliahController extends GetxController {
       String room,
       String day) async {
     try {
-      if (_userid == null) {
-        return;
-      }
-
-      await _matkulCollection.doc(id).update({
-        "matkul": matkul,
-        "kelas": kelas,
-        "formattedJamAwal": formattedJamAwal,
-        "formattedJamAkhir": formattedJamAkhir,
-        "dosen1": dosen1,
-        "dosen2": dosen2,
-        "room": room,
-        "day": day,
-      });
-
       //buat objek matkul baru dengan data yang diudate
       Matkul updatedMatkul = Matkul(
         matkulId: id,
@@ -303,13 +205,6 @@ class JadwalkuliahController extends GetxController {
   Future<void> deleteMatkuls(
       String id, DayKuliahController dayKuliahController) async {
     try {
-      if (_userid == null) {
-        return;
-      }
-
-      //hapus matkul dari firebase
-      await _matkulCollection.doc(id).delete();
-
       //hapus dari list local
       allMatkul.removeWhere(
         (product) => product.matkulId == id,
@@ -326,7 +221,7 @@ class JadwalkuliahController extends GetxController {
       Get.snackbar(
         'Error',
         'Gagal menghapus mata kuliah: $error',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: color.colorScheme.error,
         colorText: color.colorScheme.onError,
       );
@@ -345,11 +240,7 @@ class JadwalkuliahController extends GetxController {
       );
 
       // Dapatkan semua controller yang diperlukan
-      final pdfBack = Get.find<PdfBack>();
       final hariKuliahProvider = Get.find<DayKuliahController>();
-
-      // Hapus data dari Firebase
-      await pdfBack.clearUserData();
 
       // Hapus data pada controller jadwal
       clearData();
@@ -367,7 +258,7 @@ class JadwalkuliahController extends GetxController {
       Get.snackbar(
         'Berhasil',
         'Semua data berhasil dihapus',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
