@@ -1,27 +1,25 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
+import 'package:jaku/services/jadwal_kuliah_local.dart';
 import 'package:jaku/models/jadwal.dart';
-import 'package:jaku/provider/jadwal_kuliah.dart';
+import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class PdfBack extends GetxController {
   final RxList<Matkul> _allMatkul = <Matkul>[].obs;
   List<Matkul> get allMatkul => _allMatkul;
 
   final String baseUrl = 'https://ariyalexx.pythonanywhere.com/';
+
   Rx<File?> selectedFile = Rx<File?>(null);
   RxString responseMessage = RxString('');
   RxBool isLoading = false.obs;
   RxBool isUploading = false.obs;
   final dio_package.Dio dio = dio_package.Dio();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> pickPdfFile() async {
     try {
@@ -41,40 +39,7 @@ class PdfBack extends GetxController {
     }
   }
 
-  // Clear all user data in Firebase
-  Future<void> clearUserData() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    try {
-      // Get all documents for the current user
-      final QuerySnapshot snapshot = await _firestore
-          .collection("matkuls")
-          .where("userId", isEqualTo: user.uid)
-          .get();
-
-      // Create a batch write to delete all documents
-      WriteBatch batch = _firestore.batch();
-
-      for (var doc in snapshot.docs) {
-        batch.delete(doc.reference);
-      }
-
-      // Commit the batch
-      await batch.commit();
-
-      // Clear local data
-      _allMatkul.clear();
-    } catch (e) {
-      print("Error clearing user data: $e");
-      throw "Error clearing user data: $e";
-    }
-  }
-
-  Future<void> uploadAndProcessPdf(
-      JadwalkuliahController jadwalProvider) async {
+  Future<void> uploadAndProcessPdf(JadwalkuliahC jadwalProvider) async {
     if (selectedFile.value == null) {
       responseMessage.value = "Pilih file PDF terlebih dahulu";
       return;
@@ -85,7 +50,7 @@ class PdfBack extends GetxController {
 
     try {
       // Clear existing data both in Firebase and locally first
-      await clearUserData();
+      await JadwalKuliahLocal.deleteAllMatkulL();
       jadwalProvider.clearData(); // Clear data in the JadwalKuliah provider
 
       responseMessage.value = "Mengunggah dan memproses file...";
@@ -166,26 +131,26 @@ class PdfBack extends GetxController {
           }
         }
 
-        // Upload to Firebase
+        // save to local
         isUploading.value = true;
-        responseMessage.value = "Menyimpan ke Firebase...";
+        responseMessage.value = "Menyimpan ke local...";
 
         // Upload each matkul using the existing provider function
         for (var matkul in _allMatkul) {
-          await jadwalProvider.addMatkuls(
-            matkul.matkul,
-            matkul.kelas ?? "",
-            matkul.formattedJamAwal,
-            matkul.formattedJamAkhir ?? "",
-            matkul.dosen1 ?? "",
-            matkul.dosen2 ?? "",
-            matkul.room ?? "",
-            matkul.day,
-          );
+          jadwalProvider.matkulC.text = matkul.matkul;
+          jadwalProvider.kelas.value = matkul.kelas ?? "";
+          jadwalProvider.jamAwal.value = matkul.formattedJamAwal;
+          jadwalProvider.jamAkhir.value = matkul.formattedJamAkhir ?? "";
+          jadwalProvider.dosen1C.text = matkul.dosen1 ?? "";
+          jadwalProvider.dosen2C.text = matkul.dosen2 ?? "";
+          jadwalProvider.ruanganC.text = matkul.room!;
+          jadwalProvider.hari.value = matkul.day;
+
+          await jadwalProvider.addMatkuls();
         }
 
         // Refresh the jadwalProvider data
-        await jadwalProvider.getOnce();
+        jadwalProvider.loadFromLocalStorage();
 
         isLoading.value = false;
         isUploading.value = false;
