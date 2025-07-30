@@ -7,7 +7,6 @@ import 'package:jaku/controllers/hari_kuliah.dart';
 import 'package:jaku/controllers/jadwal_kuliah.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
-import 'package:jaku/widgets/jadwal_kosong.dart';
 
 class Table extends StatefulWidget {
   const Table({super.key});
@@ -246,11 +245,6 @@ class _TableState extends State<Table> {
           },
           // Opsi DataCell tambahan
         );
-      }
-
-      //jika jadwal empty
-      if (jadwalKuliahDayProvider.jadwalHari.isEmpty) {
-        return const jadwalKosong();
       }
 
       //main code

@@ -28,6 +28,19 @@ class _AddMatkulState extends State<AddMatkul> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    allMatkulProvider.matkulC.clear();
+    allMatkulProvider.dosen1C.clear();
+    allMatkulProvider.dosen2C.clear();
+    allMatkulProvider.ruanganC.clear();
+    allMatkulProvider.kelas.value = null;
+    allMatkulProvider.jamAkhir.value = null;
+    allMatkulProvider.jamAwal.value = null;
+    allMatkulProvider.hari.value = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 

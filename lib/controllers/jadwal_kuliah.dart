@@ -12,15 +12,19 @@ import '../models/jadwal.dart';
 var uuid = const Uuid();
 
 class JadwalkuliahController extends GetxController {
+  //text controller
   final matkulC = TextEditingController();
   final dosen1C = TextEditingController();
   final dosen2C = TextEditingController();
   final ruanganC = TextEditingController();
-
   RxnString hari = RxnString();
   RxnString kelas = RxnString();
   RxnString jamAwal = RxnString();
   RxnString jamAkhir = RxnString();
+
+  //loading state
+  final RxBool isLoading = false.obs;
+  final RxString errorMsg = ''.obs;
 
   List<String> hariList = [
     "Senin",
@@ -61,9 +65,10 @@ class JadwalkuliahController extends GetxController {
   }
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    JadwalKuliahLocal.initL();
+    await JadwalKuliahLocal.initL();
+    loadFromLocalStorage();
   }
 
   //fungsi mebandingkan dua matkul saat sorting
@@ -92,8 +97,10 @@ class JadwalkuliahController extends GetxController {
         .compareTo(jamAwalB.hour * 60 + jamAwalB.minute);
   }
 
-  //fungsi untuk memuad data dari local storage
-  void loadFromLocalStorage() {
+  //fungsi untuk memuat data dari local storage
+  Future<void> loadFromLocalStorage() async {
+    isLoading.value = true;
+    errorMsg.value = '';
     try {
       List<Matkul> localData = JadwalKuliahLocal.getAllMatkulsL();
 
@@ -106,6 +113,9 @@ class JadwalkuliahController extends GetxController {
       }
     } catch (e) {
       print("error loading from local storage: $e");
+      errorMsg.value = 'Error: $e';
+    } finally {
+      isLoading.value = false;
     }
   }
 

@@ -1,42 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/jadwal_kuliah.dart';
+import 'package:jaku/widgets/jadwal_kosong.dart';
 import 'package:jaku/widgets/table_view/table.dart' as tbl;
 
 class TableView extends StatelessWidget {
   const TableView({
     super.key,
-    required Rx<Future<void>?> futureMatkul,
-  }) : _futureMatkul = futureMatkul;
-
-  final Rx<Future<void>?> _futureMatkul;
+  });
 
   @override
   Widget build(BuildContext context) {
     final allMatkulProvider = Get.find<JadwalkuliahController>();
 
-    return Obx(() {
-      final _ = allMatkulProvider.allMatkul;
-
-      return FutureBuilder(
-        future: _futureMatkul.value,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else {
-            return const Flex(
-              direction: Axis.vertical,
-              children: [
-                Expanded(
-                  child: tbl.Table(),
-                )
-              ],
-            );
-          }
-        },
-      );
-    });
+    return Obx(
+      () {
+        if (allMatkulProvider.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (allMatkulProvider.errorMsg.value.isNotEmpty) {
+          return Center(child: Text(allMatkulProvider.errorMsg.value));
+        } else if (allMatkulProvider.allMatkul.isEmpty) {
+          return const JadwalKosong();
+        } else {
+          return const Flex(
+            direction: Axis.vertical,
+            children: [
+              Expanded(
+                child: tbl.Table(),
+              )
+            ],
+          );
+        }
+      },
+    );
   }
 }

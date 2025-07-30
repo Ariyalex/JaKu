@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 
-class jadwalKosong extends StatelessWidget {
-  const jadwalKosong({
+class JadwalKosong extends StatelessWidget {
+  const JadwalKosong({
     super.key,
   });
 

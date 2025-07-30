@@ -26,12 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   RxBool isCardView = true.obs;
 
-  final Rx<Future<void>?> _futureMatkul = Rx<Future<void>?>(null);
-
   @override
   void initState() {
     super.initState();
-    loadData();
     loadViewValue();
     jadwalKuliahDayProvider.getOrderedDays();
   }
@@ -47,31 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
     pref.setBool("cardView", value);
   }
 
-  void loadData() {
-    _futureMatkul.value = Future(() async {
-      try {
-        allMatkulProvider.loadFromLocalStorage();
-        jadwalKuliahDayProvider.getUniqueDays(allMatkulProvider);
-      } catch (err) {
-        Get.defaultDialog(
-          title: "Error Occured",
-          content: Text(err.toString()),
-          confirm: TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("Okay"),
-          ),
-        );
-      }
-    });
-  }
-
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
         title: "Hapus semua data",
         backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
-        content: Text("Yakin ingin menghapus semua data?"),
+        content: const Text("Yakin ingin menghapus semua data?"),
         cancel: OutlinedButton(
             onPressed: () {
               Get.back();
@@ -172,14 +149,12 @@ class _HomeScreenState extends State<HomeScreen> {
             return isCardView.value
                 ? Container(
                     padding: const EdgeInsets.only(bottom: 40, top: 8),
-                    child: CardView(futureMatkul: _futureMatkul),
+                    child: const CardView(),
                   )
                 : Container(
                     padding: const EdgeInsets.only(
                         right: 8, left: 8, top: 8, bottom: 40),
-                    child: TableView(
-                      futureMatkul: _futureMatkul,
-                    ),
+                    child: TableView(),
                   );
           },
         ));

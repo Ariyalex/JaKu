@@ -20,11 +20,24 @@ class DetailMatkul extends StatefulWidget {
 class _AddMatkulState extends State<DetailMatkul> {
   final color = AppTheme.dark;
 
+  final allMatkulProvider = Get.find<JadwalkuliahController>();
+  final dayKuliahController = Get.find<DayKuliahController>();
+
+  @override
+  void initState() {
+    super.initState();
+    allMatkulProvider.matkulC.clear();
+    allMatkulProvider.dosen1C.clear();
+    allMatkulProvider.dosen2C.clear();
+    allMatkulProvider.ruanganC.clear();
+    allMatkulProvider.kelas.value = null;
+    allMatkulProvider.jamAkhir.value = null;
+    allMatkulProvider.jamAwal.value = null;
+    allMatkulProvider.hari.value = null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Get.find<JadwalkuliahController>();
-    final dayKuliahController = Get.find<DayKuliahController>();
-
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final matkulId = ModalRoute.of(context)?.settings.arguments as String;
     final selectedMatkul = allMatkulProvider.selectById(matkulId)!;
