@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:jaku/services/jadwal_kuliah_local.dart';
 import 'package:jaku/models/jadwal.dart';
-import 'package:jaku/controllers/jadwal_kuliah.dart';
+import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfBack extends GetxController {
@@ -39,8 +39,7 @@ class PdfBack extends GetxController {
     }
   }
 
-  Future<void> uploadAndProcessPdf(
-      JadwalkuliahController jadwalProvider) async {
+  Future<void> uploadAndProcessPdf(JadwalkuliahC jadwalProvider) async {
     if (selectedFile.value == null) {
       responseMessage.value = "Pilih file PDF terlebih dahulu";
       return;
@@ -132,7 +131,7 @@ class PdfBack extends GetxController {
           }
         }
 
-        // Upload to Firebase
+        // save to local
         isUploading.value = true;
         responseMessage.value = "Menyimpan ke local...";
 

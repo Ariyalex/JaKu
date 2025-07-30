@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:jaku/widgets/table_view/table_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../controllers/hari_kuliah.dart';
-import '../controllers/jadwal_kuliah.dart';
+import '../controllers/hari_kuliah_c.dart';
+import '../controllers/jadwal_kuliah_c.dart';
 import '../routes/route_named.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,8 +19,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final allMatkulProvider = Get.find<JadwalkuliahController>();
-  final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
+  final allMatkulProvider = Get.find<JadwalkuliahC>();
+  final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
 
   final color = AppTheme.dark;
 
@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         confirm: FilledButton(
             onPressed: () async {
               Get.back(); // Tutup dialog konfirmasi
-              final allMatkulProvider = Get.find<JadwalkuliahController>();
+              final allMatkulProvider = Get.find<JadwalkuliahC>();
 
               allMatkulProvider.clearAllData();
             },

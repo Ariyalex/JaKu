@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/jadwal_kuliah.dart';
+import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/pdf_back.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
@@ -13,7 +13,7 @@ class PdfParsing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pdfback = Get.find<PdfBack>();
-    final jadwalProvider = Get.find<JadwalkuliahController>();
+    final jadwalProvider = Get.find<JadwalkuliahC>();
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
     final color = AppTheme.dark;

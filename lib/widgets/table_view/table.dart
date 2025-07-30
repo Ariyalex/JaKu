@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/hari_kuliah.dart';
-import 'package:jaku/controllers/jadwal_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 
@@ -17,8 +17,8 @@ class Table extends StatefulWidget {
 
 class _TableState extends State<Table> {
   final ScrollController _horizontalScrollController = ScrollController();
-  final allMatkulProvider = Get.find<JadwalkuliahController>();
-  final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
+  final allMatkulProvider = Get.find<JadwalkuliahC>();
+  final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _TableState extends State<Table> {
   void scrollToTodayColumn() {
     debugPrint("==== _scrollToTodayColumn dipanggil ====");
 
-    final jadwalKuliahDayProvider = Get.find<DayKuliahController>();
+    final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
 
     final dayNow = jadwalKuliahDayProvider.getCurrentDay();
     // final dayNow = "Kamis";
@@ -102,7 +102,7 @@ class _TableState extends State<Table> {
 
   //tunggu data lalu scroll
   Future<void> _waitForDataAndScrollToToday() async {
-    final dayController = Get.find<DayKuliahController>();
+    final dayController = Get.find<HariKuliahC>();
 
     // Check if data is already available
     if (dayController.jadwalHariTerurut.isNotEmpty) {

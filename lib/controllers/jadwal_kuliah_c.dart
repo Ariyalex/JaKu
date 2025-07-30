@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/services/jadwal_kuliah_local.dart';
-import 'package:jaku/controllers/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:uuid/uuid.dart';
@@ -11,7 +11,7 @@ import '../models/jadwal.dart';
 
 var uuid = const Uuid();
 
-class JadwalkuliahController extends GetxController {
+class JadwalkuliahC extends GetxController {
   //text controller
   final matkulC = TextEditingController();
   final dosen1C = TextEditingController();
@@ -109,7 +109,7 @@ class JadwalkuliahController extends GetxController {
         allMatkul.clear();
         allMatkul.addAll(localData);
 
-        Get.find<DayKuliahController>().getUniqueDays(this);
+        Get.find<HariKuliahC>().getUniqueDays(this);
       }
     } catch (e) {
       print("error loading from local storage: $e");
@@ -140,7 +140,7 @@ class JadwalkuliahController extends GetxController {
       await JadwalKuliahLocal.saveMatkulL(newMatkul);
 
       try {
-        final dayController = Get.find<DayKuliahController>();
+        final dayController = Get.find<HariKuliahC>();
         dayController.getUniqueDays(this);
       } catch (e) {
         print("Tidak dapat memperbarui daftar hari: $e");
@@ -180,7 +180,7 @@ class JadwalkuliahController extends GetxController {
 
         // Perbarui daftar hari unik setelah memperbarui matkul
         try {
-          final dayController = Get.find<DayKuliahController>();
+          final dayController = Get.find<HariKuliahC>();
           dayController.getUniqueDays(this);
         } catch (e) {
           print("Tidak dapat memperbarui daftar hari: $e");
@@ -193,8 +193,7 @@ class JadwalkuliahController extends GetxController {
     }
   }
 
-  Future<void> deleteMatkuls(
-      String id, DayKuliahController dayKuliahController) async {
+  Future<void> deleteMatkuls(String id, HariKuliahC dayKuliahController) async {
     try {
       //hapus dari list local
       allMatkul.removeWhere(
@@ -231,7 +230,7 @@ class JadwalkuliahController extends GetxController {
       );
 
       // Dapatkan semua controller yang diperlukan
-      final hariKuliahProvider = Get.find<DayKuliahController>();
+      final hariKuliahProvider = Get.find<HariKuliahC>();
 
       // Hapus data pada controller jadwal
       clearData();

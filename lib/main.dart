@@ -8,8 +8,8 @@ import 'package:jaku/controllers/version_control.dart';
 import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/home_screen.dart';
 
-import 'controllers/hari_kuliah.dart';
-import 'controllers/jadwal_kuliah.dart';
+import 'controllers/hari_kuliah_c.dart';
+import 'controllers/jadwal_kuliah_c.dart';
 import './theme/theme.dart';
 
 void main() async {
@@ -22,8 +22,8 @@ void main() async {
   await JadwalKuliahLocal.initL();
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
-  Get.put(JadwalkuliahController(), permanent: true);
-  Get.put(DayKuliahController(), permanent: true);
+  Get.put(JadwalkuliahC(), permanent: true);
+  Get.put(HariKuliahC(), permanent: true);
   Get.put(PdfBack(), permanent: true);
   Get.put(VersionControl());
 

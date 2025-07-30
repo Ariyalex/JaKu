@@ -1,41 +1,33 @@
 import 'package:get/get.dart';
 import '../models/jadwal.dart';
-import 'jadwal_kuliah.dart';
+import 'jadwal_kuliah_c.dart';
 
-class DayKuliahController extends GetxController {
+class HariKuliahC extends GetxController {
   final RxList<HariKuliah> jadwalHari = <HariKuliah>[].obs;
   final RxList<HariKuliah> jadwalHariTerurut = <HariKuliah>[].obs;
 
+  List<String> hariList = [
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jum'at",
+    "Sabtu",
+    "Minggu",
+  ];
+
   int getDayIndex(String day) {
-    List<String> hariList = [
-      "Senin",
-      "Selasa",
-      "Rabu",
-      "Kamis",
-      "Jum'at",
-      "Sabtu",
-      "Minggu",
-    ];
     return hariList.indexOf(day);
   }
 
   // Fungsi untuk mendapatkan nama hari saat ini
   String getCurrentDay() {
-    List<String> hariList = [
-      "Senin",
-      "Selasa",
-      "Rabu",
-      "Kamis",
-      "Jum'at",
-      "Sabtu",
-      "Minggu"
-    ];
     int todayIndex = DateTime.now().weekday - 1; // Senin = 0, Minggu = 6
     return hariList[todayIndex];
   }
 
   // Mengambil hari-hari unik dari jadwal mata kuliah
-  void getUniqueDays(JadwalkuliahController jadwalKuliah) {
+  void getUniqueDays(JadwalkuliahC jadwalKuliah) {
     // Bersihkan data sebelumnya
     jadwalHari.clear();
     jadwalHariTerurut.clear();

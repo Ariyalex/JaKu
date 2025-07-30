@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
 
-import '../controllers/jadwal_kuliah.dart';
+import '../controllers/jadwal_kuliah_c.dart';
 
 class DetailMatkul extends StatefulWidget {
   static const routeName = "/detail-matkul";
@@ -20,8 +20,8 @@ class DetailMatkul extends StatefulWidget {
 class _AddMatkulState extends State<DetailMatkul> {
   final color = AppTheme.dark;
 
-  final allMatkulProvider = Get.find<JadwalkuliahController>();
-  final dayKuliahController = Get.find<DayKuliahController>();
+  final allMatkulProvider = Get.find<JadwalkuliahC>();
+  final dayKuliahController = Get.find<HariKuliahC>();
 
   @override
   void initState() {

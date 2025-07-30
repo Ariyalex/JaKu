@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
 import '../routes/route_named.dart';
-import '../controllers/jadwal_kuliah.dart';
+import '../controllers/jadwal_kuliah_c.dart';
 
 class AddMatkul extends StatefulWidget {
   const AddMatkul({super.key});
@@ -16,7 +16,7 @@ class AddMatkul extends StatefulWidget {
 }
 
 class _AddMatkulState extends State<AddMatkul> {
-  final allMatkulProvider = Get.find<JadwalkuliahController>();
+  final allMatkulProvider = Get.find<JadwalkuliahC>();
   final color = AppTheme.dark;
 
   String divider(String formattedJamAkhir) {
@@ -55,7 +55,7 @@ class _AddMatkulState extends State<AddMatkul> {
 
         Get.back();
 
-        Get.find<DayKuliahController>().getUniqueDays(allMatkulProvider);
+        Get.find<HariKuliahC>().getUniqueDays(allMatkulProvider);
         Get.snackbar(
           "Success",
           "Jadwal berhasil ditambahkan",

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
 
 import '../../models/jadwal.dart';
-import '../../controllers/jadwal_kuliah.dart';
+import '../../controllers/jadwal_kuliah_c.dart';
 import '../../routes/route_named.dart';
 
 class MatkulCard extends StatelessWidget {
@@ -17,8 +17,8 @@ class MatkulCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Get.find<JadwalkuliahController>();
-    final dayKuliahController = Get.find<DayKuliahController>();
+    final allMatkulProvider = Get.find<JadwalkuliahC>();
+    final dayKuliahController = Get.find<HariKuliahC>();
 
     String divider(String? formattedJamAkhir) {
       if (formattedJamAkhir == null || formattedJamAkhir.isEmpty) {
