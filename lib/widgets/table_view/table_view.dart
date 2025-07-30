@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/provider/jadwal_kuliah.dart';
+import 'package:jaku/controllers/jadwal_kuliah.dart';
 import 'package:jaku/widgets/table_view/table.dart' as tbl;
 
 class TableView extends StatelessWidget {

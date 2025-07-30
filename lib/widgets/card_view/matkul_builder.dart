@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
 
 import '../../models/jadwal.dart';
-import '../../provider/jadwal_kuliah.dart';
+import '../../controllers/jadwal_kuliah.dart';
 import '../../routes/route_named.dart';
 
 class MatkulBuilder extends StatelessWidget {

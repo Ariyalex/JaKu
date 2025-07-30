@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
-import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
+import 'package:jaku/services/jadwal_kuliah_local.dart';
 import 'package:jaku/models/jadwal.dart';
-import 'package:jaku/provider/jadwal_kuliah.dart';
+import 'package:jaku/controllers/jadwal_kuliah.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfBack extends GetxController {
@@ -138,16 +138,16 @@ class PdfBack extends GetxController {
 
         // Upload each matkul using the existing provider function
         for (var matkul in _allMatkul) {
-          await jadwalProvider.addMatkuls(
-            matkul.matkul,
-            matkul.kelas ?? "",
-            matkul.formattedJamAwal,
-            matkul.formattedJamAkhir ?? "",
-            matkul.dosen1 ?? "",
-            matkul.dosen2 ?? "",
-            matkul.room ?? "",
-            matkul.day,
-          );
+          jadwalProvider.matkulC.text = matkul.matkul;
+          jadwalProvider.kelas.value = matkul.kelas ?? "";
+          jadwalProvider.jamAwal.value = matkul.formattedJamAwal;
+          jadwalProvider.jamAkhir.value = matkul.formattedJamAkhir ?? "";
+          jadwalProvider.dosen1C.text = matkul.dosen1 ?? "";
+          jadwalProvider.dosen2C.text = matkul.dosen2 ?? "";
+          jadwalProvider.ruanganC.text = matkul.room!;
+          jadwalProvider.hari.value = matkul.day;
+
+          await jadwalProvider.addMatkuls();
         }
 
         // Refresh the jadwalProvider data

@@ -2,15 +2,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/firebase_options.dart';
-import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
-import 'package:jaku/provider/pdf_back.dart';
-import 'package:jaku/provider/version_control.dart';
+import 'package:jaku/services/jadwal_kuliah_local.dart';
+import 'package:jaku/controllers/pdf_back.dart';
+import 'package:jaku/controllers/version_control.dart';
 import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/home_screen.dart';
 
-import '../provider/hari_kuliah.dart';
-import '../provider/jadwal_kuliah.dart';
-// import './screens/auth_page.dart';
+import 'controllers/hari_kuliah.dart';
+import 'controllers/jadwal_kuliah.dart';
 import './theme/theme.dart';
 
 void main() async {

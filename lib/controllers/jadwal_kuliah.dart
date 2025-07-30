@@ -1,21 +1,40 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/local_storage/jadwal_kuliah_local.dart';
-import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/services/jadwal_kuliah_local.dart';
+import 'package:jaku/controllers/hari_kuliah.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:uuid/uuid.dart';
-// import 'package:uuid/uuid.dart';
 
 import '../models/jadwal.dart';
 
-// var uuid = const Uuid();
+var uuid = const Uuid();
 
 class JadwalkuliahController extends GetxController {
-  final color = AppTheme.dark;
+  final matkulC = TextEditingController();
+  final dosen1C = TextEditingController();
+  final dosen2C = TextEditingController();
+  final ruanganC = TextEditingController();
 
-  var uuid = const Uuid();
+  RxnString hari = RxnString();
+  RxnString kelas = RxnString();
+  RxnString jamAwal = RxnString();
+  RxnString jamAkhir = RxnString();
+
+  List<String> hariList = [
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jum'at",
+    "Sabtu",
+    "Minggu",
+  ];
+
+  final Set<String> kelasList = {"A", "B", "C", "D"};
+
+  final color = AppTheme.dark;
 
   final RxList<Matkul> allMatkul = <Matkul>[].obs;
 
@@ -34,15 +53,6 @@ class JadwalkuliahController extends GetxController {
 
   // Fungsi untuk mendapatkan indeks hari dalam seminggu
   int getDayIndex(String day) {
-    List<String> hariList = [
-      "Senin",
-      "Selasa",
-      "Rabu",
-      "Kamis",
-      "Jum'at",
-      "Sabtu",
-      "Minggu",
-    ];
     return hariList.indexOf(day);
   }
 
@@ -99,26 +109,18 @@ class JadwalkuliahController extends GetxController {
     }
   }
 
-  Future<void> addMatkuls(
-      String matkul,
-      String kelas,
-      String formattedJamAwal,
-      String formattedJamAkhir,
-      String dosen1,
-      String dosen2,
-      String room,
-      String day) async {
+  Future<void> addMatkuls() async {
     try {
       Matkul newMatkul = Matkul(
         matkulId: uuid.v4(),
-        matkul: matkul,
-        kelas: kelas,
-        formattedJamAwal: formattedJamAwal,
-        formattedJamAkhir: formattedJamAkhir,
-        dosen1: dosen1,
-        dosen2: dosen2,
-        room: room,
-        day: day,
+        matkul: matkulC.text,
+        kelas: kelas.value,
+        formattedJamAwal: jamAwal.value!,
+        formattedJamAkhir: jamAkhir.value,
+        dosen1: dosen1C.text,
+        dosen2: dosen2C.text,
+        room: ruanganC.text,
+        day: hari.value!,
       );
 
       //update list lokal
@@ -132,49 +134,34 @@ class JadwalkuliahController extends GetxController {
         dayController.getUniqueDays(this);
       } catch (e) {
         print("Tidak dapat memperbarui daftar hari: $e");
+        rethrow;
       }
 
       print("matkul berhasil ditambah");
     } catch (error) {
-      print("error adding product: $error");
-
-      Get.snackbar(
-        'Error',
-        'Gagal menambahkan mata kuliah: $error',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: color.colorScheme.error,
-        colorText: color.colorScheme.onError,
-      );
+      rethrow;
     }
   }
 
-  Future<void> updateMatkul(
-      String id,
-      String matkul,
-      String kelas,
-      String formattedJamAwal,
-      String formattedJamAkhir,
-      String dosen1,
-      String dosen2,
-      String room,
-      String day) async {
+  Future<void> updateMatkul(String id) async {
     try {
       //buat objek matkul baru dengan data yang diudate
       Matkul updatedMatkul = Matkul(
         matkulId: id,
-        matkul: matkul,
-        kelas: kelas,
-        formattedJamAwal: formattedJamAwal,
-        formattedJamAkhir: formattedJamAkhir,
-        dosen1: dosen1,
-        dosen2: dosen2,
-        room: room,
-        day: day,
+        matkul: matkulC.text,
+        kelas: kelas.value,
+        formattedJamAwal: jamAwal.value!,
+        formattedJamAkhir: jamAkhir.value,
+        dosen1: dosen1C.text,
+        dosen2: dosen2C.text,
+        room: ruanganC.text,
+        day: hari.value!,
       );
 
       int index = allMatkul.indexWhere(
         (matkul) => matkul.matkulId == id,
       );
+
       if (index != -1) {
         allMatkul[index] = updatedMatkul;
 
@@ -187,18 +174,12 @@ class JadwalkuliahController extends GetxController {
           dayController.getUniqueDays(this);
         } catch (e) {
           print("Tidak dapat memperbarui daftar hari: $e");
+          rethrow;
         }
       }
     } catch (error) {
       print("error updating product: $error");
-
-      Get.snackbar(
-        'Error',
-        'Gagal memperbarui mata kuliah: $error',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: color.colorScheme.error,
-        colorText: color.colorScheme.onError,
-      );
+      rethrow;
     }
   }
 

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/widgets/jadwal_kosong.dart';
 
-import '../../provider/hari_kuliah.dart';
-import '../../provider/jadwal_kuliah.dart';
+import '../../controllers/hari_kuliah.dart';
+import '../../controllers/jadwal_kuliah.dart';
 import 'matkul_builder.dart';
 
 class DayCardBuilder extends StatelessWidget {

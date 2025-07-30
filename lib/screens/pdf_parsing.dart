@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/provider/jadwal_kuliah.dart';
-import 'package:jaku/provider/pdf_back.dart';
+import 'package:jaku/controllers/jadwal_kuliah.dart';
+import 'package:jaku/controllers/pdf_back.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
 

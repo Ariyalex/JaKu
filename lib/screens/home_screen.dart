@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:jaku/widgets/table_view/table_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../provider/hari_kuliah.dart';
-import '../provider/jadwal_kuliah.dart';
+import '../controllers/hari_kuliah.dart';
+import '../controllers/jadwal_kuliah.dart';
 import '../routes/route_named.dart';
 
 class HomeScreen extends StatefulWidget {

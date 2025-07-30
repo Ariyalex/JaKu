@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/edit_matkul_c.dart';
-import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
 
-import '../provider/jadwal_kuliah.dart';
+import '../controllers/jadwal_kuliah.dart';
 
 class DetailMatkul extends StatefulWidget {
   static const routeName = "/detail-matkul";
@@ -20,21 +19,9 @@ class DetailMatkul extends StatefulWidget {
 
 class _AddMatkulState extends State<DetailMatkul> {
   final color = AppTheme.dark;
-  final Set<String> hari = {
-    "Senin",
-    "Selasa",
-    "Rabu",
-    "Kamis",
-    "Jum'at",
-    "Sabtu",
-    "Minggu"
-  };
-
-  final Set<String> kelas = {"A", "B", "C", "D"};
 
   @override
   Widget build(BuildContext context) {
-    final editC = Get.put(EditMatkulC());
     final allMatkulProvider = Get.find<JadwalkuliahController>();
     final dayKuliahController = Get.find<DayKuliahController>();
 
@@ -42,16 +29,17 @@ class _AddMatkulState extends State<DetailMatkul> {
     final matkulId = ModalRoute.of(context)?.settings.arguments as String;
     final selectedMatkul = allMatkulProvider.selectById(matkulId)!;
 
-    if (editC.matkulC.text.isEmpty) {
-      editC.matkulC.text = selectedMatkul.matkul;
-      editC.dosen1C.text = selectedMatkul.dosen1 ?? "";
-      editC.dosen2C.text = selectedMatkul.dosen2 ?? "";
-      editC.ruanganC.text = selectedMatkul.room ?? "";
-      editC.kelas.value = selectedMatkul.kelas;
-      editC.hari.value = selectedMatkul.day;
-      editC.jamAwal.value = selectedMatkul.formattedJamAwal;
-      editC.jamAkhir.value = selectedMatkul.formattedJamAkhir!;
+    if (allMatkulProvider.matkulC.text.isEmpty) {
+      allMatkulProvider.matkulC.text = selectedMatkul.matkul;
+      allMatkulProvider.dosen1C.text = selectedMatkul.dosen1 ?? "";
+      allMatkulProvider.dosen2C.text = selectedMatkul.dosen2 ?? "";
+      allMatkulProvider.ruanganC.text = selectedMatkul.room ?? "";
+      allMatkulProvider.kelas.value = selectedMatkul.kelas ?? "";
+      allMatkulProvider.hari.value = selectedMatkul.day;
+      allMatkulProvider.jamAwal.value = selectedMatkul.formattedJamAwal;
+      allMatkulProvider.jamAkhir.value = selectedMatkul.formattedJamAkhir ?? "";
     }
+
     void editJadwal() async {
       // Show loading dialog
       Get.dialog(
@@ -61,17 +49,7 @@ class _AddMatkulState extends State<DetailMatkul> {
 
       try {
         // Wait for the update to complete
-        await allMatkulProvider.updateMatkul(
-          matkulId,
-          editC.matkulC.text,
-          editC.kelas.value ?? "",
-          editC.jamAwal.value ?? "",
-          editC.jamAkhir.value ?? "",
-          editC.dosen1C.text,
-          editC.dosen2C.text,
-          editC.ruanganC.text,
-          editC.hari.value ?? "",
-        );
+        await allMatkulProvider.updateMatkul(matkulId);
 
         // Close loading dialog
         Get.back();
@@ -80,22 +58,21 @@ class _AddMatkulState extends State<DetailMatkul> {
         dayKuliahController.getUniqueDays(allMatkulProvider);
 
         // Show success message
-        Get.snackbar("Success", "Jadwal berhasil diedit",
-            backgroundColor: Colors.green.shade400,
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          "Success",
+          "Jadwal berhasil diedit",
+          backgroundColor: Colors.green.shade400,
+        );
 
         // Clear form fields
-        editC.matkulC.clear();
-        editC.dosen1C.clear();
-        editC.dosen2C.clear();
-        editC.ruanganC.clear();
-        editC.kelas.value = null;
-        editC.jamAkhir.value = null;
-        editC.jamAwal.value = null;
-        editC.hari.value = null;
-
-        //delete controller
-        Get.delete<EditMatkulC>();
+        allMatkulProvider.matkulC.clear();
+        allMatkulProvider.dosen1C.clear();
+        allMatkulProvider.dosen2C.clear();
+        allMatkulProvider.ruanganC.clear();
+        allMatkulProvider.kelas.value = null;
+        allMatkulProvider.jamAkhir.value = null;
+        allMatkulProvider.jamAwal.value = null;
+        allMatkulProvider.hari.value = null;
 
         // Return to previous screen
         Get.toNamed(RouteNamed.homePage);
@@ -141,7 +118,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: editC.matkulC,
+                controller: allMatkulProvider.matkulC,
               ),
               const SizedBox(
                 height: 12,
@@ -156,7 +133,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: editC.dosen1C,
+                controller: allMatkulProvider.dosen1C,
               ),
               const SizedBox(
                 height: 12,
@@ -171,7 +148,7 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: editC.dosen2C,
+                controller: allMatkulProvider.dosen2C,
               ),
               const SizedBox(
                 height: 12,
@@ -186,14 +163,15 @@ class _AddMatkulState extends State<DetailMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: editC.ruanganC,
+                controller: allMatkulProvider.ruanganC,
               ),
               const SizedBox(
                 height: 12,
               ),
               DropdownSearch<String>(
-                selectedItem:
-                    (editC.hari.value == "null") ? null : editC.hari.value,
+                selectedItem: (allMatkulProvider.hari.value == "null")
+                    ? null
+                    : allMatkulProvider.hari.value,
                 decoratorProps: DropDownDecoratorProps(
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -229,13 +207,14 @@ class _AddMatkulState extends State<DetailMatkul> {
                     ),
                   ),
                 ),
-                items: (filter, loadProps) => hari.toList(),
+                items: (filter, loadProps) =>
+                    allMatkulProvider.hariList.toList(),
                 onChanged: (value) {
                   setState(() {
                     if (value != null) {
-                      editC.hari.value = value;
+                      allMatkulProvider.hari.value = value;
                     } else {
-                      editC.hari.value = null;
+                      allMatkulProvider.hari.value = null;
                     }
                   });
                 },
@@ -244,10 +223,10 @@ class _AddMatkulState extends State<DetailMatkul> {
                 height: 12,
               ),
               DropdownSearch<String>(
-                selectedItem:
-                    (editC.kelas.value == "null" || editC.kelas.value == "")
-                        ? "Kelas belum dipilih"
-                        : editC.kelas.value,
+                selectedItem: (allMatkulProvider.kelas.value == "null" ||
+                        allMatkulProvider.kelas.value == "")
+                    ? "Kelas belum dipilih"
+                    : allMatkulProvider.kelas.value,
                 decoratorProps: DropDownDecoratorProps(
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -281,12 +260,13 @@ class _AddMatkulState extends State<DetailMatkul> {
                     ),
                   ),
                 ),
-                items: (filter, loadProps) => kelas.toList(),
+                items: (filter, loadProps) =>
+                    allMatkulProvider.kelasList.toList(),
                 onChanged: (value) {
                   if (value != null) {
-                    editC.kelas.value = value;
+                    allMatkulProvider.kelas.value = value;
                   } else if (value == null) {
-                    editC.kelas.value = "";
+                    allMatkulProvider.kelas.value = "";
                   }
                 },
               ),
@@ -297,10 +277,10 @@ class _AddMatkulState extends State<DetailMatkul> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    (editC.jamAwal.value == null ||
-                            editC.jamAwal.value == "null:null")
+                    (allMatkulProvider.jamAwal.value == null ||
+                            allMatkulProvider.jamAwal.value == "null:null")
                         ? "Jam Kuliah"
-                        : "${editC.jamAwal.value} ${divider(editC.jamAkhir.value!)} ${editC.jamAkhir.value}",
+                        : "${allMatkulProvider.jamAwal.value} ${divider(allMatkulProvider.jamAkhir.value!)} ${allMatkulProvider.jamAkhir.value}",
                     style: const TextStyle(fontSize: 19),
                   ),
                   FilledButton(
@@ -315,14 +295,14 @@ class _AddMatkulState extends State<DetailMatkul> {
                         onSubmitted: (TimeRangeValue value) {
                           setState(() {
                             if (value.endTime != null) {
-                              editC.jamAwal.value =
+                              allMatkulProvider.jamAwal.value =
                                   "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              editC.jamAkhir.value =
+                              allMatkulProvider.jamAkhir.value =
                                   "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
                             } else {
-                              editC.jamAwal.value =
+                              allMatkulProvider.jamAwal.value =
                                   "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              editC.jamAkhir.value = "";
+                              allMatkulProvider.jamAkhir.value = "";
                             }
                           });
                         },
@@ -344,9 +324,9 @@ class _AddMatkulState extends State<DetailMatkul> {
                       fixedSize: WidgetStatePropertyAll(
                           Size.fromWidth(mediaQueryWidth * 1 / 3))),
                   onPressed: () {
-                    if (editC.matkulC.text.isNotEmpty &&
-                        editC.hari.value != null &&
-                        editC.jamAwal.value != "null:null") {
+                    if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                        allMatkulProvider.hari.value != null &&
+                        allMatkulProvider.jamAwal.value != "null:null") {
                       editJadwal();
                     } else {
                       Get.defaultDialog(

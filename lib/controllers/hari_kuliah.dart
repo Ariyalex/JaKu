@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../models/jadwal.dart';
-import './jadwal_kuliah.dart';
+import 'jadwal_kuliah.dart';
 
 class DayKuliahController extends GetxController {
   final RxList<HariKuliah> jadwalHari = <HariKuliah>[].obs;

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/add_matkul_c.dart';
-import 'package:jaku/provider/hari_kuliah.dart';
+import 'package:jaku/controllers/hari_kuliah.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
 import '../routes/route_named.dart';
-import '../provider/jadwal_kuliah.dart';
+import '../controllers/jadwal_kuliah.dart';
 
 class AddMatkul extends StatefulWidget {
   const AddMatkul({super.key});
@@ -17,25 +16,8 @@ class AddMatkul extends StatefulWidget {
 }
 
 class _AddMatkulState extends State<AddMatkul> {
-  final addMatkulC = Get.put(AddMatkulC());
+  final allMatkulProvider = Get.find<JadwalkuliahController>();
   final color = AppTheme.dark;
-  final Set<String> hari = {
-    "Senin",
-    "Selasa",
-    "Rabu",
-    "Kamis",
-    "Jum'at",
-    "Sabtu",
-    "Minggu"
-  };
-
-  final Set<String> kelas = {"A", "B", "C", "D"};
-
-  bool isFormValid() {
-    return addMatkulC.matkulC.text.isNotEmpty &&
-        addMatkulC.hari.value != null &&
-        addMatkulC.jamAwal.value != null;
-  }
 
   String divider(String formattedJamAkhir) {
     if (formattedJamAkhir.isEmpty) {
@@ -47,44 +29,35 @@ class _AddMatkulState extends State<AddMatkul> {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Get.find<JadwalkuliahController>();
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    void addJadwal() {
+    void addJadwal() async {
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
 
       try {
-        allMatkulProvider
-            .addMatkuls(
-                addMatkulC.matkulC.text,
-                addMatkulC.kelas.value ?? "",
-                addMatkulC.jamAwal.value ?? "",
-                addMatkulC.jamAkhir.value ?? "",
-                addMatkulC.dosen1C.text,
-                addMatkulC.dosen2C.text,
-                addMatkulC.ruanganC.text,
-                addMatkulC.hari.value ?? "")
-            .then(
-          (response) {
-            Get.back();
-            Get.find<DayKuliahController>().getUniqueDays(allMatkulProvider);
-            Get.snackbar("Success", "Jadwal berhasil ditambahkan",
-                backgroundColor: Colors.green.shade400,
-                snackPosition: SnackPosition.BOTTOM);
-          },
+        await allMatkulProvider.addMatkuls();
+
+        Get.back();
+
+        Get.find<DayKuliahController>().getUniqueDays(allMatkulProvider);
+        Get.snackbar(
+          "Success",
+          "Jadwal berhasil ditambahkan",
+          backgroundColor: Colors.green.shade400,
         );
 
-        addMatkulC.matkulC.clear();
-        addMatkulC.dosen1C.clear();
-        addMatkulC.dosen2C.clear();
-        addMatkulC.ruanganC.clear();
-        addMatkulC.kelas.value = null;
-        addMatkulC.jamAkhir.value = null;
-        addMatkulC.jamAwal.value = null;
-        addMatkulC.hari.value = null;
+        //clear controller
+        allMatkulProvider.matkulC.clear();
+        allMatkulProvider.dosen1C.clear();
+        allMatkulProvider.dosen2C.clear();
+        allMatkulProvider.ruanganC.clear();
+        allMatkulProvider.kelas.value = null;
+        allMatkulProvider.jamAkhir.value = null;
+        allMatkulProvider.jamAwal.value = null;
+        allMatkulProvider.hari.value = null;
       } catch (error) {
         // Close loading dialog
         Get.back();
@@ -151,7 +124,7 @@ class _AddMatkulState extends State<AddMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: addMatkulC.matkulC,
+                controller: allMatkulProvider.matkulC,
               ),
               const SizedBox(
                 height: 12,
@@ -166,7 +139,7 @@ class _AddMatkulState extends State<AddMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: addMatkulC.dosen1C,
+                controller: allMatkulProvider.dosen1C,
               ),
               const SizedBox(
                 height: 12,
@@ -181,7 +154,7 @@ class _AddMatkulState extends State<AddMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: addMatkulC.dosen2C,
+                controller: allMatkulProvider.dosen2C,
               ),
               const SizedBox(
                 height: 12,
@@ -196,13 +169,13 @@ class _AddMatkulState extends State<AddMatkul> {
                 autocorrect: false,
                 style: const TextStyle(fontWeight: FontWeight.normal),
                 textInputAction: TextInputAction.next,
-                controller: addMatkulC.ruanganC,
+                controller: allMatkulProvider.ruanganC,
               ),
               const SizedBox(
                 height: 12,
               ),
               Obx(() => DropdownSearch<String>(
-                    selectedItem: addMatkulC.hari.value,
+                    selectedItem: allMatkulProvider.hari.value,
                     decoratorProps: DropDownDecoratorProps(
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -238,12 +211,13 @@ class _AddMatkulState extends State<AddMatkul> {
                         ),
                       ),
                     ),
-                    items: (filter, loadProps) => hari.toList(),
+                    items: (filter, loadProps) =>
+                        allMatkulProvider.hariList.toList(),
                     onChanged: (value) {
                       if (value != null) {
-                        addMatkulC.hari.value = value;
+                        allMatkulProvider.hari.value = value;
                       } else {
-                        addMatkulC.hari.value = "";
+                        allMatkulProvider.hari.value = "";
                       }
                     },
                   )),
@@ -251,7 +225,7 @@ class _AddMatkulState extends State<AddMatkul> {
                 height: 12,
               ),
               Obx(() => DropdownSearch<String>(
-                    selectedItem: addMatkulC.kelas.value,
+                    selectedItem: allMatkulProvider.kelas.value,
                     decoratorProps: DropDownDecoratorProps(
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -285,12 +259,13 @@ class _AddMatkulState extends State<AddMatkul> {
                         ),
                       ),
                     ),
-                    items: (filter, loadProps) => kelas.toList(),
+                    items: (filter, loadProps) =>
+                        allMatkulProvider.kelasList.toList(),
                     onChanged: (value) {
                       if (value != null) {
-                        addMatkulC.kelas.value = value;
+                        allMatkulProvider.kelas.value = value;
                       } else if (value == null || value == "") {
-                        addMatkulC.kelas.value = null;
+                        allMatkulProvider.kelas.value = null;
                       }
                     },
                   )),
@@ -303,15 +278,16 @@ class _AddMatkulState extends State<AddMatkul> {
                   Obx(() {
                     String displayText = "Jam Kuliah";
 
-                    if (addMatkulC.jamAwal.value != null &&
-                        addMatkulC.jamAwal.value != "null:null") {
+                    if (allMatkulProvider.jamAwal.value != null &&
+                        allMatkulProvider.jamAwal.value != "null:null") {
                       //format jam awal
-                      displayText = addMatkulC.jamAwal.value!;
+                      displayText = allMatkulProvider.jamAwal.value!;
 
                       //jika jam akhir ada
-                      if (addMatkulC.jamAkhir.value != null &&
-                          addMatkulC.jamAkhir.value!.isNotEmpty) {
-                        displayText += " - ${addMatkulC.jamAkhir.value!}";
+                      if (allMatkulProvider.jamAkhir.value != null &&
+                          allMatkulProvider.jamAkhir.value!.isNotEmpty) {
+                        displayText +=
+                            " - ${allMatkulProvider.jamAkhir.value!}";
                       }
                     }
                     return Text(
@@ -330,17 +306,17 @@ class _AddMatkulState extends State<AddMatkul> {
                         context: context,
                         onSubmitted: (TimeRangeValue value) {
                           if (value.endTime != null) {
-                            addMatkulC.jamAwal.value =
+                            allMatkulProvider.jamAwal.value =
                                 "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                            addMatkulC.jamAkhir.value =
+                            allMatkulProvider.jamAkhir.value =
                                 "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
                           } else if (value.startTime == null) {
-                            addMatkulC.jamAwal.value = null;
-                            addMatkulC.jamAkhir.value = null;
+                            allMatkulProvider.jamAwal.value = null;
+                            allMatkulProvider.jamAkhir.value = null;
                           } else {
-                            addMatkulC.jamAwal.value =
+                            allMatkulProvider.jamAwal.value =
                                 "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                            addMatkulC.jamAkhir.value = "";
+                            allMatkulProvider.jamAkhir.value = "";
                           }
                         },
                       );
@@ -361,9 +337,9 @@ class _AddMatkulState extends State<AddMatkul> {
                       fixedSize: WidgetStatePropertyAll(
                           Size.fromWidth(mediaQueryWidth * 1 / 3))),
                   onPressed: () {
-                    if (addMatkulC.matkulC.text.isNotEmpty &&
-                        addMatkulC.hari.value != null &&
-                        addMatkulC.jamAwal.value != null) {
+                    if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                        allMatkulProvider.hari.value != null &&
+                        allMatkulProvider.jamAwal.value != null) {
                       addJadwal();
                     } else {
                       Get.defaultDialog(
