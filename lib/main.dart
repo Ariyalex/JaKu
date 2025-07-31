@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
       getPages: AppPage.pages,

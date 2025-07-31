@@ -136,12 +136,14 @@ class _TableState extends State<Table> {
     //get hari saat ini untuk highlight
     final String todayDay = jadwalKuliahDayProvider.getCurrentDay();
 
+    final theme = Theme.of(context);
+
     //color
-    final primaryColor = AppTheme.dark.primaryColor;
-    final colorTheme = AppTheme.dark.colorScheme;
+    final primaryColor = Theme.of(context).primaryColor;
+    final colorTheme = Theme.of(context).colorScheme;
 
     //text theme
-    final textTheme = AppTheme.dark.textTheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Obx(() {
       final allJadwal = allMatkulProvider.allMatkul;
@@ -262,7 +264,7 @@ class _TableState extends State<Table> {
           isHorizontalScrollBarVisible: false,
           isVerticalScrollBarVisible: false,
           horizontalScrollController: _horizontalScrollController,
-          border: TableBorder.all(width: 1, color: colorTheme.onPrimary),
+          border: TableBorder.all(width: 1, color: theme.primaryColorDark),
           minWidth: 1800,
           columns: [
             DataColumn2(

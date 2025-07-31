@@ -22,8 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final allMatkulProvider = Get.find<JadwalkuliahC>();
   final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
 
-  final color = AppTheme.dark;
-
   RxBool isCardView = true.obs;
 
   @override
@@ -47,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
         title: "Hapus semua data",
-        backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
+        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
         content: const Text("Yakin ingin menghapus semua data?"),
         cancel: OutlinedButton(
             onPressed: () {
@@ -66,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = AppTheme.dark.colorScheme;
-    final textTheme = AppTheme.dark.textTheme;
+    final colorTheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
         key: _scaffoldKey,
@@ -146,16 +144,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: Obx(
           () {
-            return isCardView.value
-                ? Container(
-                    padding: const EdgeInsets.only(bottom: 40, top: 8),
-                    child: const CardView(),
-                  )
-                : Container(
-                    padding: const EdgeInsets.only(
-                        right: 8, left: 8, top: 8, bottom: 40),
-                    child: TableView(),
-                  );
+            return SafeArea(
+              child: isCardView.value
+                  ? Container(
+                      // padding: const EdgeInsets.only(bottom: 15, top: 8),
+                      child: const CardView(),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: TableView(),
+                    ),
+            );
           },
         ));
   }

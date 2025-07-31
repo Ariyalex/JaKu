@@ -20,6 +20,8 @@ class MatkulCard extends StatelessWidget {
     final allMatkulProvider = Get.find<JadwalkuliahC>();
     final dayKuliahController = Get.find<HariKuliahC>();
 
+    final theme = Theme.of(context);
+
     String divider(String? formattedJamAkhir) {
       if (formattedJamAkhir == null || formattedJamAkhir.isEmpty) {
         return " ";
@@ -31,15 +33,15 @@ class MatkulCard extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
         child: Card(
-          elevation: 1,
-          color: const Color(0xFF282828),
+          elevation: 0,
+          color: theme.highlightColor,
           child: ListTile(
             onTap: () {
               Get.toNamed(RouteNamed.editMatkul, arguments: matkul.matkulId);
             },
             onLongPress: () {
               Get.defaultDialog(
-                  backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
+                  backgroundColor: theme.dialogTheme.backgroundColor,
                   title: "Hapus Item",
                   content: Text("Yakin hapus matkul ini?"),
                   cancel: TextButton(
@@ -56,13 +58,6 @@ class MatkulCard extends StatelessWidget {
                     child: const Text("Yes"),
                   ));
             },
-            titleTextStyle: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-            ),
-            subtitleTextStyle: const TextStyle(
-              fontSize: 14,
-            ),
             title: Text(
               (matkul.kelas == null ||
                       matkul.kelas == "" ||
@@ -73,16 +68,42 @@ class MatkulCard extends StatelessWidget {
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 5,
               children: [
-                Text((matkul.formattedJamAwal.isEmpty)
-                    ? "Jam belum ditambahkan"
-                    : "${matkul.formattedJamAwal}${divider(matkul.formattedJamAkhir)}${matkul.formattedJamAkhir}"),
-                Text("Ruang ${matkul.room}"),
-                Text(
-                  (matkul.dosen1 == "null")
-                      ? "dosen belum ditambahkan"
-                      : "${matkul.dosen1}\n${matkul.dosen2}",
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(
+                        (matkul.formattedJamAwal.isEmpty)
+                            ? "Jam belum ditambahkan"
+                            : "${matkul.formattedJamAwal}${divider(matkul.formattedJamAkhir)}${matkul.formattedJamAkhir}",
+                        style: theme.textTheme.bodyLarge!
+                            .copyWith(color: theme.colorScheme.primary)),
+                    Text(
+                      "${matkul.room}",
+                      style: theme.textTheme.bodyLarge!
+                          .copyWith(color: theme.colorScheme.primary),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      (matkul.dosen1 == "null")
+                          ? "dosen belum ditambahkan"
+                          : "${matkul.dosen1}",
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    matkul.dosen2 == "null" || matkul.dosen2!.isEmpty
+                        ? const SizedBox.shrink()
+                        : Text(
+                            "${matkul.dosen2}",
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                  ],
                 ),
               ],
             ),

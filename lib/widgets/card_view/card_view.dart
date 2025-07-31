@@ -15,6 +15,8 @@ class CardView extends StatelessWidget {
     final allMatkulC = Get.find<JadwalkuliahC>();
     final dayKuliahController = Get.find<HariKuliahC>();
 
+    final theme = Theme.of(context);
+
     return Obx(() {
       if (allMatkulC.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
@@ -28,7 +30,7 @@ class CardView extends StatelessWidget {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
                 itemCount: dayKuliahController.jadwalHari.length,
                 itemBuilder: (context, index) {
                   final hariKuliah = dayKuliahController.jadwalHari[index];
@@ -39,23 +41,29 @@ class CardView extends StatelessWidget {
                       .toList();
                   return Card(
                     elevation: 0,
+                    borderOnForeground: false,
+                    // shadowColor: theme.shadowColor,
+                    // shape: RoundedRectangleBorder(
+                    //   borderRadius: BorderRadius.circular(16),
+                    //   side: BorderSide(
+                    //     color: theme.colorScheme.primary,
+                    //     width: 2,
+                    //   ),
+                    // ),
                     clipBehavior: Clip.hardEdge,
-                    color: const Color(0xFF151515),
                     child: Column(
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 7),
                           alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                              border: Border(
-                                  bottom:
-                                      BorderSide(color: Color(0xFF777777)))),
+                          decoration:
+                              BoxDecoration(color: theme.colorScheme.primary),
                           child: Text(
                             hariKuliah.day,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onPrimary),
                           ),
                         ),
                         ListView.separated(
