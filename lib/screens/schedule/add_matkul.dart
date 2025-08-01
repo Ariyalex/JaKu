@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
-import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
-import '../routes/route_named.dart';
-import '../controllers/jadwal_kuliah_c.dart';
+import '../../routes/route_named.dart';
+import '../../controllers/jadwal_kuliah_c.dart';
 
 class AddMatkul extends StatefulWidget {
   const AddMatkul({super.key});
@@ -17,7 +16,6 @@ class AddMatkul extends StatefulWidget {
 
 class _AddMatkulState extends State<AddMatkul> {
   final allMatkulProvider = Get.find<JadwalkuliahC>();
-  final color = AppTheme.dark;
 
   String divider(String formattedJamAkhir) {
     if (formattedJamAkhir.isEmpty) {
@@ -43,6 +41,7 @@ class _AddMatkulState extends State<AddMatkul> {
   @override
   Widget build(BuildContext context) {
     final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
 
     void addJadwal() async {
       Get.dialog(
@@ -79,14 +78,13 @@ class _AddMatkulState extends State<AddMatkul> {
         Get.snackbar(
           "Error",
           "Gagal menambahkan jadwal: ${error.toString()}",
-          backgroundColor: color.colorScheme.error,
-          colorText: color.colorScheme.onError,
+          backgroundColor: theme.colorScheme.error,
+          colorText: theme.colorScheme.onError,
         );
       }
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text("Add Matkul"),
         centerTitle: true,
@@ -95,7 +93,7 @@ class _AddMatkulState extends State<AddMatkul> {
               onPressed: () {
                 Get.defaultDialog(
                   title: "Peringatan!!",
-                  backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
+                  backgroundColor: theme.dialogTheme.backgroundColor,
                   titlePadding: EdgeInsets.only(top: 20),
                   titleStyle: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -214,8 +212,8 @@ class _AddMatkulState extends State<AddMatkul> {
                         );
                       },
                       constraints: const BoxConstraints(maxHeight: 200),
-                      menuProps: const MenuProps(
-                        backgroundColor: Color(0xFF151515),
+                      menuProps: MenuProps(
+                        backgroundColor: theme.colorScheme.surfaceContainer,
                         margin: EdgeInsets.only(top: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(
@@ -262,8 +260,8 @@ class _AddMatkulState extends State<AddMatkul> {
                         );
                       },
                       constraints: const BoxConstraints(maxHeight: 200),
-                      menuProps: const MenuProps(
-                        backgroundColor: Color(0xFF151515),
+                      menuProps: MenuProps(
+                        backgroundColor: theme.colorScheme.surfaceContainer,
                         margin: EdgeInsets.only(top: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:jaku/controllers/jadwal_kuliah_c.dart';
-import 'package:jaku/widgets/card_view/matkul_card.dart';
+import 'package:jaku/widgets/schedule_widget/card_view/matkul_card.dart';
 import 'package:jaku/widgets/jadwal_kosong.dart';
 
 class CardView extends StatelessWidget {
@@ -30,7 +30,8 @@ class CardView extends StatelessWidget {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.only(
+                    top: 5, right: 5, left: 5, bottom: 60),
                 itemCount: dayKuliahController.jadwalHari.length,
                 itemBuilder: (context, index) {
                   final hariKuliah = dayKuliahController.jadwalHari[index];
@@ -41,15 +42,6 @@ class CardView extends StatelessWidget {
                       .toList();
                   return Card(
                     elevation: 0,
-                    borderOnForeground: false,
-                    // shadowColor: theme.shadowColor,
-                    // shape: RoundedRectangleBorder(
-                    //   borderRadius: BorderRadius.circular(16),
-                    //   side: BorderSide(
-                    //     color: theme.colorScheme.primary,
-                    //     width: 2,
-                    //   ),
-                    // ),
                     clipBehavior: Clip.hardEdge,
                     child: Column(
                       children: [
@@ -66,26 +58,29 @@ class CardView extends StatelessWidget {
                                 color: theme.colorScheme.onPrimary),
                           ),
                         ),
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: matkulList.length,
-                          separatorBuilder: (context, index) => Container(
-                            height: 3,
-                          ),
-                          itemBuilder: (context, index) {
-                            final matkul = matkulList[index];
-                            // var id = matkulList[index].matkulId;
+                        Container(
+                          color: theme.colorScheme.surfaceContainer,
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: matkulList.length,
+                            separatorBuilder: (context, index) => Container(
+                              height: 3,
+                            ),
+                            itemBuilder: (context, index) {
+                              final matkul = matkulList[index];
+                              // var id = matkulList[index].matkulId;
 
-                            return MatkulCard(matkul: matkul);
-                          },
+                              return MatkulCard(matkul: matkul);
+                            },
+                          ),
                         ),
                       ],
                     ),
                   );
                 },
               ),
-            )
+            ),
           ],
         );
       }

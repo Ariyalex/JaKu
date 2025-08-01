@@ -222,7 +222,7 @@ class _TableState extends State<Table> {
             ),
           ),
           onTap: () {
-            Get.toNamed(RouteNamed.editMatkul,
+            Get.toNamed(RouteNamed.detailMatkul,
                 arguments: matchingMatkul.first.matkulId);
           },
           onLongPress: () {
@@ -253,7 +253,7 @@ class _TableState extends State<Table> {
       return DataTable2(
           horizontalMargin: 0,
           columnSpacing: 0,
-          bottomMargin: 20,
+          bottomMargin: 70,
           dataRowHeight: 100,
           fixedLeftColumns: 1,
           headingRowColor: WidgetStateProperty.resolveWith<Color>(

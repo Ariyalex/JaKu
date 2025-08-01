@@ -2,24 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
-import 'package:jaku/theme/theme.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
 
-import '../controllers/jadwal_kuliah_c.dart';
+import '../../controllers/jadwal_kuliah_c.dart';
 
-class DetailMatkul extends StatefulWidget {
-  static const routeName = "/detail-matkul";
-
-  const DetailMatkul({super.key});
+class EditMatkul extends StatefulWidget {
+  const EditMatkul({super.key});
 
   @override
-  State<DetailMatkul> createState() => _AddMatkulState();
+  State<EditMatkul> createState() => _AddMatkulState();
 }
 
-class _AddMatkulState extends State<DetailMatkul> {
-  final color = AppTheme.dark;
-
+class _AddMatkulState extends State<EditMatkul> {
   final allMatkulProvider = Get.find<JadwalkuliahC>();
   final dayKuliahController = Get.find<HariKuliahC>();
 
@@ -34,12 +29,8 @@ class _AddMatkulState extends State<DetailMatkul> {
     allMatkulProvider.jamAkhir.value = null;
     allMatkulProvider.jamAwal.value = null;
     allMatkulProvider.hari.value = null;
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
-    final matkulId = ModalRoute.of(context)?.settings.arguments as String;
+    final matkulId = Get.arguments as String;
     final selectedMatkul = allMatkulProvider.selectById(matkulId)!;
 
     if (allMatkulProvider.matkulC.text.isEmpty) {
@@ -52,6 +43,12 @@ class _AddMatkulState extends State<DetailMatkul> {
       allMatkulProvider.jamAwal.value = selectedMatkul.formattedJamAwal;
       allMatkulProvider.jamAkhir.value = selectedMatkul.formattedJamAkhir ?? "";
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final color = Theme.of(context);
 
     void editJadwal() async {
       // Show loading dialog
@@ -62,6 +59,7 @@ class _AddMatkulState extends State<DetailMatkul> {
 
       try {
         // Wait for the update to complete
+        final matkulId = await Get.arguments as String;
         await allMatkulProvider.updateMatkul(matkulId);
 
         // Close loading dialog
@@ -88,7 +86,7 @@ class _AddMatkulState extends State<DetailMatkul> {
         allMatkulProvider.hari.value = null;
 
         // Return to previous screen
-        Get.toNamed(RouteNamed.homePage);
+        Get.toNamed(RouteNamed.scheduleDashboard);
       } catch (e) {
         // Close loading dialog
         Get.back();
@@ -181,108 +179,106 @@ class _AddMatkulState extends State<DetailMatkul> {
               const SizedBox(
                 height: 12,
               ),
-              DropdownSearch<String>(
-                selectedItem: (allMatkulProvider.hari.value == "null")
-                    ? null
-                    : allMatkulProvider.hari.value,
-                decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintStyle: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 17),
-                      hintText: "Pilih hari..."),
-                ),
-                suffixProps: const DropdownSuffixProps(
-                  dropdownButtonProps: DropdownButtonProps(
-                    iconOpened: Icon(Icons.keyboard_arrow_up),
-                    iconClosed: Icon(Icons.keyboard_arrow_down),
-                  ),
-                ),
-                popupProps: PopupProps.menu(
-                  itemBuilder: (context, item, isDisabled, isSelected) {
-                    return Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Text(
-                        item,
-                      ),
-                    );
-                  },
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  menuProps: const MenuProps(
-                    backgroundColor: Color(0xFF151515),
-                    margin: EdgeInsets.only(top: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(12),
+              Obx(() => DropdownSearch<String>(
+                    selectedItem: (allMatkulProvider.hari.value == "null")
+                        ? null
+                        : allMatkulProvider.hari.value,
+                    decoratorProps: DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          hintStyle: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 17),
+                          hintText: "Pilih hari..."),
+                    ),
+                    suffixProps: const DropdownSuffixProps(
+                      dropdownButtonProps: DropdownButtonProps(
+                        iconOpened: Icon(Icons.keyboard_arrow_up),
+                        iconClosed: Icon(Icons.keyboard_arrow_down),
                       ),
                     ),
-                  ),
-                ),
-                items: (filter, loadProps) =>
-                    allMatkulProvider.hariList.toList(),
-                onChanged: (value) {
-                  setState(() {
-                    if (value != null) {
-                      allMatkulProvider.hari.value = value;
-                    } else {
-                      allMatkulProvider.hari.value = null;
-                    }
-                  });
-                },
-              ),
+                    popupProps: PopupProps.menu(
+                      itemBuilder: (context, item, isDisabled, isSelected) {
+                        return Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Text(
+                            item,
+                          ),
+                        );
+                      },
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      menuProps: MenuProps(
+                        backgroundColor: color.colorScheme.surfaceContainer,
+                        margin: EdgeInsets.only(top: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    items: (filter, loadProps) =>
+                        allMatkulProvider.hariList.toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        allMatkulProvider.hari.value = value;
+                      } else {
+                        allMatkulProvider.hari.value = null;
+                      }
+                    },
+                  )),
               const SizedBox(
                 height: 12,
               ),
-              DropdownSearch<String>(
-                selectedItem: (allMatkulProvider.kelas.value == "null" ||
-                        allMatkulProvider.kelas.value == "")
-                    ? "Kelas belum dipilih"
-                    : allMatkulProvider.kelas.value,
-                decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintStyle: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 17),
-                      hintText: "Pilih kelas..."),
-                ),
-                suffixProps: const DropdownSuffixProps(
-                  dropdownButtonProps: DropdownButtonProps(
-                    iconOpened: Icon(Icons.keyboard_arrow_up),
-                    iconClosed: Icon(Icons.keyboard_arrow_down),
-                  ),
-                ),
-                popupProps: PopupProps.menu(
-                  itemBuilder: (context, item, isDisabled, isSelected) {
-                    return Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Text(item),
-                    );
-                  },
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  menuProps: const MenuProps(
-                    backgroundColor: Color(0xFF151515),
-                    margin: EdgeInsets.only(top: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(12),
+              Obx(() => DropdownSearch<String>(
+                    selectedItem: (allMatkulProvider.kelas.value == "null" ||
+                            allMatkulProvider.kelas.value == "")
+                        ? "Kelas belum dipilih"
+                        : allMatkulProvider.kelas.value,
+                    decoratorProps: DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          hintStyle: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 17),
+                          hintText: "Pilih kelas..."),
+                    ),
+                    suffixProps: const DropdownSuffixProps(
+                      dropdownButtonProps: DropdownButtonProps(
+                        iconOpened: Icon(Icons.keyboard_arrow_up),
+                        iconClosed: Icon(Icons.keyboard_arrow_down),
                       ),
                     ),
-                  ),
-                ),
-                items: (filter, loadProps) =>
-                    allMatkulProvider.kelasList.toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    allMatkulProvider.kelas.value = value;
-                  } else if (value == null) {
-                    allMatkulProvider.kelas.value = "";
-                  }
-                },
-              ),
+                    popupProps: PopupProps.menu(
+                      itemBuilder: (context, item, isDisabled, isSelected) {
+                        return Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Text(item),
+                        );
+                      },
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      menuProps: MenuProps(
+                        backgroundColor: color.colorScheme.surfaceContainer,
+                        margin: EdgeInsets.only(top: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    items: (filter, loadProps) =>
+                        allMatkulProvider.kelasList.toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        allMatkulProvider.kelas.value = value;
+                      } else if (value == null) {
+                        allMatkulProvider.kelas.value = "";
+                      }
+                    },
+                  )),
               const SizedBox(
                 height: 12,
               ),

@@ -4,7 +4,7 @@ import 'package:jaku/controllers/pdf_back.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
 
-import '../routes/route_named.dart';
+import '../../routes/route_named.dart';
 
 class PdfParsing extends StatelessWidget {
   static const routeNamed = "/pdf-parsing";
@@ -130,7 +130,7 @@ class PdfParsing extends StatelessWidget {
                       const SizedBox(height: 10),
                       OutlinedButton(
                         onPressed: () {
-                          Get.offNamed(RouteNamed.homePage);
+                          Get.offNamed(RouteNamed.scheduleDashboard);
                         },
                         child: const Text("Kembali ke Home"),
                       ),

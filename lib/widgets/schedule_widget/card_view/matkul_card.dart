@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:get/get.dart';
-import 'package:jaku/theme/theme.dart';
 
-import '../../models/jadwal.dart';
-import '../../controllers/jadwal_kuliah_c.dart';
-import '../../routes/route_named.dart';
+import '../../../models/jadwal.dart';
+import '../../../controllers/jadwal_kuliah_c.dart';
+import '../../../routes/route_named.dart';
 
 class MatkulCard extends StatelessWidget {
   const MatkulCard({
@@ -37,19 +36,19 @@ class MatkulCard extends StatelessWidget {
           color: theme.highlightColor,
           child: ListTile(
             onTap: () {
-              Get.toNamed(RouteNamed.editMatkul, arguments: matkul.matkulId);
+              Get.toNamed(RouteNamed.detailMatkul, arguments: matkul.matkulId);
             },
             onLongPress: () {
               Get.defaultDialog(
                   backgroundColor: theme.dialogTheme.backgroundColor,
                   title: "Hapus Item",
                   content: Text("Yakin hapus matkul ini?"),
-                  cancel: TextButton(
+                  cancel: OutlinedButton(
                       onPressed: () {
                         Get.back();
                       },
                       child: const Text("No")),
-                  confirm: OutlinedButton(
+                  confirm: FilledButton(
                     onPressed: () {
                       allMatkulProvider.deleteMatkuls(
                           matkul.matkulId!, dayKuliahController);

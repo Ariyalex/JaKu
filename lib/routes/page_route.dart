@@ -1,17 +1,28 @@
 import 'package:get/get.dart';
 import 'package:jaku/routes/route_named.dart';
-import 'package:jaku/screens/add_matkul.dart';
-import 'package:jaku/screens/detail_matkul.dart';
-import 'package:jaku/screens/guide/guide_general.dart';
+import 'package:jaku/screens/note/note_dashboard.dart';
+import 'package:jaku/screens/schedule/add_matkul.dart';
+import 'package:jaku/screens/schedule/detail_matkul.dart';
+import 'package:jaku/screens/schedule/edit_matkul.dart';
+import 'package:jaku/screens/guide/guide_schedule.dart';
 import 'package:jaku/screens/guide/guide_pdf.dart';
-import 'package:jaku/screens/home_screen.dart';
-import 'package:jaku/screens/pdf_parsing.dart';
+import 'package:jaku/screens/schedule/schedule_dashboard.dart';
+import 'package:jaku/screens/schedule/pdf_parsing.dart';
+import 'package:jaku/screens/tesk/task_dashboard.dart';
 
 class AppPage {
   static final pages = [
     GetPage(
-      name: RouteNamed.homePage,
-      page: () => const HomeScreen(),
+      name: RouteNamed.scheduleDashboard,
+      page: () => const ScheduleDashboard(),
+    ),
+    GetPage(
+      name: RouteNamed.noteDashboard,
+      page: () => const NoteDashboard(),
+    ),
+    GetPage(
+      name: RouteNamed.taskDashboard,
+      page: () => const TaskDashboard(),
     ),
     GetPage(
       name: RouteNamed.addMatkul,
@@ -19,7 +30,7 @@ class AppPage {
     ),
     GetPage(
       name: RouteNamed.editMatkul,
-      page: () => const DetailMatkul(),
+      page: () => const EditMatkul(),
     ),
     GetPage(
       name: RouteNamed.pdfParsing,
@@ -32,6 +43,10 @@ class AppPage {
     GetPage(
       name: RouteNamed.guideGeneral,
       page: () => const GuideGeneral(),
+    ),
+    GetPage(
+      name: RouteNamed.detailMatkul,
+      page: () => const DetailMatkul(),
     ),
   ];
 }

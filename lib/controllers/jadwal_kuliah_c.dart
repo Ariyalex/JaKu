@@ -254,7 +254,7 @@ class JadwalkuliahC extends GetxController {
       );
 
       // Kembali ke halaman home
-      Get.offNamed(RouteNamed.homePage);
+      Get.offNamed(RouteNamed.scheduleDashboard);
     } catch (e) {
       // Tutup dialog loading jika terjadi error
       Get.back();
