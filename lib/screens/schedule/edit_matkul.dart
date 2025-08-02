@@ -8,7 +8,9 @@ import 'package:get/get.dart';
 import '../../controllers/jadwal_kuliah_c.dart';
 
 class EditMatkul extends StatefulWidget {
-  const EditMatkul({super.key});
+  const EditMatkul({super.key, required this.matkulId});
+
+  final String matkulId;
 
   @override
   State<EditMatkul> createState() => _AddMatkulState();
@@ -30,8 +32,7 @@ class _AddMatkulState extends State<EditMatkul> {
     allMatkulProvider.jamAwal.value = null;
     allMatkulProvider.hari.value = null;
 
-    final matkulId = Get.arguments as String;
-    final selectedMatkul = allMatkulProvider.selectById(matkulId)!;
+    final selectedMatkul = allMatkulProvider.selectById(widget.matkulId)!;
 
     if (allMatkulProvider.matkulC.text.isEmpty) {
       allMatkulProvider.matkulC.text = selectedMatkul.matkul;
@@ -47,7 +48,7 @@ class _AddMatkulState extends State<EditMatkul> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final mediaQueryWidth = Get.width;
     final color = Theme.of(context);
 
     void editJadwal() async {
@@ -59,8 +60,7 @@ class _AddMatkulState extends State<EditMatkul> {
 
       try {
         // Wait for the update to complete
-        final matkulId = await Get.arguments as String;
-        await allMatkulProvider.updateMatkul(matkulId);
+        await allMatkulProvider.updateMatkul(widget.matkulId);
 
         // Close loading dialog
         Get.back();
@@ -73,6 +73,7 @@ class _AddMatkulState extends State<EditMatkul> {
           "Success",
           "Jadwal berhasil diedit",
           backgroundColor: Colors.green.shade400,
+          colorText: Colors.white,
         );
 
         // Clear form fields
@@ -109,260 +110,260 @@ class _AddMatkulState extends State<EditMatkul> {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Matkul"),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: mediaQueryWidth,
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-          child: Column(
-            children: [
-              TextField(
-                decoration: const InputDecoration(
-                    labelStyle:
-                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
-                    hintText: "Ex: Basis Data",
-                    labelText: "Matkul",
-                    alignLabelWithHint: true),
-                autocorrect: false,
-                style: const TextStyle(fontWeight: FontWeight.normal),
-                textInputAction: TextInputAction.next,
-                controller: allMatkulProvider.matkulC,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: "Dosen1",
-                  labelStyle:
-                      TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
-                  hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
+    return Material(
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            width: mediaQueryWidth,
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+            child: Column(
+              children: [
+                TextField(
+                  decoration: const InputDecoration(
+                      labelStyle: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 17),
+                      hintText: "Ex: Basis Data",
+                      labelText: "Matkul",
+                      alignLabelWithHint: true),
+                  autocorrect: false,
+                  style: const TextStyle(fontWeight: FontWeight.normal),
+                  textInputAction: TextInputAction.next,
+                  controller: allMatkulProvider.matkulC,
                 ),
-                autocorrect: false,
-                style: const TextStyle(fontWeight: FontWeight.normal),
-                textInputAction: TextInputAction.next,
-                controller: allMatkulProvider.dosen1C,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: const InputDecoration(
+                const SizedBox(
+                  height: 12,
+                ),
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: "Dosen1",
                     labelStyle:
                         TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
                     hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
-                    labelText: "Dosen2",
-                    alignLabelWithHint: true),
-                autocorrect: false,
-                style: const TextStyle(fontWeight: FontWeight.normal),
-                textInputAction: TextInputAction.next,
-                controller: allMatkulProvider.dosen2C,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: const InputDecoration(
-                    labelStyle:
-                        TextStyle(fontWeight: FontWeight.normal, fontSize: 17),
-                    hintText: "Ex: fst-404",
-                    labelText: "Ruang kelas",
-                    alignLabelWithHint: true),
-                autocorrect: false,
-                style: const TextStyle(fontWeight: FontWeight.normal),
-                textInputAction: TextInputAction.next,
-                controller: allMatkulProvider.ruanganC,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              Obx(() => DropdownSearch<String>(
-                    selectedItem: (allMatkulProvider.hari.value == "null")
-                        ? null
-                        : allMatkulProvider.hari.value,
-                    decoratorProps: DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          hintStyle: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 17),
-                          hintText: "Pilih hari..."),
-                    ),
-                    suffixProps: const DropdownSuffixProps(
-                      dropdownButtonProps: DropdownButtonProps(
-                        iconOpened: Icon(Icons.keyboard_arrow_up),
-                        iconClosed: Icon(Icons.keyboard_arrow_down),
-                      ),
-                    ),
-                    popupProps: PopupProps.menu(
-                      itemBuilder: (context, item, isDisabled, isSelected) {
-                        return Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Text(
-                            item,
-                          ),
-                        );
-                      },
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      menuProps: MenuProps(
-                        backgroundColor: color.colorScheme.surfaceContainer,
-                        margin: EdgeInsets.only(top: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                    items: (filter, loadProps) =>
-                        allMatkulProvider.hariList.toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        allMatkulProvider.hari.value = value;
-                      } else {
-                        allMatkulProvider.hari.value = null;
-                      }
-                    },
-                  )),
-              const SizedBox(
-                height: 12,
-              ),
-              Obx(() => DropdownSearch<String>(
-                    selectedItem: (allMatkulProvider.kelas.value == "null" ||
-                            allMatkulProvider.kelas.value == "")
-                        ? "Kelas belum dipilih"
-                        : allMatkulProvider.kelas.value,
-                    decoratorProps: DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          hintStyle: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 17),
-                          hintText: "Pilih kelas..."),
-                    ),
-                    suffixProps: const DropdownSuffixProps(
-                      dropdownButtonProps: DropdownButtonProps(
-                        iconOpened: Icon(Icons.keyboard_arrow_up),
-                        iconClosed: Icon(Icons.keyboard_arrow_down),
-                      ),
-                    ),
-                    popupProps: PopupProps.menu(
-                      itemBuilder: (context, item, isDisabled, isSelected) {
-                        return Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Text(item),
-                        );
-                      },
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      menuProps: MenuProps(
-                        backgroundColor: color.colorScheme.surfaceContainer,
-                        margin: EdgeInsets.only(top: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                    items: (filter, loadProps) =>
-                        allMatkulProvider.kelasList.toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        allMatkulProvider.kelas.value = value;
-                      } else if (value == null) {
-                        allMatkulProvider.kelas.value = "";
-                      }
-                    },
-                  )),
-              const SizedBox(
-                height: 12,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    (allMatkulProvider.jamAwal.value == null ||
-                            allMatkulProvider.jamAwal.value == "null:null")
-                        ? "Jam Kuliah"
-                        : "${allMatkulProvider.jamAwal.value} ${divider(allMatkulProvider.jamAkhir.value!)} ${allMatkulProvider.jamAkhir.value}",
-                    style: const TextStyle(fontSize: 19),
                   ),
-                  FilledButton(
-                    style: const ButtonStyle(
-                        padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 8))),
-                    onPressed: () {
-                      TimeRangePicker.show(
-                        autoAdjust: true,
-                        unSelectedEmpty: true,
-                        context: context,
-                        onSubmitted: (TimeRangeValue value) {
-                          setState(() {
-                            if (value.endTime != null) {
-                              allMatkulProvider.jamAwal.value =
-                                  "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              allMatkulProvider.jamAkhir.value =
-                                  "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
-                            } else {
-                              allMatkulProvider.jamAwal.value =
-                                  "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              allMatkulProvider.jamAkhir.value = "";
-                            }
-                          });
-                        },
-                      );
-                    },
-                    child: const Text(
-                      "Pilih Jam Matkul",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              OutlinedButton(
-                  style: ButtonStyle(
-                      alignment: Alignment.center,
-                      fixedSize: WidgetStatePropertyAll(
-                          Size.fromWidth(mediaQueryWidth * 1 / 3))),
-                  onPressed: () {
-                    if (allMatkulProvider.matkulC.text.isNotEmpty &&
-                        allMatkulProvider.hari.value != null &&
-                        allMatkulProvider.jamAwal.value != "null:null") {
-                      editJadwal();
-                    } else {
-                      Get.defaultDialog(
-                        contentPadding: EdgeInsets.all(10),
-                        titlePadding: EdgeInsets.only(top: 20),
-                        title: "Form tidak lengkap",
-                        content: const Text("Harap Isi Matkul, Hari, dan Jam"),
-                        actions: [
-                          FilledButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            child: const Text(
-                              "OK",
-                              style: TextStyle(fontSize: 17),
+                  autocorrect: false,
+                  style: const TextStyle(fontWeight: FontWeight.normal),
+                  textInputAction: TextInputAction.next,
+                  controller: allMatkulProvider.dosen1C,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                TextField(
+                  decoration: const InputDecoration(
+                      labelStyle: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 17),
+                      hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
+                      labelText: "Dosen2",
+                      alignLabelWithHint: true),
+                  autocorrect: false,
+                  style: const TextStyle(fontWeight: FontWeight.normal),
+                  textInputAction: TextInputAction.next,
+                  controller: allMatkulProvider.dosen2C,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                TextField(
+                  decoration: const InputDecoration(
+                      labelStyle: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 17),
+                      hintText: "Ex: fst-404",
+                      labelText: "Ruang kelas",
+                      alignLabelWithHint: true),
+                  autocorrect: false,
+                  style: const TextStyle(fontWeight: FontWeight.normal),
+                  textInputAction: TextInputAction.next,
+                  controller: allMatkulProvider.ruanganC,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                Obx(() => DropdownSearch<String>(
+                      selectedItem: (allMatkulProvider.hari.value == "null")
+                          ? null
+                          : allMatkulProvider.hari.value,
+                      decoratorProps: DropDownDecoratorProps(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                          )
-                        ],
-                      );
-                    }
-                  },
-                  // onPressed: addJadwal,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [Text("Simpan"), Icon(Icons.save)],
-                  ))
-            ],
+                            hintStyle: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 17),
+                            hintText: "Pilih hari..."),
+                      ),
+                      suffixProps: const DropdownSuffixProps(
+                        dropdownButtonProps: DropdownButtonProps(
+                          iconOpened: Icon(Icons.keyboard_arrow_up),
+                          iconClosed: Icon(Icons.keyboard_arrow_down),
+                        ),
+                      ),
+                      popupProps: PopupProps.menu(
+                        itemBuilder: (context, item, isDisabled, isSelected) {
+                          return Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Text(
+                              item,
+                            ),
+                          );
+                        },
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        menuProps: MenuProps(
+                          backgroundColor: color.colorScheme.surfaceContainer,
+                          margin: EdgeInsets.only(top: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      items: (filter, loadProps) =>
+                          allMatkulProvider.hariList.toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          allMatkulProvider.hari.value = value;
+                        } else {
+                          allMatkulProvider.hari.value = null;
+                        }
+                      },
+                    )),
+                const SizedBox(
+                  height: 12,
+                ),
+                Obx(() => DropdownSearch<String>(
+                      selectedItem: (allMatkulProvider.kelas.value == "null" ||
+                              allMatkulProvider.kelas.value == "")
+                          ? "Kelas belum dipilih"
+                          : allMatkulProvider.kelas.value,
+                      decoratorProps: DropDownDecoratorProps(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            hintStyle: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 17),
+                            hintText: "Pilih kelas..."),
+                      ),
+                      suffixProps: const DropdownSuffixProps(
+                        dropdownButtonProps: DropdownButtonProps(
+                          iconOpened: Icon(Icons.keyboard_arrow_up),
+                          iconClosed: Icon(Icons.keyboard_arrow_down),
+                        ),
+                      ),
+                      popupProps: PopupProps.menu(
+                        itemBuilder: (context, item, isDisabled, isSelected) {
+                          return Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Text(item),
+                          );
+                        },
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        menuProps: MenuProps(
+                          backgroundColor: color.colorScheme.surfaceContainer,
+                          margin: EdgeInsets.only(top: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      items: (filter, loadProps) =>
+                          allMatkulProvider.kelasList.toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          allMatkulProvider.kelas.value = value;
+                        } else if (value == null) {
+                          allMatkulProvider.kelas.value = "";
+                        }
+                      },
+                    )),
+                const SizedBox(
+                  height: 12,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      (allMatkulProvider.jamAwal.value == null ||
+                              allMatkulProvider.jamAwal.value == "null:null")
+                          ? "Jam Kuliah"
+                          : "${allMatkulProvider.jamAwal.value} ${divider(allMatkulProvider.jamAkhir.value!)} ${allMatkulProvider.jamAkhir.value}",
+                      style: const TextStyle(fontSize: 19),
+                    ),
+                    FilledButton(
+                      style: const ButtonStyle(
+                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8))),
+                      onPressed: () {
+                        TimeRangePicker.show(
+                          autoAdjust: true,
+                          unSelectedEmpty: true,
+                          context: context,
+                          onSubmitted: (TimeRangeValue value) {
+                            setState(() {
+                              if (value.endTime != null) {
+                                allMatkulProvider.jamAwal.value =
+                                    "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
+                                allMatkulProvider.jamAkhir.value =
+                                    "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
+                              } else {
+                                allMatkulProvider.jamAwal.value =
+                                    "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
+                                allMatkulProvider.jamAkhir.value = "";
+                              }
+                            });
+                          },
+                        );
+                      },
+                      child: const Text(
+                        "Pilih Jam Matkul",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                OutlinedButton(
+                    style: ButtonStyle(
+                        alignment: Alignment.center,
+                        fixedSize: WidgetStatePropertyAll(
+                            Size.fromWidth(mediaQueryWidth * 1 / 3))),
+                    onPressed: () {
+                      if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                          allMatkulProvider.hari.value != null &&
+                          allMatkulProvider.jamAwal.value != "null:null") {
+                        editJadwal();
+                      } else {
+                        Get.defaultDialog(
+                          contentPadding: EdgeInsets.all(10),
+                          titlePadding: EdgeInsets.only(top: 20),
+                          title: "Form tidak lengkap",
+                          content:
+                              const Text("Harap Isi Matkul, Hari, dan Jam"),
+                          actions: [
+                            FilledButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              child: const Text(
+                                "OK",
+                                style: TextStyle(fontSize: 17),
+                              ),
+                            )
+                          ],
+                        );
+                      }
+                    },
+                    // onPressed: addJadwal,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [Text("Simpan"), Icon(Icons.save)],
+                    ))
+              ],
+            ),
           ),
         ),
       ),

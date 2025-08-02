@@ -16,8 +16,8 @@ class MatkulCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Get.find<JadwalkuliahC>();
-    final dayKuliahController = Get.find<HariKuliahC>();
+    final jadwalKuliahC = Get.find<JadwalkuliahC>();
+    final hariKuliahC = Get.find<HariKuliahC>();
 
     final theme = Theme.of(context);
 
@@ -42,17 +42,35 @@ class MatkulCard extends StatelessWidget {
               Get.defaultDialog(
                   backgroundColor: theme.dialogTheme.backgroundColor,
                   title: "Hapus Item",
-                  content: Text("Yakin hapus matkul ini?"),
+                  content: Text("Yakin hapus ${matkul.matkul}?"),
                   cancel: OutlinedButton(
                       onPressed: () {
                         Get.back();
                       },
                       child: const Text("No")),
                   confirm: FilledButton(
-                    onPressed: () {
-                      allMatkulProvider.deleteMatkuls(
-                          matkul.matkulId!, dayKuliahController);
-                      Get.back();
+                    onPressed: () async {
+                      try {
+                        await jadwalKuliahC.deleteMatkuls(
+                            matkul.matkulId!, hariKuliahC);
+
+                        Get.back();
+
+                        Get.snackbar(
+                          "Success",
+                          "Berhasil menghapus ${matkul.matkul}",
+                          backgroundColor: Colors.green.shade400,
+                          colorText: Colors.white,
+                        );
+                      } catch (error) {
+                        Get.snackbar(
+                          'Error',
+                          'Gagal menghapus ${matkul.matkul}: $error',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: theme.colorScheme.error,
+                          colorText: theme.colorScheme.onError,
+                        );
+                      }
                     },
                     child: const Text("Yes"),
                   ));
@@ -91,7 +109,7 @@ class MatkulCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (matkul.dosen1 == "null")
+                      (matkul.dosen1 == "null" || matkul.dosen1!.isEmpty)
                           ? "dosen belum ditambahkan"
                           : "${matkul.dosen1}",
                       overflow: TextOverflow.ellipsis,

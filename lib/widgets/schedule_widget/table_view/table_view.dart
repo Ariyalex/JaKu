@@ -11,15 +11,15 @@ class TableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulProvider = Get.find<JadwalkuliahC>();
+    final jadwalKuliahC = Get.find<JadwalkuliahC>();
 
     return Obx(
       () {
-        if (allMatkulProvider.isLoading.value) {
+        if (jadwalKuliahC.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
-        } else if (allMatkulProvider.errorMsg.value.isNotEmpty) {
-          return Center(child: Text(allMatkulProvider.errorMsg.value));
-        } else if (allMatkulProvider.allMatkul.isEmpty) {
+        } else if (jadwalKuliahC.errorMsg.value.isNotEmpty) {
+          return Center(child: Text(jadwalKuliahC.errorMsg.value));
+        } else if (jadwalKuliahC.allMatkul.isEmpty) {
           return const JadwalKosong();
         } else {
           return const Flex(

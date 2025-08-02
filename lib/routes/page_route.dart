@@ -1,9 +1,7 @@
 import 'package:get/get.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
-import 'package:jaku/screens/schedule/add_matkul.dart';
 import 'package:jaku/screens/schedule/detail_matkul.dart';
-import 'package:jaku/screens/schedule/edit_matkul.dart';
 import 'package:jaku/screens/guide/guide_schedule.dart';
 import 'package:jaku/screens/guide/guide_pdf.dart';
 import 'package:jaku/screens/schedule/schedule_dashboard.dart';
@@ -23,14 +21,6 @@ class AppPage {
     GetPage(
       name: RouteNamed.taskDashboard,
       page: () => const TaskDashboard(),
-    ),
-    GetPage(
-      name: RouteNamed.addMatkul,
-      page: () => const AddMatkul(),
-    ),
-    GetPage(
-      name: RouteNamed.editMatkul,
-      page: () => const EditMatkul(),
     ),
     GetPage(
       name: RouteNamed.pdfParsing,

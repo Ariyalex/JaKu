@@ -12,17 +12,17 @@ class CardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allMatkulC = Get.find<JadwalkuliahC>();
-    final dayKuliahController = Get.find<HariKuliahC>();
+    final jadwalKuliahC = Get.find<JadwalkuliahC>();
+    final hariKuliahC = Get.find<HariKuliahC>();
 
     final theme = Theme.of(context);
 
     return Obx(() {
-      if (allMatkulC.isLoading.value) {
+      if (jadwalKuliahC.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
-      } else if (allMatkulC.errorMsg.value.isNotEmpty) {
-        return Center(child: Text(allMatkulC.errorMsg.value));
-      } else if (allMatkulC.allMatkul.isEmpty) {
+      } else if (jadwalKuliahC.errorMsg.value.isNotEmpty) {
+        return Center(child: Text(jadwalKuliahC.errorMsg.value));
+      } else if (jadwalKuliahC.allMatkul.isEmpty) {
         return const JadwalKosong();
       } else {
         return Flex(
@@ -32,10 +32,10 @@ class CardView extends StatelessWidget {
               child: ListView.builder(
                 padding: const EdgeInsets.only(
                     top: 5, right: 5, left: 5, bottom: 60),
-                itemCount: dayKuliahController.jadwalHari.length,
+                itemCount: hariKuliahC.jadwalHari.length,
                 itemBuilder: (context, index) {
-                  final hariKuliah = dayKuliahController.jadwalHari[index];
-                  final matkulList = allMatkulC.allMatkul
+                  final hariKuliah = hariKuliahC.jadwalHari[index];
+                  final matkulList = jadwalKuliahC.allMatkul
                       .where(
                         (matkul) => matkul.day == hariKuliah.day,
                       )

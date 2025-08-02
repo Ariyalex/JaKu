@@ -14,7 +14,7 @@ class PdfParsing extends StatelessWidget {
   Widget build(BuildContext context) {
     final pdfback = Get.find<PdfBack>();
     final jadwalProvider = Get.find<JadwalkuliahC>();
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final mediaQueryWidth = Get.width;
 
     final color = AppTheme.dark;
 
@@ -67,7 +67,7 @@ class PdfParsing extends StatelessWidget {
                       style: TextStyle(
                         color: pdfback.responseMessage.value.contains('Error')
                             ? color.colorScheme.error
-                            : Colors.green,
+                            : Colors.green.shade400,
                       ),
                     ),
                   )),
@@ -84,7 +84,7 @@ class PdfParsing extends StatelessWidget {
                           if (states.contains(WidgetState.disabled)) {
                             return color.disabledColor;
                           }
-                          return Colors.green;
+                          return Colors.green.shade400;
                         },
                       ),
                     ),

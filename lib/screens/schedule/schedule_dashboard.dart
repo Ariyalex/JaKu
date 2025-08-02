@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:jaku/controllers/theme_c.dart';
+import 'package:jaku/screens/schedule/add_matkul.dart';
 import 'package:jaku/widgets/schedule_widget/card_view/card_view.dart';
 import 'package:get/get.dart';
 import 'package:jaku/widgets/schedule_widget/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../controllers/hari_kuliah_c.dart';
@@ -229,9 +231,14 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
               SizedBox(width: 20),
               FloatingActionButton(
                 heroTag: null,
-                onPressed: () {
+                onPressed: () async {
                   fabKey.currentState?.close();
-                  Get.toNamed(RouteNamed.addMatkul);
+                  await showBarModalBottomSheet<Map<String, dynamic>>(
+                    barrierColor: Colors.black.withValues(alpha: 0.4),
+                    context: context,
+                    useRootNavigator: true,
+                    builder: (context) => const AddMatkul(),
+                  );
                 },
                 child: Icon(LucideIcons.plus),
               ),

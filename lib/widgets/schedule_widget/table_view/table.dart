@@ -17,8 +17,8 @@ class Table extends StatefulWidget {
 
 class _TableState extends State<Table> {
   final ScrollController _horizontalScrollController = ScrollController();
-  final allMatkulProvider = Get.find<JadwalkuliahC>();
-  final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
+  final jadwalKuliahC = Get.find<JadwalkuliahC>();
+  final hariKuliahC = Get.find<HariKuliahC>();
 
   @override
   void initState() {
@@ -134,7 +134,7 @@ class _TableState extends State<Table> {
   @override
   Widget build(BuildContext context) {
     //get hari saat ini untuk highlight
-    final String todayDay = jadwalKuliahDayProvider.getCurrentDay();
+    final String todayDay = hariKuliahC.getCurrentDay();
 
     final theme = Theme.of(context);
 
@@ -146,8 +146,8 @@ class _TableState extends State<Table> {
     final textTheme = Theme.of(context).textTheme;
 
     return Obx(() {
-      final allJadwal = allMatkulProvider.allMatkul;
-      final hari = jadwalKuliahDayProvider.jadwalHariTerurut;
+      final allJadwal = jadwalKuliahC.allMatkul;
+      final hari = hariKuliahC.jadwalHariTerurut;
 
       //fungsi mendapatkanJam
       List<Map<String, String>> getJam() {
@@ -236,10 +236,29 @@ class _TableState extends State<Table> {
                     },
                     child: const Text("No")),
                 confirm: OutlinedButton(
-                  onPressed: () {
-                    allMatkulProvider.deleteMatkuls(
-                        matchingMatkul.first.matkulId!,
-                        jadwalKuliahDayProvider);
+                  onPressed: () async {
+                    try {
+                      await jadwalKuliahC.deleteMatkuls(
+                          matchingMatkul.first.matkulId!, hariKuliahC);
+
+                      Get.back();
+
+                      Get.snackbar(
+                        "Success",
+                        "Jadwal berhasil ditambahkan",
+                        backgroundColor: Colors.green.shade400,
+                        colorText: Colors.white,
+                      );
+                    } catch (error) {
+                      Get.snackbar(
+                        'Error',
+                        'Gagal menghapus mata kuliah: $error',
+                        snackPosition: SnackPosition.TOP,
+                        backgroundColor: theme.colorScheme.error,
+                        colorText: theme.colorScheme.onError,
+                      );
+                    }
+
                     Get.back();
                   },
                   child: const Text("Yes"),
