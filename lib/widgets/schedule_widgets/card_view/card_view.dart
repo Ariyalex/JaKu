@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:jaku/controllers/jadwal_kuliah_c.dart';
-import 'package:jaku/widgets/schedule_widget/card_view/matkul_card.dart';
+import 'package:jaku/widgets/schedule_widgets/card_view/matkul_card.dart';
 import 'package:jaku/widgets/jadwal_kosong.dart';
 
 class CardView extends StatelessWidget {

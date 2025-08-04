@@ -101,7 +101,9 @@ class MyApp extends StatelessWidget {
               () => Style8BottomNavBar(
                 navBarConfig: navBarConfig,
                 navBarDecoration: NavBarDecoration(
-                    color: themeC.isLight.value ? Colors.white : Colors.black),
+                    color: themeC.isLight.value
+                        ? themeLight.colorScheme.surface
+                        : themeDark.colorScheme.surface),
                 height: 60,
               ),
             ),

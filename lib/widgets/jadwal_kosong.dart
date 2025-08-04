@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/routes/route_named.dart';
-import 'package:jaku/screens/schedule/add_matkul.dart';
+import 'package:jaku/widgets/schedule_widgets/add_matkul.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 

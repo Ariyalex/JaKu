@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
-import 'package:jaku/theme/theme.dart';
 
 class Table extends StatefulWidget {
   const Table({super.key});
@@ -227,7 +226,7 @@ class _TableState extends State<Table> {
           },
           onLongPress: () {
             Get.defaultDialog(
-                backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
+                backgroundColor: theme.dialogTheme.backgroundColor,
                 title: "Hapus Item",
                 content: const Text("Yakin hapus matkul ini?"),
                 cancel: TextButton(
@@ -235,7 +234,7 @@ class _TableState extends State<Table> {
                       Get.back();
                     },
                     child: const Text("No")),
-                confirm: OutlinedButton(
+                confirm: FilledButton(
                   onPressed: () async {
                     try {
                       await jadwalKuliahC.deleteMatkuls(

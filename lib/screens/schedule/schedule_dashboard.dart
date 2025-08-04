@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:jaku/controllers/theme_c.dart';
-import 'package:jaku/screens/schedule/add_matkul.dart';
-import 'package:jaku/widgets/schedule_widget/card_view/card_view.dart';
+import 'package:jaku/widgets/schedule_widgets/add_matkul.dart';
+import 'package:jaku/widgets/schedule_widgets/card_view/card_view.dart';
 import 'package:get/get.dart';
-import 'package:jaku/widgets/schedule_widget/table_view/table_view.dart';
+import 'package:jaku/widgets/schedule_widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,15 +52,21 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
 
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
-        title: "Hapus semua data",
+        title: "Hapus semua data?",
+        titleStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
         backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-        content: const Text("Yakin ingin menghapus semua data?"),
-        cancel: OutlinedButton(
+        content: const Text(
+          "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
+          textAlign: TextAlign.center,
+        ),
+        cancel: FilledButton(
             onPressed: () {
               Get.back();
             },
             child: const Text("Tidak")),
-        confirm: FilledButton(
+        confirm: OutlinedButton(
             onPressed: () async {
               Get.back(); // Tutup dialog konfirmasi
               final allMatkulProvider = Get.find<JadwalkuliahC>();
@@ -79,6 +85,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
     final themeC = Get.find<ThemeC>();
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text("Jaku"),
@@ -170,7 +177,10 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           angle: math.pi / 4,
         ),
         closeButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(LucideIcons.x),
+          child: Transform.rotate(
+            angle: math.pi / 4,
+            child: const Icon(LucideIcons.plus),
+          ),
           fabSize: ExpandableFabSize.regular,
           shape: const CircleBorder(),
         ),

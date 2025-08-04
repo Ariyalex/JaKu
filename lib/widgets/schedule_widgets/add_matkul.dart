@@ -218,9 +218,17 @@ class _AddMatkulState extends State<AddMatkul> {
                                   " - ${allMatkulProvider.jamAkhir.value!}";
                             }
                           }
-                          return Text(
-                            displayText,
-                            style: theme.textTheme.bodyLarge,
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 6, horizontal: 12),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: BoxBorder.all(
+                                    color: theme.colorScheme.primary)),
+                            child: Text(
+                              displayText,
+                              style: theme.textTheme.bodyLarge,
+                            ),
                           );
                         }),
                         FilledButton.icon(
@@ -261,45 +269,56 @@ class _AddMatkulState extends State<AddMatkul> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      if (allMatkulProvider.matkulC.text.isNotEmpty &&
-                          allMatkulProvider.hari.value != null &&
-                          allMatkulProvider.jamAwal.value != null) {
-                        addJadwal();
-                      } else {
-                        Get.defaultDialog(
-                          contentPadding: EdgeInsets.all(10),
-                          titlePadding: EdgeInsets.only(top: 20),
-                          title: "Form tidak lengkap",
-                          content:
-                              const Text("Harap Isi Matkul, Hari, dan Jam"),
-                          actions: [
-                            FilledButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: const Text(
-                                "OK",
-                                style: TextStyle(fontSize: 17),
-                              ),
-                            )
-                          ],
-                        );
-                      }
-                    },
-                    label: Text(
-                      "Save",
-                      style: theme.textTheme.bodyLarge!
-                          .copyWith(color: theme.colorScheme.onPrimary),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "(*) wajib diisi",
+                      style: theme.textTheme.labelLarge,
                     ),
-                    icon: const Icon(
-                      LucideIcons.save500,
-                      size: 20,
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                              allMatkulProvider.hari.value != null &&
+                              allMatkulProvider.jamAwal.value != null) {
+                            addJadwal();
+                          } else {
+                            Get.defaultDialog(
+                              contentPadding: EdgeInsets.all(10),
+                              titlePadding: EdgeInsets.only(top: 20),
+                              title: "Form tidak lengkap",
+                              content:
+                                  const Text("Harap Isi Matkul, Hari, dan Jam"),
+                              actions: [
+                                FilledButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  child: const Text(
+                                    "OK",
+                                    style: TextStyle(fontSize: 17),
+                                  ),
+                                )
+                              ],
+                            );
+                          }
+                        },
+                        label: Text(
+                          "Save",
+                          style: theme.textTheme.bodyLarge!
+                              .copyWith(color: theme.colorScheme.onPrimary),
+                        ),
+                        icon: const Icon(
+                          LucideIcons.save500,
+                          size: 20,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 )
               ],
             ),

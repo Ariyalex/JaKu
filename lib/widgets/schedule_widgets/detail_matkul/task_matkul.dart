@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jaku/models/task.dart';
 import 'package:jaku/screens/schedule/detail_matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -10,7 +11,7 @@ class TaskMatkul extends StatelessWidget {
   });
 
   final ThemeData theme;
-  final List<Map<String, Object>> tasks;
+  final List<Task> tasks;
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +47,14 @@ class TaskMatkul extends StatelessWidget {
                           ),
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           child: CheckboxListTile(
-                            value: task["done"] as bool,
+                            value: task.status,
                             onChanged: (val) {
                               // TODO: Update status task
                             },
-                            title: Text(task["title"] as String),
-                            subtitle: task["datetime"] != null
+                            title: Text(task.task),
+                            subtitle: task.dateTime != null
                                 ? Text(formatTaskDate(
-                                    task["datetime"] as DateTime))
+                                    task.dateTime ?? DateTime.now()))
                                 : null,
                           ),
                         ))

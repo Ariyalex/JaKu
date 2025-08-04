@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/widgets/jadwal_kosong.dart';
-import 'package:jaku/widgets/schedule_widget/table_view/table.dart' as tbl;
+import 'package:jaku/widgets/schedule_widgets/table_view/table.dart' as tbl;
 
 class TableView extends StatelessWidget {
   const TableView({
