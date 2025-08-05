@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:dynamic_tabbar/dynamic_tabbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:jaku/models/task.dart';
 import 'package:jaku/widgets/task_widgets/build_task_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -12,6 +15,8 @@ class TaskDashboard extends StatefulWidget {
 }
 
 class _TaskDashboardState extends State<TaskDashboard> {
+  final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
+
   // Dummy data
   final List<Task> tasks = [
     Task(
@@ -114,11 +119,80 @@ class _TaskDashboardState extends State<TaskDashboard> {
       ),
       body: SafeArea(
         child: DynamicTabBarWidget(
+          isScrollable: true,
+          showBackIcon: false,
+          showNextIcon: false,
+          tabAlignment: TabAlignment.start,
           dynamicTabs: tabs,
           onTabControllerUpdated: (p0) {},
           onTabChanged: (index) {},
           // isScrollable: true,
         ),
+      ),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        key: fabKey,
+        openButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(LucideIcons.plus),
+          fabSize: ExpandableFabSize.regular,
+          shape: const CircleBorder(),
+          angle: math.pi / 4,
+        ),
+        closeButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: Transform.rotate(
+            angle: math.pi / 4,
+            child: const Icon(LucideIcons.plus),
+          ),
+          fabSize: ExpandableFabSize.regular,
+          shape: const CircleBorder(),
+        ),
+        type: ExpandableFabType.up,
+        duration: Duration(milliseconds: 340),
+        childrenAnimation: ExpandableFabAnimation.none,
+        distance: 70,
+        overlayStyle: ExpandableFabOverlayStyle(
+          color: theme.colorScheme.surface.withValues(alpha: 0.7),
+        ),
+        children: [
+          Row(
+            children: [
+              Text(
+                'Add Group',
+                style: theme.textTheme.bodyLarge,
+              ),
+              SizedBox(width: 20),
+              FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  fabKey.currentState?.close();
+                },
+                child: Icon(Icons.playlist_add),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                'Add Task',
+                style: theme.textTheme.bodyLarge,
+              ),
+              SizedBox(width: 20),
+              FloatingActionButton(
+                heroTag: null,
+                onPressed: () async {
+                  fabKey.currentState?.close();
+                  // await showBarModalBottomSheet<Map<String, dynamic>>(
+                  //   barrierColor: Colors.black.withValues(alpha: 0.4),
+                  //   context: context,
+                  //   useRootNavigator: true,
+                  //   builder: (context) => ,
+                  // );
+                },
+                child: Icon(Icons.add_task),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

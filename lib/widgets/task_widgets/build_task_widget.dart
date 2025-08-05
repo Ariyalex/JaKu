@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:jaku/models/task.dart';
 import 'package:jaku/screens/schedule/detail_matkul.dart';
 
@@ -40,29 +39,31 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Card untuk setiap matkul (incomplete)
-          ...matkulGroups.entries.map((entry) => Card(
-                color: theme.colorScheme.surfaceContainer,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+          ...matkulGroups.entries.map(
+            (entry) => Card(
+              color: theme.colorScheme.surfaceContainer,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                      const SizedBox(height: 8),
-                      ...entry.value
-                          .map((task) => _buildTaskTile(context, task, false)),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...entry.value
+                        .map((task) => _buildTaskTile(context, task, false)),
+                  ],
                 ),
-              )),
+              ),
+            ),
+          ),
 
           // Card untuk completed
           Card(
@@ -127,20 +128,8 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
               )
             : null,
       ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (task.matkul != null && task.matkul!.isNotEmpty && !completed)
-            Text(
-              task.matkul!,
-              style: const TextStyle(
-                color: Colors.blueGrey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          if (task.dateTime != null) Text(formatTaskDate(task.dateTime!)),
-        ],
-      ),
+      subtitle:
+          (task.dateTime != null) ? Text(formatTaskDate(task.dateTime!)) : null,
       trailing: IconButton(
         onPressed: () {
           setState(() {

@@ -111,12 +111,10 @@ class TutorialStepCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundColor: AppTheme.dark.primaryColor,
               child: Text(
                 '$step',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
             ),

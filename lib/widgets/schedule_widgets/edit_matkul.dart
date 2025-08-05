@@ -103,20 +103,17 @@ class _AddMatkulState extends State<EditMatkul> {
       }
     }
 
-    String divider(String formattedJamAkhir) {
-      if (formattedJamAkhir.isEmpty) {
-        return " ";
-      } else {
-        return " - ";
-      }
-    }
-
     return Material(
       child: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            width: mediaQueryWidth,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        child: Container(
+          width: mediaQueryWidth,
+          padding: EdgeInsets.only(
+              right: 20,
+              left: 20,
+              top: 10,
+              bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 30,

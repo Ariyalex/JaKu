@@ -247,6 +247,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                     barrierColor: Colors.black.withValues(alpha: 0.4),
                     context: context,
                     useRootNavigator: true,
+                    bounce: true,
                     builder: (context) => const AddMatkul(),
                   );
                 },

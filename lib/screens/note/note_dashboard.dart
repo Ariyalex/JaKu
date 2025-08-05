@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/widgets/note_widgets/note_global.dart';
+import 'package:jaku/widgets/note_widgets/search_textfield.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class NoteDashboard extends StatelessWidget {
   const NoteDashboard({super.key});
@@ -101,23 +103,13 @@ class NoteDashboard extends StatelessWidget {
     ];
 
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: SafeArea(
-            child: Column(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: SafeArea(
+        child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(12.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Cari catatan...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(100),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                ),
-              ),
+              child: SearchTextfield(),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -127,6 +119,13 @@ class NoteDashboard extends StatelessWidget {
               ),
             ),
           ],
-        )));
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        shape: const CircleBorder(),
+        child: Icon(LucideIcons.plus),
+      ),
+    );
   }
 }
