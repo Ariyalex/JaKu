@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jaku/widgets/note_widgets/filter_note_modal.dart';
+import 'package:jaku/widgets/note_widgets/sort_note_modal.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class SearchTextfield extends StatefulWidget {
   const SearchTextfield({
@@ -32,6 +35,8 @@ class _SearchTextfieldState extends State<SearchTextfield> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return TextField(
       focusNode: _focusNode,
       decoration: InputDecoration(
@@ -47,12 +52,28 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                       icon: Icon(LucideIcons.arrowDownUp),
                       onPressed: () {
                         // TODO: aksi filter
+                        showBarModalBottomSheet<Map<String, dynamic>>(
+                          barrierColor: Colors.black.withValues(alpha: 0.4),
+                          context: context,
+                          useRootNavigator: true,
+                          bounce: true,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          builder: (context) => const SortNoteModal(),
+                        );
                       },
                     ),
                     IconButton(
                       icon: Icon(LucideIcons.funnel),
                       onPressed: () {
                         // TODO: aksi filter
+                        showBarModalBottomSheet<Map<String, dynamic>>(
+                          barrierColor: Colors.black.withValues(alpha: 0.4),
+                          context: context,
+                          useRootNavigator: true,
+                          bounce: true,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          builder: (context) => const FilterNoteModal(),
+                        );
                       },
                     ),
                   ],

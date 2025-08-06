@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
@@ -31,7 +32,11 @@ void main() async {
   Get.put(HariKuliahC(), permanent: true);
   Get.put(PdfBack(), permanent: true);
   Get.put(VersionControl());
-  Get.put(ThemeC(), permanent: true);
+
+  //init theme
+  await Hive.openBox('settings');
+  final themeC = Get.put(ThemeC(), permanent: true);
+  themeC.initTheme();
 
   // Pastikan data login dimuat sebelum menampilkan UI
 

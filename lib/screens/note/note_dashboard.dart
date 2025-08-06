@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:jaku/models/note.dart';
+import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:jaku/widgets/note_widgets/search_textfield.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -95,11 +97,11 @@ class NoteDashboard extends StatelessWidget {
               "Pembahasan hasil UTS. Dosen memberikan umpan balik dan membahas soal yang dianggap sulit.",
           matkul: "IMK"),
       Note(
-          id: "15",
-          title: "Reminder Tugas Akhir",
-          desc:
-              "Tugas akhir dikumpulkan akhir bulan. Pastikan seluruh persyaratan dan dokumentasi sudah lengkap.",
-          matkul: "IMK"),
+        id: "15",
+        title: "Reminder Tugas Akhir",
+        desc:
+            "Tugas akhir dikumpulkan akhir bulan. Pastikan seluruh persyaratan dan dokumentasi sudah lengkap.",
+      ),
     ];
 
     return Scaffold(
@@ -122,7 +124,9 @@ class NoteDashboard extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Get.toNamed(RouteNamed.addNote);
+        },
         shape: const CircleBorder(),
         child: Icon(LucideIcons.plus),
       ),

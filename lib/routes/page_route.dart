@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/screens/note/add_note.dart';
+import 'package:jaku/screens/note/detail_note.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
 import 'package:jaku/screens/schedule/detail_matkul.dart';
 import 'package:jaku/screens/guide/guide_schedule.dart';
@@ -37,6 +39,14 @@ class AppPage {
     GetPage(
       name: RouteNamed.detailMatkul,
       page: () => const DetailMatkul(),
+    ),
+    GetPage(
+      name: RouteNamed.addNote,
+      page: () => const AddNote(),
+    ),
+    GetPage(
+      name: RouteNamed.detailNote,
+      page: () => const DetailNote(),
     ),
   ];
 }

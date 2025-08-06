@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get/get.dart';
 import 'package:jaku/models/note.dart';
+import 'package:jaku/routes/route_named.dart';
+
+String getInitials(String kalimat) {
+  final words = kalimat.split(' ').where((word) => word.isNotEmpty).toList();
+
+  if (words.length <= 2) {
+    // Kembalikan kalimat asli dengan kapitalisasi awal tiap kata
+    return words.map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+  }
+
+  // Jika lebih dari 2 kata, ambil huruf awal tiap kata
+  return words.map((word) => word[0].toUpperCase()).join();
+}
 
 class NoteGlobal extends StatelessWidget {
   const NoteGlobal({super.key, required this.notes});
@@ -10,19 +24,6 @@ class NoteGlobal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    String getInitials(String kalimat) {
-      final words =
-          kalimat.split(' ').where((word) => word.isNotEmpty).toList();
-
-      if (words.length <= 2) {
-        // Kembalikan kalimat asli dengan kapitalisasi awal tiap kata
-        return words.map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
-      }
-
-      // Jika lebih dari 2 kata, ambil huruf awal tiap kata
-      return words.map((word) => word[0].toUpperCase()).join();
-    }
 
     return MasonryGridView.builder(
       shrinkWrap: true,
@@ -34,9 +35,11 @@ class NoteGlobal extends StatelessWidget {
       crossAxisSpacing: 8,
       mainAxisSpacing: 8,
       itemBuilder: (context, index) {
-        final note = notes[index];
+        final Note note = notes[index];
         return InkWell(
-          onTap: () {},
+          onTap: () {
+            Get.toNamed(RouteNamed.detailNote, arguments: note);
+          },
           borderRadius: BorderRadius.circular(12),
           child: Container(
             decoration: BoxDecoration(
@@ -49,7 +52,7 @@ class NoteGlobal extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (note.title != null)
+                  if (note.title != null && note.title!.isNotEmpty)
                     Text(
                       note.title!,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -57,12 +60,12 @@ class NoteGlobal extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 6),
-                  if (note.desc != null || note.desc != "")
+                  if (note.desc != null && note.desc!.isNotEmpty)
                     Text(
                       note.desc!,
                       style: theme.textTheme.bodySmall,
                     ),
-                  if (note.matkul != null || note.desc != "")
+                  if (note.matkul != null && note.matkul!.isNotEmpty)
                     Chip(
                       label: Text(getInitials(note.matkul!)),
                       padding: EdgeInsets.symmetric(vertical: 0, horizontal: 3),

@@ -125,6 +125,7 @@ class _DetailMatkulState extends State<DetailMatkul> {
                 barrierColor: Colors.black.withValues(alpha: 0.4),
                 context: context,
                 useRootNavigator: true,
+                backgroundColor: theme.colorScheme.surfaceContainer,
                 builder: (context) =>
                     EditMatkul(matkulId: selectedMatkul.matkulId!),
               );
