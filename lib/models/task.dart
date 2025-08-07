@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'task.g.dart';
@@ -11,22 +12,31 @@ class Task extends HiveObject {
   String task;
 
   @HiveField(2)
-  bool status;
+  String? desc;
 
   @HiveField(3)
-  DateTime? dateTime;
+  bool status;
 
   @HiveField(4)
-  String? matkul;
+  DateTime? taskDueDate;
 
   @HiveField(5)
+  TimeOfDay? taskDueTime;
+
+  @HiveField(6)
+  String? matkul;
+
+  @HiveField(7)
   bool isStared;
 
-  Task(
-      {this.id,
-      required this.task,
-      required this.status,
-      this.dateTime,
-      this.matkul,
-      required this.isStared});
+  Task({
+    this.id,
+    required this.task,
+    required this.status,
+    this.desc,
+    this.taskDueDate,
+    this.taskDueTime,
+    this.matkul,
+    required this.isStared,
+  });
 }

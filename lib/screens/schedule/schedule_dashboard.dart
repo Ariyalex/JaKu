@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:hive/hive.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/widgets/schedule_widgets/add_matkul.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/card_view.dart';
@@ -7,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:jaku/widgets/schedule_widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../controllers/hari_kuliah_c.dart';
 import '../../controllers/jadwal_kuliah_c.dart';
@@ -40,40 +40,42 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
   }
 
   Future<void> loadViewValue() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    final hasil = pref.getBool("cardView");
+    // Pakai Hive untuk menyimpan setting
+    final box = await Hive.openBox('settings');
+    final hasil = box.get('cardView') as bool?;
     isCardView.value = hasil ?? true;
   }
 
   Future<void> saveViewValue(bool value) async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setBool("cardView", value);
+    final box = await Hive.openBox('settings');
+    await box.put('cardView', value);
   }
 
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
-        title: "Hapus semua data?",
-        titleStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
-        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-        content: const Text(
-          "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
-          textAlign: TextAlign.center,
-        ),
-        cancel: FilledButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("Tidak")),
-        confirm: OutlinedButton(
-            onPressed: () async {
-              Get.back(); // Tutup dialog konfirmasi
-              final allMatkulProvider = Get.find<JadwalkuliahC>();
+      title: "Hapus semua data?",
+      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+      content: const Text(
+        "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
+        textAlign: TextAlign.center,
+      ),
+      cancel: FilledButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: const Text("Tidak"),
+      ),
+      confirm: OutlinedButton(
+        onPressed: () async {
+          Get.back(); // Tutup dialog konfirmasi
+          final allMatkulProvider = Get.find<JadwalkuliahC>();
 
-              allMatkulProvider.clearAllData();
-            },
-            child: const Text("Ya")));
+          allMatkulProvider.clearAllData();
+        },
+        child: const Text("Ya"),
+      ),
+    );
   }
 
   @override
@@ -104,10 +106,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
             itemBuilder: (BuildContext context) => [
               const PopupMenuItem<String>(
                 value: "info",
-                child: ListTile(
-                  leading: Icon(Icons.info),
-                  title: Text("Info"),
-                ),
+                child: ListTile(leading: Icon(Icons.info), title: Text("Info")),
               ),
               const PopupMenuItem<String>(
                 value: "clear",
@@ -127,46 +126,51 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                 saveViewValue(isCardView.value);
               },
               label: isCardView.value
-                  ? Text("Card view",
-                      style: textTheme.bodyMedium!
-                          .copyWith(color: colorTheme.primary))
-                  : Text("Table view",
-                      style: textTheme.bodyMedium!
-                          .copyWith(color: colorTheme.onPrimary)),
+                  ? Text(
+                      "Card view",
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorTheme.primary,
+                      ),
+                    )
+                  : Text(
+                      "Table view",
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorTheme.onPrimary,
+                      ),
+                    ),
               icon: isCardView.value
                   ? Icon(Icons.view_agenda_outlined)
                   : Icon(Icons.table_chart),
               style: ButtonStyle(
-                  backgroundColor: isCardView.value
-                      ? null
-                      : WidgetStatePropertyAll(colorTheme.primary),
-                  iconColor: isCardView.value
-                      ? null
-                      : WidgetStatePropertyAll(colorTheme.onPrimary),
-                  side: WidgetStatePropertyAll(
-                      BorderSide(width: 1, color: colorTheme.primary))),
+                backgroundColor: isCardView.value
+                    ? null
+                    : WidgetStatePropertyAll(colorTheme.primary),
+                iconColor: isCardView.value
+                    ? null
+                    : WidgetStatePropertyAll(colorTheme.onPrimary),
+                side: WidgetStatePropertyAll(
+                  BorderSide(width: 1, color: colorTheme.primary),
+                ),
+              ),
             ),
           ),
-          const SizedBox(
-            width: 15,
-          ),
+          const SizedBox(width: 15),
           IconButton(
-              onPressed: () => themeC.changeTheme(),
-              icon: Icon(Icons.color_lens))
+            onPressed: () => themeC.changeTheme(),
+            icon: Icon(Icons.color_lens),
+          ),
         ],
       ),
-      body: Obx(
-        () {
-          return SafeArea(
-            child: isCardView.value
-                ? const CardView()
-                : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: TableView(),
-                  ),
-          );
-        },
-      ),
+      body: Obx(() {
+        return SafeArea(
+          child: isCardView.value
+              ? const CardView()
+              : Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: TableView(),
+                ),
+        );
+      }),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         key: fabKey,
@@ -194,10 +198,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
         children: [
           Row(
             children: [
-              Text(
-                'PDF to Schedule',
-                style: textTheme.bodyLarge,
-              ),
+              Text('PDF to Schedule', style: textTheme.bodyLarge),
               SizedBox(width: 20),
               FloatingActionButton(
                 heroTag: null,
@@ -207,25 +208,25 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                     title: "Peringatan!!",
                     backgroundColor: theme.dialogTheme.backgroundColor,
                     titlePadding: EdgeInsets.only(top: 20),
-                    titleStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    titleStyle: TextStyle(fontWeight: FontWeight.bold),
                     content: const Text(
                       "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
                       textAlign: TextAlign.center,
                     ),
                     contentPadding: EdgeInsets.all(10),
                     confirm: FilledButton(
-                        onPressed: () {
-                          Get.back();
-                          Get.toNamed(RouteNamed.pdfParsing);
-                        },
-                        child: const Text("Ok Bang")),
+                      onPressed: () {
+                        Get.back();
+                        Get.toNamed(RouteNamed.pdfParsing);
+                      },
+                      child: const Text("Ok Bang"),
+                    ),
                     cancel: OutlinedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        child: const Text("Ga jadi")),
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: const Text("Ga jadi"),
+                    ),
                   );
                 },
                 child: Icon(LucideIcons.filePlus2),
@@ -234,10 +235,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           ),
           Row(
             children: [
-              Text(
-                'Add Schedule',
-                style: textTheme.bodyLarge,
-              ),
+              Text('Add Schedule', style: textTheme.bodyLarge),
               SizedBox(width: 20),
               FloatingActionButton(
                 heroTag: null,

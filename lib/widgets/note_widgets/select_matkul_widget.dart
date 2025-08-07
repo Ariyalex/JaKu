@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SelectMatkulWidget extends StatefulWidget {
@@ -30,10 +31,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
       child: DropdownButton2(
         customButton: Container(
           decoration: BoxDecoration(
-            border: Border.all(
-              color: theme.colorScheme.primary,
-              width: 1,
-            ),
+            border: Border.all(color: theme.colorScheme.primary, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: !isMatkulSelected
@@ -48,7 +46,9 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
               ),
               const SizedBox(width: 8),
               Text(
-                isMatkulSelected ? selectedMatkul! : "Select matkul",
+                isMatkulSelected
+                    ? getInitials(selectedMatkul!)
+                    : "Select matkul",
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
@@ -72,10 +72,8 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
         ),
         items: matkulList
             .map(
-              (item) => DropdownMenuItem<Object>(
-                value: item,
-                child: Text(item),
-              ),
+              (item) =>
+                  DropdownMenuItem<Object>(value: item, child: Text(item)),
             )
             .toList(),
         onChanged: (value) {
@@ -85,7 +83,9 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
         },
         dropdownStyleData: DropdownStyleData(
           width: 150,
+
           decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),
           ),
         ),

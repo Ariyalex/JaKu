@@ -5,9 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class SearchTextfield extends StatefulWidget {
-  const SearchTextfield({
-    super.key,
-  });
+  const SearchTextfield({super.key});
 
   @override
   State<SearchTextfield> createState() => _SearchTextfieldState();
@@ -15,6 +13,7 @@ class SearchTextfield extends StatefulWidget {
 
 class _SearchTextfieldState extends State<SearchTextfield> {
   final FocusNode _focusNode = FocusNode();
+  final searchController = TextEditingController();
   bool _isFocused = false;
 
   @override
@@ -30,6 +29,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
   @override
   void dispose() {
     _focusNode.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -37,13 +37,28 @@ class _SearchTextfieldState extends State<SearchTextfield> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    bool isNotEmpty = searchController.text.trim().isNotEmpty;
     return TextField(
       focusNode: _focusNode,
+      controller: searchController,
       decoration: InputDecoration(
         hintText: 'Cari catatan',
         prefixIcon: Icon(Icons.search),
-        suffixIcon: !_isFocused
-            ? Container(
+        suffixIcon: Builder(
+          builder: (context) {
+            // 1. Jika controller not empty & focused: clear
+            if (isNotEmpty && _isFocused) {
+              return IconButton(
+                icon: Icon(Icons.clear),
+                onPressed: () {
+                  searchController.clear();
+                  setState(() {});
+                },
+              );
+            }
+            // 2. Jika controller empty & not focused: sort + filter
+            if (!isNotEmpty && !_isFocused) {
+              return Container(
                 margin: EdgeInsets.only(right: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -51,7 +66,6 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                     IconButton(
                       icon: Icon(LucideIcons.arrowDownUp),
                       onPressed: () {
-                        // TODO: aksi filter
                         showBarModalBottomSheet<Map<String, dynamic>>(
                           barrierColor: Colors.black.withValues(alpha: 0.4),
                           context: context,
@@ -65,7 +79,6 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                     IconButton(
                       icon: Icon(LucideIcons.funnel),
                       onPressed: () {
-                        // TODO: aksi filter
                         showBarModalBottomSheet<Map<String, dynamic>>(
                           barrierColor: Colors.black.withValues(alpha: 0.4),
                           context: context,
@@ -78,14 +91,64 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                     ),
                   ],
                 ),
-              )
-            : null,
+              );
+            }
+            // 3. Jika controller not empty & not focused: clear + sort + filter
+            if (isNotEmpty && !_isFocused) {
+              return Container(
+                margin: EdgeInsets.only(right: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          searchController.clear();
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(LucideIcons.arrowDownUp),
+                      onPressed: () {
+                        showBarModalBottomSheet<Map<String, dynamic>>(
+                          barrierColor: Colors.black.withValues(alpha: 0.4),
+                          context: context,
+                          useRootNavigator: true,
+                          bounce: true,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          builder: (context) => const SortNoteModal(),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(LucideIcons.funnel),
+                      onPressed: () {
+                        showBarModalBottomSheet<Map<String, dynamic>>(
+                          barrierColor: Colors.black.withValues(alpha: 0.4),
+                          context: context,
+                          useRootNavigator: true,
+                          bounce: true,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          builder: (context) => const FilterNoteModal(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
+            // 4. Jika controller empty & focused: tidak ada tombol
+            return SizedBox.shrink();
+          },
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(100),
           borderSide: BorderSide.none,
         ),
         filled: true,
       ),
+      onChanged: (_) => setState(() {}),
     );
   }
 }

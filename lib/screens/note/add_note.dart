@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
 
 class AddNote extends StatelessWidget {
@@ -7,13 +8,14 @@ class AddNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final matkul = Get.arguments;
 
     return Scaffold(
       appBar: AppBar(
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SelectMatkulWidget(),
+            child: SelectMatkulWidget(selectedMatkul: matkul),
           ),
         ],
       ),
@@ -25,6 +27,8 @@ class AddNote extends StatelessWidget {
             children: [
               TextField(
                 style: theme.textTheme.titleLarge,
+                minLines: 1,
+                maxLines: null, // expands vertically when overflow
                 decoration: InputDecoration(
                   hintText: 'Title',
                   hintStyle: theme.textTheme.titleLarge,

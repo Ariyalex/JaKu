@@ -11,30 +11,6 @@ import 'package:jaku/widgets/schedule_widgets/detail_matkul/task_matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-String formatTaskDate(DateTime dt) {
-  const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
-  const bulan = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember"
-  ];
-  final hariStr = hari[dt.weekday - 1];
-  final tglStr = "${dt.day} ${bulan[dt.month - 1]}";
-  final jamStr =
-      "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
-
-  return "$hariStr, $tglStr, $jamStr";
-}
-
 class DetailMatkul extends StatefulWidget {
   const DetailMatkul({super.key});
 
@@ -62,57 +38,65 @@ class _DetailMatkulState extends State<DetailMatkul> {
     // Dummy data untuk notes dan tasks (ganti dengan data asli nanti)
     final List<Note> notes = [
       Note(
-          id: "1",
-          title: "Catatan Pertemuan 1",
-          desc: "Bahas pengenalan mata kuliah dan kontrak kuliah.",
-          matkul: "IMK"),
+        id: "1",
+        title: "Catatan Pertemuan 1",
+        desc: "Bahas pengenalan mata kuliah dan kontrak kuliah.",
+        matkul: "IMK",
+      ),
       Note(
-          id: "2",
-          title: "Catatan Pertemuan 2",
-          desc: "Diskusi tentang user interface dan user experience.",
-          matkul: "IMK"),
+        id: "2",
+        title: "Catatan Pertemuan 2",
+        desc: "Diskusi tentang user interface dan user experience.",
+        matkul: "IMK",
+      ),
       Note(
-          id: "3",
-          title: "Reminder Quiz",
-          desc: "Akan ada quiz minggu depan, materi bab 1-2.",
-          matkul: "IMK"),
+        id: "3",
+        title: "Reminder Quiz",
+        desc: "Akan ada quiz minggu depan, materi bab 1-2.",
+        matkul: "IMK",
+      ),
     ];
     final List<Task> tasks = [
       Task(
-          id: "1",
-          task: "Tugas ERD",
-          status: false,
-          dateTime: DateTime(2025, 8, 4, 10, 0),
-          isStared: false,
-          matkul: "IMK"),
+        id: "1",
+        task: "Tugas ERD",
+        status: false,
+        taskDueDate: DateTime(2025, 8, 4, 10, 0),
+        isStared: false,
+        matkul: "IMK",
+      ),
       Task(
-          id: "2",
-          task: "Presentasi UI/UX",
-          status: true,
-          dateTime: DateTime(2025, 8, 11, 13, 30),
-          isStared: false,
-          matkul: "IMK"),
+        id: "2",
+        task: "Presentasi UI/UX",
+        status: true,
+        taskDueDate: DateTime(2025, 8, 11, 13, 30),
+        isStared: false,
+        matkul: "IMK",
+      ),
       Task(
-          id: "3",
-          task: "Kuis Bab 1-2",
-          status: false,
-          dateTime: DateTime(2025, 8, 18, 9, 0),
-          isStared: false,
-          matkul: "IMK"),
+        id: "3",
+        task: "Kuis Bab 1-2",
+        status: false,
+        taskDueDate: DateTime(2025, 8, 18, 9, 0),
+        isStared: false,
+        matkul: "IMK",
+      ),
       Task(
-          id: "4",
-          task: "Tugas Makalah",
-          status: false,
-          dateTime: DateTime(2025, 8, 25, 23, 59),
-          isStared: false,
-          matkul: "IMK"),
+        id: "4",
+        task: "Tugas Makalah",
+        status: false,
+        taskDueDate: DateTime(2025, 8, 25, 23, 59),
+        isStared: false,
+        matkul: "IMK",
+      ),
       Task(
-          id: "5",
-          task: "Ujian Tengah Semester",
-          status: false,
-          dateTime: DateTime(2025, 9, 1, 8, 0),
-          isStared: false,
-          matkul: "IMK"),
+        id: "5",
+        task: "Ujian Tengah Semester",
+        status: false,
+        taskDueDate: DateTime(2025, 9, 1, 8, 0),
+        isStared: false,
+        matkul: "IMK",
+      ),
     ];
 
     return Scaffold(
@@ -131,7 +115,7 @@ class _DetailMatkulState extends State<DetailMatkul> {
               );
             },
             icon: const Icon(LucideIcons.squarePen),
-          )
+          ),
         ],
       ),
       body: SafeArea(
@@ -145,11 +129,19 @@ class _DetailMatkulState extends State<DetailMatkul> {
                 const SizedBox(height: 5),
 
                 // Section Notes
-                NoteMatkul(theme: theme, notes: notes),
+                NoteMatkul(
+                  theme: theme,
+                  notes: notes,
+                  matkul: selectedMatkul.matkul,
+                ),
                 const SizedBox(height: 10),
 
                 // Section Tasks
-                TaskMatkul(theme: theme, tasks: tasks),
+                TaskMatkul(
+                  theme: theme,
+                  tasks: tasks,
+                  matkul: selectedMatkul.matkul,
+                ),
               ],
             ),
           ),

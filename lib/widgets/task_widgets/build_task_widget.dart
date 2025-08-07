@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/models/task.dart';
-import 'package:jaku/screens/schedule/detail_matkul.dart';
+import 'package:jaku/widgets/task_widgets/task_tile.dart';
+import 'package:reorderables/reorderables.dart';
 
 class BuildTaskWidget extends StatefulWidget {
-  const BuildTaskWidget(
-      {super.key, required this.filteredTasks, required this.title});
+  const BuildTaskWidget({
+    super.key,
+    required this.filteredTasks,
+    required this.title,
+  });
 
   final List<Task> filteredTasks;
   final String title;
@@ -15,16 +19,38 @@ class BuildTaskWidget extends StatefulWidget {
 
 class _BuildTaskWidgetState extends State<BuildTaskWidget> {
   bool showCompleted = false;
+  late List<Task> completedTasks;
+  late List<Task> incompleteTasks;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    completedTasks = widget.filteredTasks.where((task) => task.status).toList();
+    incompleteTasks = widget.filteredTasks
+        .where((task) => !task.status)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     // Pisahkan task berdasarkan status
-    final completedTasks =
-        widget.filteredTasks.where((task) => task.status).toList();
-    final incompleteTasks =
-        widget.filteredTasks.where((task) => !task.status).toList();
+
+    void onReorderCompleted(int oldIndex, int newIndex) {
+      setState(() {
+        final task = completedTasks.removeAt(oldIndex);
+        completedTasks.insert(newIndex, task);
+      });
+    }
+
+    void onReorderIncompleted(int oldIndex, int newIndex) {
+      setState(() {
+        final task = incompleteTasks.removeAt(oldIndex);
+        incompleteTasks.insert(newIndex, task);
+      });
+    }
 
     // Kelompokkan incomplete task per matkul
     final Map<String, List<Task>> matkulGroups = {};
@@ -33,113 +59,127 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
       matkulGroups.putIfAbsent(matkul, () => []).add(task);
     }
 
-    return SingleChildScrollView(
+    return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Card untuk setiap matkul (incomplete)
-          ...matkulGroups.entries.map(
-            (entry) => Card(
-              color: theme.colorScheme.surfaceContainer,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Card untuk setiap matkul (incomplete)
+        Card(
+          color: theme.colorScheme.surfaceContainer,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...entry.value
-                        .map((task) => _buildTaskTile(context, task, false)),
+                    Text(widget.title, style: theme.textTheme.bodyLarge),
                   ],
                 ),
               ),
-            ),
-          ),
-
-          // Card untuk completed
-          Card(
-            color: theme.colorScheme.surfaceContainer,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => setState(() => showCompleted = !showCompleted),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          "Completed",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+              incompleteTasks.isEmpty
+                  ? Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Tidak ada task",
+                            style: theme.textTheme.bodyLarge,
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          showCompleted
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                        ),
-                        const Spacer(),
-                        Text("(${completedTasks.length})"),
-                      ],
+                          Container(
+                            margin: EdgeInsets.all(12),
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Image.asset("images/malas.gif"),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ReorderableColumn(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 20,
+                      ),
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      onReorder: onReorderIncompleted,
+                      children: incompleteTasks
+                          .map(
+                            (task) => TaskTile(
+                              task: task,
+                              completed: false,
+                              key: ValueKey(task.id),
+                            ),
+                          )
+                          .toList(),
                     ),
-                    if (showCompleted)
-                      ...completedTasks
-                          .map((task) => _buildTaskTile(context, task, true)),
-                  ],
+            ],
+          ),
+        ),
+
+        // Card untuk completed
+        Card(
+          color: theme.colorScheme.surfaceContainer,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: () => setState(() => showCompleted = !showCompleted),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 20,
+                  ),
+                  child: Row(
+                    children: [
+                      const Text(
+                        "Completed",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        showCompleted
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                      ),
+                      const Spacer(),
+                      Text("(${completedTasks.length})"),
+                    ],
+                  ),
                 ),
               ),
-            ),
+              if (showCompleted)
+                ReorderableColumn(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 20,
+                  ),
+                  onReorder: onReorderCompleted,
+                  children: completedTasks
+                      .map(
+                        (task) => TaskTile(
+                          task: task,
+                          completed: true,
+                          key: ValueKey(task.id),
+                        ),
+                      )
+                      .toList(),
+                ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaskTile(BuildContext context, Task task, bool completed) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Checkbox(
-        value: task.status,
-        onChanged: (val) {
-          // TODO: update status
-        },
-      ),
-      title: Text(
-        task.task,
-        style: completed
-            ? const TextStyle(
-                decoration: TextDecoration.lineThrough,
-                color: Colors.grey,
-              )
-            : null,
-      ),
-      subtitle:
-          (task.dateTime != null) ? Text(formatTaskDate(task.dateTime!)) : null,
-      trailing: IconButton(
-        onPressed: () {
-          setState(() {
-            task.isStared = !task.isStared;
-          });
-        },
-        icon: task.isStared
-            ? const Icon(Icons.star, color: Colors.amber)
-            : const Icon(Icons.star_border),
-      ),
+        ),
+      ],
     );
   }
 }

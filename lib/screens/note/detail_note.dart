@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DetailNote extends StatefulWidget {
   const DetailNote({super.key});
@@ -36,6 +37,7 @@ class _DetailNoteState extends State<DetailNote> {
               selectedMatkul: getInitials(selectedNote.matkul ?? ""),
             ),
           ),
+          IconButton(onPressed: () {}, icon: Icon(LucideIcons.trash2)),
         ],
       ),
       body: SafeArea(
@@ -46,6 +48,8 @@ class _DetailNoteState extends State<DetailNote> {
             children: [
               TextField(
                 controller: titleC,
+                minLines: 1,
+                maxLines: null, // expands vertically when overflow
                 style: theme.textTheme.titleLarge,
                 decoration: InputDecoration(
                   hintText: 'Title',

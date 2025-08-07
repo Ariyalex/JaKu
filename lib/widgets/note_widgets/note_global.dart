@@ -5,7 +5,10 @@ import 'package:jaku/models/note.dart';
 import 'package:jaku/routes/route_named.dart';
 
 String getInitials(String kalimat) {
-  final words = kalimat.split(' ').where((word) => word.isNotEmpty).toList();
+  final words = kalimat
+      .split(' ')
+      .where((word) => word.isNotEmpty && word.toLowerCase() != 'dan')
+      .toList();
 
   if (words.length <= 2) {
     // Kembalikan kalimat asli dengan kapitalisasi awal tiap kata
@@ -17,9 +20,10 @@ String getInitials(String kalimat) {
 }
 
 class NoteGlobal extends StatelessWidget {
-  const NoteGlobal({super.key, required this.notes});
+  const NoteGlobal({super.key, required this.notes, this.showMatkul = true});
 
   final List<Note> notes;
+  final bool showMatkul;
 
   @override
   Widget build(BuildContext context) {
@@ -61,15 +65,16 @@ class NoteGlobal extends StatelessWidget {
                     ),
                   const SizedBox(height: 6),
                   if (note.desc != null && note.desc!.isNotEmpty)
-                    Text(
-                      note.desc!,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  if (note.matkul != null && note.matkul!.isNotEmpty)
-                    Chip(
-                      label: Text(getInitials(note.matkul!)),
-                      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 3),
-                    )
+                    Text(note.desc!, style: theme.textTheme.bodySmall),
+                  if (showMatkul)
+                    if (note.matkul != null && note.matkul!.isNotEmpty)
+                      Chip(
+                        label: Text(getInitials(note.matkul!)),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 3,
+                        ),
+                      ),
                 ],
               ),
             ),
