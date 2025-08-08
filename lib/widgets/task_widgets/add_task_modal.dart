@@ -26,8 +26,12 @@ class _AddTaskModalState extends State<AddTaskModal> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    selectedMatkul = widget.matkul;
-    matkulList.add(widget.matkul!);
+    if (widget.matkul != null && widget.matkul!.isNotEmpty) {
+      selectedMatkul = widget.matkul;
+      if (!matkulList.contains(widget.matkul)) {
+        matkulList.add(widget.matkul!);
+      }
+    }
   }
 
   @override

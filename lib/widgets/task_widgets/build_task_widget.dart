@@ -60,7 +60,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
     }
 
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: const EdgeInsets.only(bottom: 65, top: 8, left: 12, right: 12),
       children: [
         // Card untuk setiap matkul (incomplete)
         Card(
@@ -110,6 +110,17 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                       ),
                       crossAxisAlignment: CrossAxisAlignment.center,
                       onReorder: onReorderIncompleted,
+                      buildDraggableFeedback: (context, constraints, child) {
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          height: constraints.maxHeight,
+                          child: Material(
+                            elevation: 1,
+                            borderRadius: BorderRadius.circular(16),
+                            child: child,
+                          ),
+                        );
+                      },
                       children: incompleteTasks
                           .map(
                             (task) => TaskTile(
@@ -166,6 +177,17 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                     horizontal: 20,
                   ),
                   onReorder: onReorderCompleted,
+                  buildDraggableFeedback: (context, constraints, child) {
+                    return Material(
+                      elevation: 1,
+                      borderRadius: BorderRadius.circular(16),
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                        child: child,
+                      ),
+                    );
+                  },
                   children: completedTasks
                       .map(
                         (task) => TaskTile(

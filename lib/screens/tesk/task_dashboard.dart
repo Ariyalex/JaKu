@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:jaku/models/task.dart';
+import 'package:jaku/widgets/task_widgets/add_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/build_task_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -170,6 +171,14 @@ class _TaskDashboardState extends State<TaskDashboard> {
                   heroTag: null,
                   onPressed: () {
                     fabKey.currentState?.close();
+                    showBarModalBottomSheet<Map<String, dynamic>>(
+                      barrierColor: Colors.black.withValues(alpha: 0.4),
+                      context: context,
+                      useRootNavigator: true,
+                      bounce: true,
+                      backgroundColor: theme.colorScheme.surfaceContainer,
+                      builder: (context) => const AddGroupModal(),
+                    );
                   },
                   child: Icon(Icons.playlist_add),
                 ),

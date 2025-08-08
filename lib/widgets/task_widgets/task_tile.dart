@@ -38,6 +38,7 @@ class _TaskTileState extends State<TaskTile> {
         );
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
       contentPadding: EdgeInsets.zero,
       leading: Checkbox(
         value: task.status,
