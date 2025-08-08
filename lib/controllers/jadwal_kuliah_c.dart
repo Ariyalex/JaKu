@@ -36,7 +36,7 @@ class JadwalkuliahC extends GetxController {
     "Minggu",
   ];
 
-  final Set<String> kelasList = {"A", "B", "C", "D"};
+  final Set<String> kelasList = {"A", "B", "C", "D", "E", "F"};
 
   final color = AppTheme.dark;
 
@@ -208,13 +208,7 @@ class JadwalkuliahC extends GetxController {
     } catch (error) {
       print("error deleting product: $error");
 
-      Get.snackbar(
-        'Error',
-        'Gagal menghapus mata kuliah: $error',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: color.colorScheme.error,
-        colorText: color.colorScheme.onError,
-      );
+      rethrow;
     }
   }
 
@@ -249,12 +243,12 @@ class JadwalkuliahC extends GetxController {
         'Berhasil',
         'Semua data berhasil dihapus',
         snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.green.shade400,
         colorText: Colors.white,
       );
 
       // Kembali ke halaman home
-      Get.offNamed(RouteNamed.homePage);
+      Get.offNamed(RouteNamed.scheduleDashboard);
     } catch (e) {
       // Tutup dialog loading jika terjadi error
       Get.back();

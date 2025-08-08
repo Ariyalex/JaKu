@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/models/tutorial_step.dart';
-import 'package:jaku/theme/theme.dart';
 
 class InfoCard extends StatelessWidget {
   final TutorialStep tutorialStep;
@@ -20,8 +19,9 @@ class InfoCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundColor: AppTheme.dark.primaryColor,
-              child: Icon(tutorialStep.icon),
+              child: Icon(
+                tutorialStep.icon,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

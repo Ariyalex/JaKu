@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/widgets/schedule_widgets/add_matkul.dart';
 import 'package:jaku/theme/theme.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class JadwalKosong extends StatelessWidget {
   const JadwalKosong({
@@ -10,7 +12,7 @@ class JadwalKosong extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final mediaQueryWidth = Get.width;
 
     return SingleChildScrollView(
       child: Container(
@@ -46,8 +48,13 @@ class JadwalKosong extends StatelessWidget {
               child: Column(
                 children: [
                   FilledButton(
-                    onPressed: () {
-                      Get.toNamed(RouteNamed.addMatkul);
+                    onPressed: () async {
+                      await showBarModalBottomSheet<Map<String, dynamic>>(
+                        barrierColor: Colors.black.withValues(alpha: 0.4),
+                        context: context,
+                        useRootNavigator: true,
+                        builder: (context) => const AddMatkul(),
+                      );
                     },
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,

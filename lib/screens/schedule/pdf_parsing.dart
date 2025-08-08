@@ -4,7 +4,7 @@ import 'package:jaku/controllers/pdf_back.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
 
-import '../routes/route_named.dart';
+import '../../routes/route_named.dart';
 
 class PdfParsing extends StatelessWidget {
   static const routeNamed = "/pdf-parsing";
@@ -14,7 +14,7 @@ class PdfParsing extends StatelessWidget {
   Widget build(BuildContext context) {
     final pdfback = Get.find<PdfBack>();
     final jadwalProvider = Get.find<JadwalkuliahC>();
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final mediaQueryWidth = Get.width;
 
     final color = AppTheme.dark;
 
@@ -67,7 +67,7 @@ class PdfParsing extends StatelessWidget {
                       style: TextStyle(
                         color: pdfback.responseMessage.value.contains('Error')
                             ? color.colorScheme.error
-                            : Colors.green,
+                            : Colors.green.shade400,
                       ),
                     ),
                   )),
@@ -84,7 +84,7 @@ class PdfParsing extends StatelessWidget {
                           if (states.contains(WidgetState.disabled)) {
                             return color.disabledColor;
                           }
-                          return Colors.green;
+                          return Colors.green.shade400;
                         },
                       ),
                     ),
@@ -130,7 +130,7 @@ class PdfParsing extends StatelessWidget {
                       const SizedBox(height: 10),
                       OutlinedButton(
                         onPressed: () {
-                          Get.offNamed(RouteNamed.homePage);
+                          Get.offNamed(RouteNamed.scheduleDashboard);
                         },
                         child: const Text("Kembali ke Home"),
                       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/models/tutorial_step.dart';
-import 'package:jaku/theme/theme.dart';
 
 class GuidePdf extends StatelessWidget {
   static const routeNamed = '/guide-pdf';
@@ -111,12 +110,10 @@ class TutorialStepCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundColor: AppTheme.dark.primaryColor,
               child: Text(
                 '$step',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
             ),

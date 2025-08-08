@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/hari_kuliah_c.dart';
 import 'package:jaku/controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
-import 'package:jaku/theme/theme.dart';
 
 class Table extends StatefulWidget {
   const Table({super.key});
@@ -17,8 +16,8 @@ class Table extends StatefulWidget {
 
 class _TableState extends State<Table> {
   final ScrollController _horizontalScrollController = ScrollController();
-  final allMatkulProvider = Get.find<JadwalkuliahC>();
-  final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
+  final jadwalKuliahC = Get.find<JadwalkuliahC>();
+  final hariKuliahC = Get.find<HariKuliahC>();
 
   @override
   void initState() {
@@ -134,18 +133,20 @@ class _TableState extends State<Table> {
   @override
   Widget build(BuildContext context) {
     //get hari saat ini untuk highlight
-    final String todayDay = jadwalKuliahDayProvider.getCurrentDay();
+    final String todayDay = hariKuliahC.getCurrentDay();
+
+    final theme = Theme.of(context);
 
     //color
-    final primaryColor = AppTheme.dark.primaryColor;
-    final colorTheme = AppTheme.dark.colorScheme;
+    final primaryColor = Theme.of(context).primaryColor;
+    final colorTheme = Theme.of(context).colorScheme;
 
     //text theme
-    final textTheme = AppTheme.dark.textTheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Obx(() {
-      final allJadwal = allMatkulProvider.allMatkul;
-      final hari = jadwalKuliahDayProvider.jadwalHariTerurut;
+      final allJadwal = jadwalKuliahC.allMatkul;
+      final hari = hariKuliahC.jadwalHariTerurut;
 
       //fungsi mendapatkanJam
       List<Map<String, String>> getJam() {
@@ -220,12 +221,12 @@ class _TableState extends State<Table> {
             ),
           ),
           onTap: () {
-            Get.toNamed(RouteNamed.editMatkul,
+            Get.toNamed(RouteNamed.detailMatkul,
                 arguments: matchingMatkul.first.matkulId);
           },
           onLongPress: () {
             Get.defaultDialog(
-                backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
+                backgroundColor: theme.dialogTheme.backgroundColor,
                 title: "Hapus Item",
                 content: const Text("Yakin hapus matkul ini?"),
                 cancel: TextButton(
@@ -233,11 +234,30 @@ class _TableState extends State<Table> {
                       Get.back();
                     },
                     child: const Text("No")),
-                confirm: OutlinedButton(
-                  onPressed: () {
-                    allMatkulProvider.deleteMatkuls(
-                        matchingMatkul.first.matkulId!,
-                        jadwalKuliahDayProvider);
+                confirm: FilledButton(
+                  onPressed: () async {
+                    try {
+                      await jadwalKuliahC.deleteMatkuls(
+                          matchingMatkul.first.matkulId!, hariKuliahC);
+
+                      Get.back();
+
+                      Get.snackbar(
+                        "Success",
+                        "Jadwal berhasil ditambahkan",
+                        backgroundColor: Colors.green.shade400,
+                        colorText: Colors.white,
+                      );
+                    } catch (error) {
+                      Get.snackbar(
+                        'Error',
+                        'Gagal menghapus mata kuliah: $error',
+                        snackPosition: SnackPosition.TOP,
+                        backgroundColor: theme.colorScheme.error,
+                        colorText: theme.colorScheme.onError,
+                      );
+                    }
+
                     Get.back();
                   },
                   child: const Text("Yes"),
@@ -251,7 +271,7 @@ class _TableState extends State<Table> {
       return DataTable2(
           horizontalMargin: 0,
           columnSpacing: 0,
-          bottomMargin: 20,
+          bottomMargin: 70,
           dataRowHeight: 100,
           fixedLeftColumns: 1,
           headingRowColor: WidgetStateProperty.resolveWith<Color>(
@@ -262,7 +282,7 @@ class _TableState extends State<Table> {
           isHorizontalScrollBarVisible: false,
           isVerticalScrollBarVisible: false,
           horizontalScrollController: _horizontalScrollController,
-          border: TableBorder.all(width: 1, color: colorTheme.onPrimary),
+          border: TableBorder.all(width: 1, color: theme.primaryColorDark),
           minWidth: 1800,
           columns: [
             DataColumn2(
