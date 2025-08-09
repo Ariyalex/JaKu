@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
-import 'package:jaku/services/jadwal_kuliah_local.dart';
+import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/models/jadwal.dart';
-import 'package:jaku/controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfBack extends GetxController {
@@ -50,7 +50,7 @@ class PdfBack extends GetxController {
 
     try {
       // Clear existing data both in Firebase and locally first
-      await JadwalKuliahLocal.deleteAllMatkulL();
+      await JadwalService.deleteAllMatkulL();
       jadwalProvider.clearData(); // Clear data in the JadwalKuliah provider
 
       responseMessage.value = "Mengunggah dan memproses file...";
@@ -78,8 +78,9 @@ class PdfBack extends GetxController {
       // Download JSON yang dihasilkan
       final downloadResponse = await dio.get(
         '$baseUrl/download',
-        options:
-            dio_package.Options(responseType: dio_package.ResponseType.bytes),
+        options: dio_package.Options(
+          responseType: dio_package.ResponseType.bytes,
+        ),
       );
 
       if (downloadResponse.statusCode == 200) {

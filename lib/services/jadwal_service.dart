@@ -1,13 +1,11 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jaku/models/jadwal.dart';
 
-class JadwalKuliahLocal {
+class JadwalService {
   static const String matkulBoxName = "matkul_box";
 
   //initialize hive
-  static Future<void> initL() async {
-    await Hive.initFlutter();
-
+  static Future<void> initMatkulService() async {
     //register adapter jika belum tersedia
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(MatkulAdapter());
@@ -29,11 +27,11 @@ class JadwalKuliahLocal {
     if (matkul.matkulId != null) {
       await box.put(matkul.matkulId, matkul);
     } else {
-      throw Exception("matkul ID harus disediakan dari firebase");
+      throw Exception("matkul ID kosong");
     }
   }
 
-//save multiple matkul
+  //save multiple matkul
   static Future<void> saveAllMatkulL(List<Matkul> matkuls) async {
     final box = getMatkulBox();
 
@@ -60,7 +58,7 @@ class JadwalKuliahLocal {
     await box.delete(id);
   }
 
-//delete all matkul
+  //delete all matkul
   static Future<void> deleteAllMatkulL() async {
     final box = getMatkulBox();
     await box.clear();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/models/jadwal.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/models/task.dart';

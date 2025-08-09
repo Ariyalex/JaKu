@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/services/jadwal_kuliah_local.dart';
-import 'package:jaku/controllers/hari_kuliah_c.dart';
+import 'package:jaku/services/jadwal_service.dart';
+import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/jadwal.dart';
+import '../../models/jadwal.dart';
 
 var uuid = const Uuid();
 
@@ -67,7 +67,7 @@ class JadwalkuliahC extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    await JadwalKuliahLocal.initL();
+    await JadwalService.initMatkulService();
     loadFromLocalStorage();
   }
 
@@ -83,18 +83,16 @@ class JadwalkuliahC extends GetxController {
         return const TimeOfDay(hour: 23, minute: 59);
       }
       List<String> parts = time.split(":");
-      return TimeOfDay(
-        hour: int.parse(parts[0]),
-        minute: int.parse(parts[1]),
-      );
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
     }
 
     TimeOfDay jamAwalA = parseTime(a.formattedJamAwal);
     TimeOfDay jamAwalB = parseTime(b.formattedJamAwal);
 
     //urutkan berdasarkan jam
-    return (jamAwalA.hour * 60 + jamAwalA.minute)
-        .compareTo(jamAwalB.hour * 60 + jamAwalB.minute);
+    return (jamAwalA.hour * 60 + jamAwalA.minute).compareTo(
+      jamAwalB.hour * 60 + jamAwalB.minute,
+    );
   }
 
   //fungsi untuk memuat data dari local storage
@@ -102,7 +100,7 @@ class JadwalkuliahC extends GetxController {
     isLoading.value = true;
     errorMsg.value = '';
     try {
-      List<Matkul> localData = JadwalKuliahLocal.getAllMatkulsL();
+      List<Matkul> localData = JadwalService.getAllMatkulsL();
 
       if (localData.isNotEmpty) {
         localData.sort((a, b) => _compareMatkul(a, b));
@@ -137,7 +135,7 @@ class JadwalkuliahC extends GetxController {
       allMatkul.add(newMatkul);
 
       //simpan ke local storage
-      await JadwalKuliahLocal.saveMatkulL(newMatkul);
+      await JadwalService.saveMatkulL(newMatkul);
 
       try {
         final dayController = Get.find<HariKuliahC>();
@@ -168,15 +166,13 @@ class JadwalkuliahC extends GetxController {
         day: hari.value!,
       );
 
-      int index = allMatkul.indexWhere(
-        (matkul) => matkul.matkulId == id,
-      );
+      int index = allMatkul.indexWhere((matkul) => matkul.matkulId == id);
 
       if (index != -1) {
         allMatkul[index] = updatedMatkul;
 
         //update di local storage
-        await JadwalKuliahLocal.saveMatkulL(updatedMatkul);
+        await JadwalService.saveMatkulL(updatedMatkul);
 
         // Perbarui daftar hari unik setelah memperbarui matkul
         try {
@@ -196,12 +192,10 @@ class JadwalkuliahC extends GetxController {
   Future<void> deleteMatkuls(String id, HariKuliahC dayKuliahController) async {
     try {
       //hapus dari list local
-      allMatkul.removeWhere(
-        (product) => product.matkulId == id,
-      );
+      allMatkul.removeWhere((product) => product.matkulId == id);
 
       //hapus dari local storage
-      await JadwalKuliahLocal.deleteMatkulL(id);
+      await JadwalService.deleteMatkulL(id);
 
       // Perbarui daftar hari unik setelah menghapus matkul
       dayKuliahController.getUniqueDays(this);
@@ -217,9 +211,7 @@ class JadwalkuliahC extends GetxController {
     try {
       // Tampilkan loading indicator
       Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
+        const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
 
@@ -230,7 +222,7 @@ class JadwalkuliahC extends GetxController {
       clearData();
 
       //hapus data dari local storage
-      await JadwalKuliahLocal.deleteAllMatkulL();
+      await JadwalService.deleteAllMatkulL();
 
       // Perbarui tampilan hari
       hariKuliahProvider.clearAllDays();

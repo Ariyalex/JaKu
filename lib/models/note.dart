@@ -16,10 +16,18 @@ class Note extends HiveObject {
   @HiveField(3)
   String? matkul;
 
+  @HiveField(4)
+  DateTime? createdOn;
+
+  @HiveField(5)
+  DateTime? editedOn;
+
   Note({
     this.id,
     this.title,
     this.desc,
     this.matkul,
+    this.createdOn,
+    this.editedOn,
   });
 }

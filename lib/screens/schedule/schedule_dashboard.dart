@@ -9,8 +9,8 @@ import 'package:jaku/widgets/schedule_widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../controllers/hari_kuliah_c.dart';
-import '../../controllers/jadwal_kuliah_c.dart';
+import '../../controllers/matkul_controllers/hari_kuliah_c.dart';
+import '../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import '../../routes/route_named.dart';
 
 import 'dart:math' as math;
