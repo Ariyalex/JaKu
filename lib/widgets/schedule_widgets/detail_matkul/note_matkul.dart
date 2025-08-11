@@ -44,7 +44,7 @@ class NoteMatkul extends StatelessWidget {
         ),
         notes.isEmpty
             ? Text("Belum ada catatan.", style: theme.textTheme.bodyMedium)
-            : NoteGlobal(notes: notes, showMatkul: false),
+            : NoteGlobal(showMatkul: false),
       ],
     );
   }

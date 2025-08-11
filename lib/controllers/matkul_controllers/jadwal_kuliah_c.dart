@@ -200,7 +200,7 @@ class JadwalkuliahC extends GetxController {
       // Perbarui daftar hari unik setelah menghapus matkul
       dayKuliahController.getUniqueDays(this);
     } catch (error) {
-      print("error deleting product: $error");
+      print("error deleting matkul: $error");
 
       rethrow;
     }

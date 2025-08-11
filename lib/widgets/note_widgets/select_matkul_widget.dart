@@ -1,11 +1,18 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SelectMatkulWidget extends StatefulWidget {
-  const SelectMatkulWidget({super.key, this.selectedMatkul});
+  const SelectMatkulWidget({
+    super.key,
+    this.selectedMatkul,
+    required this.noteId,
+  });
   final String? selectedMatkul;
+  final String noteId;
 
   @override
   State<SelectMatkulWidget> createState() => _SelectMatkulWidgetState();
@@ -24,6 +31,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteC = Get.find<NoteControllers>();
 
     bool isMatkulSelected =
         selectedMatkul != null && selectedMatkul!.isNotEmpty;
@@ -79,6 +87,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
         onChanged: (value) {
           setState(() {
             selectedMatkul = value as String?;
+            noteC.matkulC.value = value as String;
           });
         },
         dropdownStyleData: DropdownStyleData(

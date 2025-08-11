@@ -6,7 +6,7 @@ class NoteService {
 
   //init hive
   static Future<void> initNoteService() async {
-    if (!Hive.isAdapterRegistered(0)) {
+    if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(NoteAdapter());
     }
     await Hive.openBox<Note>(noteBoxName);

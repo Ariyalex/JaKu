@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:hive/hive.dart';
+import 'package:jaku/controllers/matkul_controllers/pdf_back.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/widgets/schedule_widgets/add_matkul.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/card_view.dart';
@@ -25,18 +26,30 @@ class ScheduleDashboard extends StatefulWidget {
 
 class _ScheduleDashboardState extends State<ScheduleDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final allMatkulProvider = Get.find<JadwalkuliahC>();
-  final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
+  late JadwalkuliahC jadwalKuliahC;
+  late HariKuliahC hariKuliahC;
 
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
 
   RxBool isCardView = true.obs;
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    Get.delete<JadwalkuliahC>();
+    Get.delete<HariKuliahC>();
+    Get.delete<PdfBack>();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
+    jadwalKuliahC = Get.put(JadwalkuliahC());
+    hariKuliahC = Get.put(HariKuliahC());
+    Get.put(PdfBack());
     loadViewValue();
-    jadwalKuliahDayProvider.getOrderedDays();
+    hariKuliahC.getOrderedDays();
   }
 
   Future<void> loadViewValue() async {
