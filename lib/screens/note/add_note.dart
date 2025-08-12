@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
@@ -12,30 +14,49 @@ class AddNote extends StatefulWidget {
 
 class _AddNoteState extends State<AddNote> {
   final noteC = Get.find<NoteControllers>();
-  String noteId = Get.arguments;
+  late final StreamSubscription _matkulSub;
+  String? noteId;
+  bool isDisposing = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      noteC.titleC.addListener(() => noteC.onNoteChanged(noteId));
-      noteC.noteC.addListener(() => noteC.onNoteChanged(noteId));
+      noteC.titleC.addListener(_onAnyChanged);
+      noteC.noteC.addListener(_onAnyChanged);
+      _matkulSub = noteC.matkulC.listen((_) => _onAnyChanged());
     });
+  }
+
+  void _onAnyChanged() {
+    if (isDisposing) return;
+    noteId ??= noteC.addNote();
+    noteC.onNoteChanged(noteId!);
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    final note = noteC.selectById(noteId);
-    if (note != null &&
-        (note.matkul?.isEmpty ?? true) &&
-        (note.title?.isEmpty ?? true)) {
+    // isDisposing = true;
+    noteC.titleC.removeListener(_onAnyChanged);
+    noteC.noteC.removeListener(_onAnyChanged);
+    _matkulSub.cancel();
+    if (noteId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        noteC.deleteNote(noteId);
+        noteC.matkulC.value = "";
+        noteC.titleC.clear();
+        noteC.noteC.clear();
+
+        final note = noteC.selectById(noteId!);
+        if (note != null &&
+            (note.desc?.isEmpty ?? true) &&
+            (note.title?.isEmpty ?? true)) {
+          noteC.deleteNote(noteId!);
+        }
       });
     }
+
+    super.dispose();
   }
 
   @override
@@ -44,10 +65,10 @@ class _AddNoteState extends State<AddNote> {
 
     return Scaffold(
       appBar: AppBar(
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SelectMatkulWidget(noteId: noteId),
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: SelectMatkulWidget(),
           ),
         ],
       ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
@@ -16,6 +18,7 @@ class DetailNote extends StatefulWidget {
 class _DetailNoteState extends State<DetailNote> {
   final noteC = Get.find<NoteControllers>();
   late Note? selectedNote;
+  late final StreamSubscription _matkulSub;
   final noteId = Get.arguments;
 
   @override
@@ -26,9 +29,29 @@ class _DetailNoteState extends State<DetailNote> {
     noteC.titleC.text = selectedNote?.title ?? '';
     noteC.noteC.text = selectedNote?.desc ?? '';
     noteC.matkulC.value = selectedNote?.matkul ?? '';
-    noteC.titleC.addListener(() => noteC.onNoteChanged(noteId));
-    noteC.noteC.addListener(() => noteC.onNoteChanged(noteId));
-    noteC.matkulC.listen((_) => noteC.onNoteChanged(noteId));
+
+    noteC.titleC.addListener(_onAnyChanged);
+    noteC.noteC.addListener(_onAnyChanged);
+    _matkulSub = noteC.matkulC.listen((_) => noteC.onNoteChanged(noteId));
+  }
+
+  void _onAnyChanged() {
+    noteC.onNoteChanged(noteId!);
+  }
+
+  @override
+  void dispose() {
+    noteC.titleC.removeListener(_onAnyChanged);
+    noteC.noteC.removeListener(_onAnyChanged);
+    _matkulSub.cancel();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      noteC.matkulC.value = "";
+      noteC.titleC.clear();
+      noteC.noteC.clear();
+    });
+
+    super.dispose();
   }
 
   @override
@@ -42,7 +65,6 @@ class _DetailNoteState extends State<DetailNote> {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SelectMatkulWidget(
               selectedMatkul: getInitials(selectedNote?.matkul ?? ""),
-              noteId: noteId,
             ),
           ),
           IconButton(

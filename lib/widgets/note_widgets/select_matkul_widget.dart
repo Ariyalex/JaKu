@@ -6,13 +6,8 @@ import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SelectMatkulWidget extends StatefulWidget {
-  const SelectMatkulWidget({
-    super.key,
-    this.selectedMatkul,
-    required this.noteId,
-  });
+  const SelectMatkulWidget({super.key, this.selectedMatkul});
   final String? selectedMatkul;
-  final String noteId;
 
   @override
   State<SelectMatkulWidget> createState() => _SelectMatkulWidgetState();
@@ -70,6 +65,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
                   onPressed: () {
                     setState(() {
                       selectedMatkul = '';
+                      noteC.matkulC.value = null;
                     });
                   },
                   tooltip: 'Reset matkul',

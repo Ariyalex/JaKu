@@ -20,13 +20,16 @@ class NoteControllers extends GetxController {
 
   Timer? debounce;
 
+  //save note debounce
   void onNoteChanged(String id) {
     if (debounce?.isActive ?? false) debounce!.cancel();
     debounce = Timer(const Duration(milliseconds: 300), () {
       updateNote(id);
+      print("debounce save");
     });
   }
 
+  //select note by id
   Note? selectById(String id) {
     if (allNote.isEmpty) {
       debugPrint("data kosong, pastikan sudah memanggil getonce");
@@ -38,11 +41,25 @@ class NoteControllers extends GetxController {
     );
   }
 
-  Future<void> loadAllNotes() async {
+  //load all note and delete empty note
+  void loadAllNotes() {
     isLoading.value = true;
     try {
       allNote.clear();
-      allNote.value = NoteService.getAllNoteService();
+
+      final notes = NoteService.getAllNoteService();
+
+      List<Note> noteList = [];
+      for (var note in notes) {
+        if ((note.title == null || note.title == "") &&
+            (note.desc == null || note.desc == "")) {
+          NoteService.deleteNoteService(note.id!);
+        } else {
+          noteList.add(note);
+        }
+      }
+
+      allNote.value = noteList;
     } catch (error) {
       print("error load note: $error");
       rethrow;
@@ -51,6 +68,7 @@ class NoteControllers extends GetxController {
     }
   }
 
+  //add note with return note id
   String addNote() {
     try {
       Note newNote = Note(
@@ -73,6 +91,7 @@ class NoteControllers extends GetxController {
     }
   }
 
+  //update note
   Future<void> updateNote(String id) async {
     try {
       Note updatedNote = Note(
@@ -95,6 +114,7 @@ class NoteControllers extends GetxController {
     }
   }
 
+  //delete note by id
   Future<void> deleteNote(String id) async {
     try {
       allNote.removeWhere((note) => note.id == id);
@@ -106,12 +126,7 @@ class NoteControllers extends GetxController {
     }
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    NoteService.initNoteService();
-  }
-
+  //dispose debaunce when onclose
   @override
   void onClose() {
     // TODO: implement onClose

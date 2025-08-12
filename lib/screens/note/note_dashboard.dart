@@ -34,8 +34,6 @@ class _NoteDashboardState extends State<NoteDashboard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final noteC = Get.find<NoteControllers>();
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -82,8 +80,7 @@ class _NoteDashboardState extends State<NoteDashboard> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final noteId = noteC.addNote();
-          Get.toNamed(RouteNamed.addNote, arguments: noteId);
+          Get.toNamed(RouteNamed.addNote);
         },
         shape: const CircleBorder(),
         child: Icon(LucideIcons.plus),
