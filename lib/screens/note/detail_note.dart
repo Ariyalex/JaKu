@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/note.dart';
-import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -17,6 +17,7 @@ class DetailNote extends StatefulWidget {
 
 class _DetailNoteState extends State<DetailNote> {
   final noteC = Get.find<NoteControllers>();
+  final matkulC = Get.find<JadwalkuliahC>();
   late Note? selectedNote;
   late final StreamSubscription _matkulSub;
   final noteId = Get.arguments;
@@ -32,11 +33,13 @@ class _DetailNoteState extends State<DetailNote> {
 
     noteC.titleC.addListener(_onAnyChanged);
     noteC.noteC.addListener(_onAnyChanged);
-    _matkulSub = noteC.matkulC.listen((_) => noteC.onNoteChanged(noteId));
+    _matkulSub = noteC.matkulC.listen(
+      (_) => noteC.onNoteChanged(noteId, matkulC),
+    );
   }
 
   void _onAnyChanged() {
-    noteC.onNoteChanged(noteId!);
+    noteC.onNoteChanged(noteId!, matkulC);
   }
 
   @override
@@ -63,9 +66,7 @@ class _DetailNoteState extends State<DetailNote> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SelectMatkulWidget(
-              selectedMatkul: getInitials(selectedNote?.matkul ?? ""),
-            ),
+            child: SelectMatkulWidget(matkulId: selectedNote?.matkulId ?? ""),
           ),
           IconButton(
             onPressed: () {

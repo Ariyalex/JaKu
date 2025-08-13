@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
@@ -10,6 +12,7 @@ import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/controllers/version_control.dart';
 import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/schedule/schedule_dashboard.dart';
+import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/services/note_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
@@ -24,13 +27,16 @@ void main() async {
 
   //inisialisasi hive
   await Hive.initFlutter();
-  await JadwalService.initMatkulService();
+  await JadwalService.initScheduleService();
   await NoteService.initNoteService();
+  await MatkulService.iniMatkulService();
   // Hive.registerAdapter(TaskAdapter());
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
 
-  Get.put(VersionControl());
+  Get.put(VersionControl(), permanent: true);
+  Get.put(HariKuliahC(), permanent: true);
+  Get.put(JadwalkuliahC(), permanent: true);
 
   //init theme
   await Hive.openBox('settings');

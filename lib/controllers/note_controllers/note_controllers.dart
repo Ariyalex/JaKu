@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/services/note_service.dart';
 import 'package:uuid/uuid.dart';
@@ -11,7 +13,7 @@ var uuid = const Uuid();
 class NoteControllers extends GetxController {
   final titleC = TextEditingController();
   final noteC = TextEditingController();
-  RxnString matkulC = RxnString();
+  RxnString matkulC = RxnString(); //ini bersi matkul id
   RxBool isSortByCreatedDate = true.obs;
 
   final RxBool isLoading = false.obs;
@@ -21,10 +23,10 @@ class NoteControllers extends GetxController {
   Timer? debounce;
 
   //save note debounce
-  void onNoteChanged(String id) {
+  void onNoteChanged(String id, JadwalkuliahC jadwalKuliahC) {
     if (debounce?.isActive ?? false) debounce!.cancel();
     debounce = Timer(const Duration(milliseconds: 300), () {
-      updateNote(id);
+      updateNote(id, jadwalKuliahC);
       print("debounce save");
     });
   }
@@ -77,7 +79,6 @@ class NoteControllers extends GetxController {
         desc: noteC.text,
         createdOn: DateTime.now(),
         editedOn: DateTime.now(),
-        matkul: matkulC.value,
       );
 
       allNote.add(newNote);
@@ -92,15 +93,27 @@ class NoteControllers extends GetxController {
   }
 
   //update note
-  Future<void> updateNote(String id) async {
+  Future<void> updateNote(String id, JadwalkuliahC jadwalkuliahC) async {
     try {
-      Note updatedNote = Note(
-        id: id,
-        title: titleC.text,
-        desc: noteC.text,
-        editedOn: DateTime.now(),
-        matkul: matkulC.value,
-      );
+      Note updatedNote;
+      if (matkulC.value != null) {
+        Matkul? selectedMatkul = jadwalkuliahC.selectMatkulById(matkulC.value!);
+        updatedNote = Note(
+          id: id,
+          matkulId: matkulC.value,
+          title: titleC.text,
+          desc: noteC.text,
+          editedOn: DateTime.now(),
+          matkul: selectedMatkul!.matkul,
+        );
+      } else {
+        updatedNote = Note(
+          id: id,
+          title: titleC.text,
+          desc: noteC.text,
+          editedOn: DateTime.now(),
+        );
+      }
 
       int index = allNote.indexWhere((note) => note.id == id);
 
@@ -124,6 +137,13 @@ class NoteControllers extends GetxController {
       print("error deleting note: $error");
       rethrow;
     }
+  }
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    loadAllNotes();
   }
 
   //dispose debaunce when onclose

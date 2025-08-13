@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:jaku/bindings/detail_jadwal_binding.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/screens/note/add_note.dart';
 import 'package:jaku/screens/note/detail_note.dart';
@@ -21,7 +22,11 @@ class AppPage {
     GetPage(name: RouteNamed.pdfParsing, page: () => const PdfParsing()),
     GetPage(name: RouteNamed.guidePdf, page: () => const GuidePdf()),
     GetPage(name: RouteNamed.guideGeneral, page: () => const GuideGeneral()),
-    GetPage(name: RouteNamed.detailMatkul, page: () => const DetailMatkul()),
+    GetPage(
+      name: RouteNamed.detailMatkul,
+      binding: DetailJadwalBinding(),
+      page: () => const DetailMatkul(),
+    ),
     GetPage(name: RouteNamed.addNote, page: () => const AddNote()),
     GetPage(name: RouteNamed.detailNote, page: () => const DetailNote()),
   ];

@@ -1,15 +1,31 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
-import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/jadwal.dart';
 
 var uuid = const Uuid();
+
+String getInitials(String kalimat) {
+  final words = kalimat
+      .split(' ')
+      .where((word) => word.isNotEmpty && word.toLowerCase() != 'dan')
+      .toList();
+
+  if (words.length <= 2) {
+    // Kembalikan kalimat asli dengan kapitalisasi awal tiap kata
+    return words.map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+  }
+
+  // Jika lebih dari 2 kata, ambil huruf awal tiap kata
+  return words.map((word) => word[0].toUpperCase()).join();
+}
 
 class JadwalkuliahC extends GetxController {
   //text controller
@@ -40,17 +56,25 @@ class JadwalkuliahC extends GetxController {
 
   final color = AppTheme.dark;
 
+  final RxList<Jadwal> allSchedule = <Jadwal>[].obs;
   final RxList<Matkul> allMatkul = <Matkul>[].obs;
 
-  int get jumlahMatkul => allMatkul.length;
+  int get jumlahSchedule => allSchedule.length;
 
-  Matkul? selectById(String id) {
-    if (allMatkul.isEmpty) {
+  Jadwal? selectById(String id) {
+    if (allSchedule.isEmpty) {
       debugPrint("data kosong, pastikan sudah memanggil getonce");
       return null;
     }
+    return allSchedule.firstWhere(
+      (element) => element.id == id,
+      orElse: () => throw Exception("Jadwal degnan ID $id tidak ditemaukan"),
+    );
+  }
+
+  Matkul? selectMatkulById(String id) {
     return allMatkul.firstWhere(
-      (element) => element.matkulId == id,
+      (element) => element.id == id,
       orElse: () => throw Exception("Matkul degnan ID $id tidak ditemaukan"),
     );
   }
@@ -61,18 +85,17 @@ class JadwalkuliahC extends GetxController {
   }
 
   void clearData() {
-    allMatkul.clear();
+    allSchedule.clear();
   }
 
   @override
   void onInit() async {
     super.onInit();
-    await JadwalService.initMatkulService();
-    loadFromLocalStorage();
+    loadSchedule();
   }
 
   //fungsi mebandingkan dua matkul saat sorting
-  int _compareMatkul(Matkul a, Matkul b) {
+  int _compareMatkul(Jadwal a, Jadwal b) {
     // 1. urutkan berdasarkan hari
     int dayCompare = getDayIndex(a.day).compareTo(getDayIndex(b.day));
     if (dayCompare != 0) return dayCompare;
@@ -96,19 +119,25 @@ class JadwalkuliahC extends GetxController {
   }
 
   //fungsi untuk memuat data dari local storage
-  Future<void> loadFromLocalStorage() async {
+  Future<void> loadSchedule() async {
     isLoading.value = true;
     errorMsg.value = '';
     try {
-      List<Matkul> localData = JadwalService.getAllMatkulsL();
+      // Load schedule
+      List<Jadwal> localData = JadwalService.getAllScheduleService();
 
       if (localData.isNotEmpty) {
         localData.sort((a, b) => _compareMatkul(a, b));
-        allMatkul.clear();
-        allMatkul.addAll(localData);
+        allSchedule.clear();
+        allSchedule.addAll(localData);
 
         Get.find<HariKuliahC>().getUniqueDays(this);
       }
+
+      // Load matkul
+      List<Matkul> matkulData = MatkulService.getAllMatkulService();
+      allMatkul.clear();
+      allMatkul.addAll(matkulData);
     } catch (e) {
       print("error loading from local storage: $e");
       errorMsg.value = 'Error: $e';
@@ -117,11 +146,34 @@ class JadwalkuliahC extends GetxController {
     }
   }
 
-  Future<void> addMatkuls() async {
+  Future<void> addSchedules() async {
     try {
-      Matkul newMatkul = Matkul(
-        matkulId: uuid.v4(),
-        matkul: matkulC.text,
+      //check if there is matkul in allmatkul
+      String matkulName = matkulC.text.trim();
+      Matkul? existing = allMatkul.firstWhereOrNull(
+        (item) => item.matkul == matkulName,
+      );
+
+      //if not, add matkul to allmatkul
+      String matkulId;
+      if (existing == null) {
+        matkulId = uuid.v4();
+        final newMatkul = Matkul(
+          id: matkulId,
+          matkul: matkulName,
+          abbreviation: getInitials(matkulName),
+        );
+        allMatkul.add(newMatkul);
+        await MatkulService.saveMatkulService(newMatkul);
+      } else {
+        matkulId = existing.id!;
+      }
+
+      //new schedule
+      Jadwal newSchedule = Jadwal(
+        id: uuid.v4(),
+        matkulId: matkulId,
+        matkul: matkulName,
         kelas: kelas.value,
         formattedJamAwal: jamAwal.value!,
         formattedJamAkhir: jamAkhir.value,
@@ -131,11 +183,11 @@ class JadwalkuliahC extends GetxController {
         day: hari.value!,
       );
 
-      //update list lokal
-      allMatkul.add(newMatkul);
+      //update list
+      allSchedule.add(newSchedule);
 
-      //simpan ke local storage
-      await JadwalService.saveMatkulL(newMatkul);
+      //save to hive
+      await JadwalService.saveScheduleService(newSchedule);
 
       try {
         final dayController = Get.find<HariKuliahC>();
@@ -151,12 +203,33 @@ class JadwalkuliahC extends GetxController {
     }
   }
 
-  Future<void> updateMatkul(String id) async {
+  Future<void> updateSchedule(String id) async {
     try {
+      //check if there is matkul in allmatkul
+      String matkulName = matkulC.text.trim();
+      Matkul? existing = allMatkul.firstWhereOrNull(
+        (item) => item.matkul == matkulName,
+      );
+
+      //if not, add matkul to allmatkul
+      String matkulId;
+      if (existing == null) {
+        matkulId = uuid.v4();
+        final newMatkul = Matkul(
+          id: matkulId,
+          matkul: matkulName,
+          abbreviation: getInitials(matkulName),
+        );
+        allMatkul.add(newMatkul);
+        await MatkulService.saveMatkulService(newMatkul);
+      } else {
+        matkulId = existing.id!;
+      }
+
       //buat objek matkul baru dengan data yang diudate
-      Matkul updatedMatkul = Matkul(
-        matkulId: id,
-        matkul: matkulC.text,
+      Jadwal updatedSchedule = Jadwal(
+        id: id,
+        matkul: matkulName,
         kelas: kelas.value,
         formattedJamAwal: jamAwal.value!,
         formattedJamAkhir: jamAkhir.value,
@@ -166,13 +239,13 @@ class JadwalkuliahC extends GetxController {
         day: hari.value!,
       );
 
-      int index = allMatkul.indexWhere((matkul) => matkul.matkulId == id);
+      int index = allSchedule.indexWhere((matkul) => matkul.id == id);
 
       if (index != -1) {
-        allMatkul[index] = updatedMatkul;
+        allSchedule[index] = updatedSchedule;
 
         //update di local storage
-        await JadwalService.saveMatkulL(updatedMatkul);
+        await JadwalService.saveScheduleService(updatedSchedule);
 
         // Perbarui daftar hari unik setelah memperbarui matkul
         try {
@@ -189,16 +262,39 @@ class JadwalkuliahC extends GetxController {
     }
   }
 
-  Future<void> deleteMatkuls(String id, HariKuliahC dayKuliahController) async {
+  Future<void> deleteSchedule(
+    String id,
+    HariKuliahC dayKuliahController,
+  ) async {
     try {
+      Jadwal? selectedSchedule = selectById(id);
+
       //hapus dari list local
-      allMatkul.removeWhere((product) => product.matkulId == id);
+      allSchedule.removeWhere((product) => product.id == id);
 
       //hapus dari local storage
-      await JadwalService.deleteMatkulL(id);
+      await JadwalService.deleteScheduleService(id);
 
       // Perbarui daftar hari unik setelah menghapus matkul
       dayKuliahController.getUniqueDays(this);
+
+      //check if there is schedule with same matkul name
+      String matkulName = selectedSchedule!.matkul;
+      bool matkulStillExists = allSchedule.any(
+        (item) => item.matkul == matkulName,
+      );
+
+      Matkul? existing;
+      if (!matkulStillExists) {
+        // Jika tidak ada lagi jadwal dengan nama matkul tersebut, hapus dari allMatkul
+        existing = allMatkul.firstWhereOrNull(
+          (item) => item.matkul == matkulName,
+        );
+        if (existing != null) {
+          allMatkul.removeWhere((item) => item.matkul == matkulName);
+          await MatkulService.deleteMatkulService(existing.id!);
+        }
+      }
     } catch (error) {
       print("error deleting matkul: $error");
 
@@ -207,7 +303,7 @@ class JadwalkuliahC extends GetxController {
   }
 
   // Menghapus semua data jadwal kuliah dari Firestore dan controller lokal
-  Future<void> clearAllData() async {
+  Future<void> clearAllSchedule() async {
     try {
       // Tampilkan loading indicator
       Get.dialog(
@@ -222,10 +318,14 @@ class JadwalkuliahC extends GetxController {
       clearData();
 
       //hapus data dari local storage
-      await JadwalService.deleteAllMatkulL();
+      await JadwalService.deleteAllScheduleService();
 
       // Perbarui tampilan hari
       hariKuliahProvider.clearAllDays();
+
+      // Hapus semua data matkul dari controller dan local storage
+      allMatkul.clear();
+      await MatkulService.deleteAllMatkulService();
 
       // Tutup dialog loading
       Get.back();
@@ -238,9 +338,6 @@ class JadwalkuliahC extends GetxController {
         backgroundColor: Colors.green.shade400,
         colorText: Colors.white,
       );
-
-      // Kembali ke halaman home
-      Get.offNamed(RouteNamed.scheduleDashboard);
     } catch (e) {
       // Tutup dialog loading jika terjadi error
       Get.back();

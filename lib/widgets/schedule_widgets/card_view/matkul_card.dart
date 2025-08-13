@@ -9,7 +9,7 @@ import '../../../routes/route_named.dart';
 class MatkulCard extends StatelessWidget {
   const MatkulCard({super.key, required this.matkul});
 
-  final Matkul matkul;
+  final Jadwal matkul;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class MatkulCard extends StatelessWidget {
         color: theme.highlightColor,
         child: ListTile(
           onTap: () {
-            Get.toNamed(RouteNamed.detailMatkul, arguments: matkul.matkulId);
+            Get.toNamed(RouteNamed.detailMatkul, arguments: matkul.id);
           },
           onLongPress: () {
             Get.defaultDialog(
@@ -49,10 +49,7 @@ class MatkulCard extends StatelessWidget {
               confirm: FilledButton(
                 onPressed: () async {
                   try {
-                    await jadwalKuliahC.deleteMatkuls(
-                      matkul.matkulId!,
-                      hariKuliahC,
-                    );
+                    await jadwalKuliahC.deleteSchedule(matkul.id!, hariKuliahC);
 
                     Get.back();
 

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
 import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/matkul_card.dart';
-import 'package:jaku/widgets/jadwal_kosong.dart';
+import 'package:jaku/widgets/schedule_widgets/jadwal_kosong.dart';
 
 class CardView extends StatelessWidget {
   const CardView({super.key});
@@ -20,7 +20,7 @@ class CardView extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       } else if (jadwalKuliahC.errorMsg.value.isNotEmpty) {
         return Center(child: Text(jadwalKuliahC.errorMsg.value));
-      } else if (jadwalKuliahC.allMatkul.isEmpty) {
+      } else if (jadwalKuliahC.allSchedule.isEmpty) {
         return const JadwalKosong();
       } else {
         return Flex(
@@ -37,7 +37,7 @@ class CardView extends StatelessWidget {
                 itemCount: hariKuliahC.jadwalHari.length,
                 itemBuilder: (context, index) {
                   final hariKuliah = hariKuliahC.jadwalHari[index];
-                  final matkulList = jadwalKuliahC.allMatkul
+                  final matkulList = jadwalKuliahC.allSchedule
                       .where((matkul) => matkul.day == hariKuliah.day)
                       .toList();
                   return Card(

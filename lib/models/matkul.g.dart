@@ -1,50 +1,38 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'note.dart';
+part of 'matkul.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class NoteAdapter extends TypeAdapter<Note> {
+class MatkulAdapter extends TypeAdapter<Matkul> {
   @override
-  final int typeId = 2;
+  final int typeId = 1;
 
   @override
-  Note read(BinaryReader reader) {
+  Matkul read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Note(
+    return Matkul(
       id: fields[0] as String?,
-      matkulId: fields[1] as String?,
-      title: fields[2] as String?,
-      desc: fields[3] as String?,
-      matkul: fields[4] as String?,
-      createdOn: fields[5] as DateTime?,
-      editedOn: fields[6] as DateTime?,
+      matkul: fields[1] as String,
+      abbreviation: fields[2] as String?,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Note obj) {
+  void write(BinaryWriter writer, Matkul obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.matkulId)
-      ..writeByte(2)
-      ..write(obj.title)
-      ..writeByte(3)
-      ..write(obj.desc)
-      ..writeByte(4)
       ..write(obj.matkul)
-      ..writeByte(5)
-      ..write(obj.createdOn)
-      ..writeByte(6)
-      ..write(obj.editedOn);
+      ..writeByte(2)
+      ..write(obj.abbreviation);
   }
 
   @override
@@ -53,7 +41,7 @@ class NoteAdapter extends TypeAdapter<Note> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NoteAdapter &&
+      other is MatkulAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -43,8 +43,7 @@ class TaskMatkul extends StatelessWidget {
                   useRootNavigator: true,
                   bounce: true,
                   backgroundColor: theme.colorScheme.surfaceContainer,
-                  builder: (context) =>
-                      AddTaskModal(matkul: getInitials(matkul!)),
+                  builder: (context) => AddTaskModal(matkul: matkul!),
                 );
               },
             ),

@@ -147,7 +147,7 @@ class _TableState extends State<Table> {
     final textTheme = Theme.of(context).textTheme;
 
     return Obx(() {
-      final allJadwal = jadwalKuliahC.allMatkul;
+      final allJadwal = jadwalKuliahC.allSchedule;
       final hari = hariKuliahC.jadwalHariTerurut;
 
       //fungsi mendapatkanJam
@@ -225,7 +225,7 @@ class _TableState extends State<Table> {
           onTap: () {
             Get.toNamed(
               RouteNamed.detailMatkul,
-              arguments: matchingMatkul.first.matkulId,
+              arguments: matchingMatkul.first.id,
             );
           },
           onLongPress: () {
@@ -242,8 +242,8 @@ class _TableState extends State<Table> {
               confirm: FilledButton(
                 onPressed: () async {
                   try {
-                    await jadwalKuliahC.deleteMatkuls(
-                      matchingMatkul.first.matkulId!,
+                    await jadwalKuliahC.deleteSchedule(
+                      matchingMatkul.first.id!,
                       hariKuliahC,
                     );
 

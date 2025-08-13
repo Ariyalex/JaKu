@@ -15,11 +15,11 @@ class NoteDashboard extends StatefulWidget {
 
 class _NoteDashboardState extends State<NoteDashboard> {
   late NoteControllers noteController;
+
   @override
   void initState() {
     super.initState();
     noteController = Get.put(NoteControllers());
-    noteController.loadAllNotes();
   }
 
   @override
@@ -33,6 +33,7 @@ class _NoteDashboardState extends State<NoteDashboard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    print(noteController.allNote);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -53,7 +54,7 @@ class _NoteDashboardState extends State<NoteDashboard> {
                 ),
                 child: Obx(
                   () => noteController.allNote.isNotEmpty
-                      ? NoteGlobal()
+                      ? NoteGlobal(notes: noteController.allNote)
                       : Center(
                           child: Column(
                             children: [

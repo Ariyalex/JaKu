@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
 
 class AddNote extends StatefulWidget {
@@ -14,14 +16,19 @@ class AddNote extends StatefulWidget {
 
 class _AddNoteState extends State<AddNote> {
   final noteC = Get.find<NoteControllers>();
+  final matkulC = Get.find<JadwalkuliahC>();
+
   late final StreamSubscription _matkulSub;
   String? noteId;
-  bool isDisposing = false;
+  late Matkul? selectedMatkul;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    selectedMatkul = Get.arguments;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       noteC.titleC.addListener(_onAnyChanged);
       noteC.noteC.addListener(_onAnyChanged);
@@ -30,14 +37,12 @@ class _AddNoteState extends State<AddNote> {
   }
 
   void _onAnyChanged() {
-    if (isDisposing) return;
     noteId ??= noteC.addNote();
-    noteC.onNoteChanged(noteId!);
+    noteC.onNoteChanged(noteId!, matkulC);
   }
 
   @override
   void dispose() {
-    // isDisposing = true;
     noteC.titleC.removeListener(_onAnyChanged);
     noteC.noteC.removeListener(_onAnyChanged);
     _matkulSub.cancel();
@@ -65,10 +70,12 @@ class _AddNoteState extends State<AddNote> {
 
     return Scaffold(
       appBar: AppBar(
-        actions: const [
+        actions: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
-            child: SelectMatkulWidget(),
+            child: selectedMatkul == null
+                ? SelectMatkulWidget()
+                : SelectMatkulWidget(matkulId: selectedMatkul!.id),
           ),
         ],
       ),

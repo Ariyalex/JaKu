@@ -8,22 +8,26 @@ class Note extends HiveObject {
   String? id;
 
   @HiveField(1)
-  String? title;
+  String? matkulId;
 
   @HiveField(2)
-  String? desc;
+  String? title;
 
   @HiveField(3)
-  String? matkul;
+  String? desc;
 
   @HiveField(4)
-  DateTime? createdOn;
+  String? matkul;
 
   @HiveField(5)
+  DateTime? createdOn;
+
+  @HiveField(6)
   DateTime? editedOn;
 
   Note({
     this.id,
+    this.matkulId,
     this.title,
     this.desc,
     this.matkul,

@@ -35,7 +35,7 @@ class HariKuliahC extends GetxController {
     // Ambil hari-hari unik dari matkul
     Set<String> uniqueDays = {};
 
-    for (var matkul in jadwalKuliah.allMatkul) {
+    for (var matkul in jadwalKuliah.allSchedule) {
       if (matkul.day.isNotEmpty) {
         uniqueDays.add(matkul.day);
       }
@@ -43,7 +43,7 @@ class HariKuliahC extends GetxController {
 
     // Tambahkan hari unik ke jadwalHari
     for (var day in uniqueDays) {
-      var hariData = HariKuliah(matkulId: day, day: day);
+      var hariData = HariKuliah(scheduleId: day, day: day);
       jadwalHari.add(hariData);
       jadwalHariTerurut.add(hariData);
     }

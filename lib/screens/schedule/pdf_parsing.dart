@@ -124,29 +124,6 @@ class PdfParsing extends StatelessWidget {
                 ),
               ),
             ),
-            Obx(() {
-              if (pdfback.allMatkul.isNotEmpty) {
-                return Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Text(
-                      "Jadwal berhasil diproses: \n${pdfback.allMatkul.length} jadwal ditambahkan",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton(
-                      onPressed: () {
-                        Get.offNamed(RouteNamed.scheduleDashboard);
-                      },
-                      child: const Text("Kembali ke Home"),
-                    ),
-                  ],
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            }),
           ],
         ),
       ),

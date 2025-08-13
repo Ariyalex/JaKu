@@ -1,35 +1,40 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
-import 'package:jaku/widgets/note_widgets/note_global.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SelectMatkulWidget extends StatefulWidget {
-  const SelectMatkulWidget({super.key, this.selectedMatkul});
-  final String? selectedMatkul;
+  const SelectMatkulWidget({super.key, this.matkulId});
+  final String? matkulId;
 
   @override
   State<SelectMatkulWidget> createState() => _SelectMatkulWidgetState();
 }
 
 class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
-  List<String> matkulList = ["IMK", "PBO", "Basis Data"];
-  String? selectedMatkul;
+  final matkulC = Get.find<JadwalkuliahC>();
+  Matkul? selectedMatkul;
 
   @override
   void initState() {
     super.initState();
-    selectedMatkul = widget.selectedMatkul;
+    if (widget.matkulId != null) {
+      selectedMatkul = matkulC.selectMatkulById(widget.matkulId!);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final noteC = Get.find<NoteControllers>();
+    final List<Matkul> matkulList = matkulC.allMatkul;
 
     bool isMatkulSelected =
-        selectedMatkul != null && selectedMatkul!.isNotEmpty;
+        selectedMatkul != null &&
+        (selectedMatkul!.abbreviation?.isNotEmpty ?? false);
     return DropdownButtonHideUnderline(
       child: DropdownButton2(
         customButton: Container(
@@ -50,7 +55,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
               const SizedBox(width: 8),
               Text(
                 isMatkulSelected
-                    ? getInitials(selectedMatkul!)
+                    ? selectedMatkul!.abbreviation!
                     : "Select matkul",
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.primary,
@@ -64,7 +69,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
                   padding: EdgeInsets.zero,
                   onPressed: () {
                     setState(() {
-                      selectedMatkul = '';
+                      selectedMatkul = null;
                       noteC.matkulC.value = null;
                     });
                   },
@@ -76,19 +81,21 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
         ),
         items: matkulList
             .map(
-              (item) =>
-                  DropdownMenuItem<Object>(value: item, child: Text(item)),
+              (item) => DropdownMenuItem<Object>(
+                value: item,
+                child: Text(item.abbreviation!),
+              ),
             )
             .toList(),
         onChanged: (value) {
           setState(() {
-            selectedMatkul = value as String?;
-            noteC.matkulC.value = value as String;
+            selectedMatkul = value as Matkul?;
+            noteC.matkulC.value = value!.id;
           });
         },
         dropdownStyleData: DropdownStyleData(
           width: 150,
-
+          maxHeight: 250,
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),

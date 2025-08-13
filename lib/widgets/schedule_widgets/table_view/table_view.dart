@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
-import 'package:jaku/widgets/jadwal_kosong.dart';
+import 'package:jaku/widgets/schedule_widgets/jadwal_kosong.dart';
 import 'package:jaku/widgets/schedule_widgets/table_view/table.dart' as tbl;
 
 class TableView extends StatelessWidget {
@@ -16,7 +16,7 @@ class TableView extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       } else if (jadwalKuliahC.errorMsg.value.isNotEmpty) {
         return Center(child: Text(jadwalKuliahC.errorMsg.value));
-      } else if (jadwalKuliahC.allMatkul.isEmpty) {
+      } else if (jadwalKuliahC.allSchedule.isEmpty) {
         return const JadwalKosong();
       } else {
         return const Flex(

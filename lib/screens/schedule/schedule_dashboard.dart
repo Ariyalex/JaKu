@@ -3,7 +3,7 @@ import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:hive/hive.dart';
 import 'package:jaku/controllers/matkul_controllers/pdf_back.dart';
 import 'package:jaku/controllers/theme_c.dart';
-import 'package:jaku/widgets/schedule_widgets/add_matkul.dart';
+import 'package:jaku/widgets/schedule_widgets/add_jadwal.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/card_view.dart';
 import 'package:get/get.dart';
 import 'package:jaku/widgets/schedule_widgets/table_view/table_view.dart';
@@ -26,8 +26,8 @@ class ScheduleDashboard extends StatefulWidget {
 
 class _ScheduleDashboardState extends State<ScheduleDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late JadwalkuliahC jadwalKuliahC;
-  late HariKuliahC hariKuliahC;
+  final JadwalkuliahC jadwalKuliahC = Get.find<JadwalkuliahC>();
+  final HariKuliahC hariKuliahC = Get.find<HariKuliahC>();
 
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
 
@@ -36,8 +36,6 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
   @override
   void dispose() {
     // TODO: implement dispose
-    Get.delete<JadwalkuliahC>();
-    Get.delete<HariKuliahC>();
     Get.delete<PdfBack>();
     super.dispose();
   }
@@ -45,8 +43,6 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
   @override
   void initState() {
     super.initState();
-    jadwalKuliahC = Get.put(JadwalkuliahC());
-    hariKuliahC = Get.put(HariKuliahC());
     Get.put(PdfBack());
     loadViewValue();
     hariKuliahC.getOrderedDays();
@@ -84,7 +80,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           Get.back(); // Tutup dialog konfirmasi
           final allMatkulProvider = Get.find<JadwalkuliahC>();
 
-          allMatkulProvider.clearAllData();
+          allMatkulProvider.clearAllSchedule();
         },
         child: const Text("Ya"),
       ),
@@ -260,7 +256,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                     useRootNavigator: true,
                     bounce: true,
                     backgroundColor: theme.colorScheme.surfaceContainer,
-                    builder: (context) => const AddMatkul(),
+                    builder: (context) => const AddJadwal(),
                   );
                 },
                 child: Icon(LucideIcons.plus),

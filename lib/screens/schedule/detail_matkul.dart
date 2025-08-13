@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/jadwal.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/models/task.dart';
-import 'package:jaku/widgets/schedule_widgets/edit_matkul.dart';
+import 'package:jaku/widgets/schedule_widgets/edit_jadwal.dart';
 import 'package:jaku/widgets/schedule_widgets/detail_matkul/informasi_matkul.dart';
 import 'package:jaku/widgets/schedule_widgets/detail_matkul/note_matkul.dart';
 import 'package:jaku/widgets/schedule_widgets/detail_matkul/task_matkul.dart';
@@ -19,43 +21,26 @@ class DetailMatkul extends StatefulWidget {
 }
 
 class _DetailMatkulState extends State<DetailMatkul> {
-  final allMatkulProvider = Get.find<JadwalkuliahC>();
+  final jadwalC = Get.find<JadwalkuliahC>();
+  final noteC = Get.find<NoteControllers>();
 
-  late Matkul selectedMatkul;
+  late Jadwal selectedSchedule;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     final matkulId = Get.arguments;
-    selectedMatkul = allMatkulProvider.selectById(matkulId)!;
+    selectedSchedule = jadwalC.selectById(matkulId)!;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final Matkul? selectedMatkul = jadwalC.selectMatkulById(
+      selectedSchedule.matkulId!,
+    );
 
-    // Dummy data untuk notes dan tasks (ganti dengan data asli nanti)
-    final List<Note> notes = [
-      Note(
-        id: "1",
-        title: "Catatan Pertemuan 1",
-        desc: "Bahas pengenalan mata kuliah dan kontrak kuliah.",
-        matkul: "IMK",
-      ),
-      Note(
-        id: "2",
-        title: "Catatan Pertemuan 2",
-        desc: "Diskusi tentang user interface dan user experience.",
-        matkul: "IMK",
-      ),
-      Note(
-        id: "3",
-        title: "Reminder Quiz",
-        desc: "Akan ada quiz minggu depan, materi bab 1-2.",
-        matkul: "IMK",
-      ),
-    ];
     final List<Task> tasks = [
       Task(
         id: "1",
@@ -111,7 +96,7 @@ class _DetailMatkulState extends State<DetailMatkul> {
                 useRootNavigator: true,
                 backgroundColor: theme.colorScheme.surfaceContainer,
                 builder: (context) =>
-                    EditMatkul(matkulId: selectedMatkul.matkulId!),
+                    EditJadwal(jadwalId: selectedSchedule.id!),
               );
             },
             icon: const Icon(LucideIcons.squarePen),
@@ -125,22 +110,29 @@ class _DetailMatkulState extends State<DetailMatkul> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InformasiMatkul(matkul: selectedMatkul),
+                InformasiMatkul(schedule: selectedSchedule),
                 const SizedBox(height: 5),
 
                 // Section Notes
-                NoteMatkul(
-                  theme: theme,
-                  notes: notes,
-                  matkul: selectedMatkul.matkul,
-                ),
+                Obx(() {
+                  final notes = noteC.allNote
+                      .where((note) => note.matkulId == selectedMatkul?.id)
+                      .toList();
+
+                  return NoteMatkul(
+                    theme: theme,
+                    notes: notes,
+                    matkul: selectedMatkul!,
+                  );
+                }),
+
                 const SizedBox(height: 10),
 
                 // Section Tasks
                 TaskMatkul(
                   theme: theme,
                   tasks: tasks,
-                  matkul: selectedMatkul.matkul,
+                  matkul: selectedMatkul!.matkul,
                 ),
               ],
             ),

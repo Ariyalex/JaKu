@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 
 class FilterNoteModal extends StatefulWidget {
   final String? initialDeviceType;
-  const FilterNoteModal({
-    super.key,
-    this.initialDeviceType,
-  });
+  const FilterNoteModal({super.key, this.initialDeviceType});
 
   @override
   State<FilterNoteModal> createState() => _FilterNoteModalState();
 }
 
 class _FilterNoteModalState extends State<FilterNoteModal> {
-  // State variables for filter selections
+  final matkulC = Get.find<JadwalkuliahC>();
 
+  // State variables for filter selections
   String _selectedDeviceType = 'All';
   bool _showActiveOnly = false;
 
   List<String> get deviceTypesList {
-    return ["All", "IMK", "PBO", "Basis Data", "Umum"];
+    return [
+      "All",
+      ...matkulC.allMatkul.map((matkul) => matkul.abbreviation!),
+      "Umum",
+    ];
   }
 
   @override
@@ -86,9 +90,7 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                         _showActiveOnly = false;
                       });
                     },
-                    child: Text(
-                      'Reset',
-                    ),
+                    child: Text('Reset'),
                   ),
                 ),
                 const SizedBox(width: 16),

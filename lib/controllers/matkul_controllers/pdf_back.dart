@@ -10,8 +10,8 @@ import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfBack extends GetxController {
-  final RxList<Matkul> _allMatkul = <Matkul>[].obs;
-  List<Matkul> get allMatkul => _allMatkul;
+  final RxList<Jadwal> _allMatkul = <Jadwal>[].obs;
+  List<Jadwal> get allMatkul => _allMatkul;
 
   final String baseUrl = 'https://ariyalexx.pythonanywhere.com/';
 
@@ -50,7 +50,7 @@ class PdfBack extends GetxController {
 
     try {
       // Clear existing data both in Firebase and locally first
-      await JadwalService.deleteAllMatkulL();
+      await JadwalService.deleteAllScheduleService();
       jadwalProvider.clearData(); // Clear data in the JadwalKuliah provider
 
       responseMessage.value = "Mengunggah dan memproses file...";
@@ -118,7 +118,7 @@ class PdfBack extends GetxController {
             String jamAkhir = waktuParts.length > 1 ? waktuParts[1] : "";
 
             // Create Matkul object
-            Matkul matkulObj = Matkul(
+            Jadwal matkulObj = Jadwal(
               day: hari,
               matkul: mataKuliah,
               formattedJamAwal: jamAwal,
@@ -147,11 +147,11 @@ class PdfBack extends GetxController {
           jadwalProvider.ruanganC.text = matkul.room!;
           jadwalProvider.hari.value = matkul.day;
 
-          await jadwalProvider.addMatkuls();
+          await jadwalProvider.addSchedules();
         }
 
         // Refresh the jadwalProvider data
-        jadwalProvider.loadFromLocalStorage();
+        jadwalProvider.loadSchedule();
 
         isLoading.value = false;
         isUploading.value = false;

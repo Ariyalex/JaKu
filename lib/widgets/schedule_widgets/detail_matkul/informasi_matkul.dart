@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jaku/models/jadwal.dart';
 
 class InformasiMatkul extends StatelessWidget {
-  const InformasiMatkul({super.key, required this.matkul});
-  final Matkul matkul;
+  const InformasiMatkul({super.key, required this.schedule});
+  final Jadwal schedule;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class InformasiMatkul extends StatelessWidget {
                     Icon(Icons.book, color: theme.colorScheme.primary),
                     Expanded(
                       child: Text(
-                        matkul.matkul,
+                        schedule.matkul,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -40,11 +40,12 @@ class InformasiMatkul extends StatelessWidget {
                   ],
                 ),
               ),
-              (matkul.kelas != null && matkul.kelas!.isNotEmpty)
+              (schedule.kelas != null && schedule.kelas!.isNotEmpty)
                   ? Chip(
-                      label: Text("Kelas ${matkul.kelas!}"),
-                      backgroundColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.1),
+                      label: Text("Kelas ${schedule.kelas!}"),
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.1,
+                      ),
                     )
                   : SizedBox.shrink(),
             ],
@@ -56,22 +57,22 @@ class InformasiMatkul extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  matkul.dosen1?.isNotEmpty == true
-                      ? matkul.dosen1!
+                  schedule.dosen1?.isNotEmpty == true
+                      ? schedule.dosen1!
                       : "Dosen belum ditambahkan",
                   style: theme.textTheme.bodyLarge,
                 ),
               ),
             ],
           ),
-          if (matkul.dosen2?.isNotEmpty == true)
+          if (schedule.dosen2?.isNotEmpty == true)
             Row(
               children: [
                 Icon(Icons.person, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    matkul.dosen2!,
+                    schedule.dosen2!,
                     style: theme.textTheme.bodyLarge,
                   ),
                 ),
@@ -85,8 +86,8 @@ class InformasiMatkul extends StatelessWidget {
                 Icon(Icons.room, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  matkul.room?.isNotEmpty == true
-                      ? matkul.room!
+                  schedule.room?.isNotEmpty == true
+                      ? schedule.room!
                       : "Ruang belum diisi",
                   style: theme.textTheme.bodyLarge,
                 ),
@@ -96,21 +97,24 @@ class InformasiMatkul extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.calendar_today,
-                  color: theme.colorScheme.primary, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                matkul.day,
-                style: theme.textTheme.bodyLarge,
+              Icon(
+                Icons.calendar_today,
+                color: theme.colorScheme.primary,
+                size: 20,
               ),
+              const SizedBox(width: 8),
+              Text(schedule.day, style: theme.textTheme.bodyLarge),
               const Spacer(),
-              Icon(Icons.access_time,
-                  color: theme.colorScheme.primary, size: 20),
+              Icon(
+                Icons.access_time,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
               const SizedBox(width: 4),
               Text(
-                matkul.formattedJamAkhir?.isNotEmpty == true
-                    ? "${matkul.formattedJamAwal} - ${matkul.formattedJamAkhir}"
-                    : matkul.formattedJamAwal,
+                schedule.formattedJamAkhir?.isNotEmpty == true
+                    ? "${schedule.formattedJamAwal} - ${schedule.formattedJamAkhir}"
+                    : schedule.formattedJamAwal,
                 style: theme.textTheme.bodyLarge,
               ),
             ],

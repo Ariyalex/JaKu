@@ -8,16 +8,16 @@ import 'package:get/get.dart';
 
 import '../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
 
-class EditMatkul extends StatefulWidget {
-  const EditMatkul({super.key, required this.matkulId});
+class EditJadwal extends StatefulWidget {
+  const EditJadwal({super.key, required this.jadwalId});
 
-  final String matkulId;
+  final String jadwalId;
 
   @override
-  State<EditMatkul> createState() => _AddMatkulState();
+  State<EditJadwal> createState() => _AddMatkulState();
 }
 
-class _AddMatkulState extends State<EditMatkul> {
+class _AddMatkulState extends State<EditJadwal> {
   final allMatkulProvider = Get.find<JadwalkuliahC>();
   final dayKuliahController = Get.find<HariKuliahC>();
 
@@ -33,7 +33,7 @@ class _AddMatkulState extends State<EditMatkul> {
     allMatkulProvider.jamAwal.value = null;
     allMatkulProvider.hari.value = null;
 
-    final selectedMatkul = allMatkulProvider.selectById(widget.matkulId)!;
+    final selectedMatkul = allMatkulProvider.selectById(widget.jadwalId)!;
 
     if (allMatkulProvider.matkulC.text.isEmpty) {
       allMatkulProvider.matkulC.text = selectedMatkul.matkul;
@@ -61,7 +61,7 @@ class _AddMatkulState extends State<EditMatkul> {
 
       try {
         // Wait for the update to complete
-        await allMatkulProvider.updateMatkul(widget.matkulId);
+        await allMatkulProvider.updateSchedule(widget.jadwalId);
 
         // Close loading dialog
         Get.back();

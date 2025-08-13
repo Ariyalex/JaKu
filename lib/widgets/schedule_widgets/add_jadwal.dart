@@ -7,14 +7,14 @@ import 'package:get/get.dart';
 
 import '../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
 
-class AddMatkul extends StatefulWidget {
-  const AddMatkul({super.key});
+class AddJadwal extends StatefulWidget {
+  const AddJadwal({super.key});
 
   @override
-  State<AddMatkul> createState() => _AddMatkulState();
+  State<AddJadwal> createState() => _AddJadwalState();
 }
 
-class _AddMatkulState extends State<AddMatkul> {
+class _AddJadwalState extends State<AddJadwal> {
   final allMatkulProvider = Get.find<JadwalkuliahC>();
 
   String divider(String formattedJamAkhir) {
@@ -50,7 +50,7 @@ class _AddMatkulState extends State<AddMatkul> {
       );
 
       try {
-        await allMatkulProvider.addMatkuls();
+        await allMatkulProvider.addSchedules();
 
         Get.back();
 
