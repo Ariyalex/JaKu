@@ -22,8 +22,8 @@ class NoteAdapter extends TypeAdapter<Note> {
       title: fields[2] as String?,
       desc: fields[3] as String?,
       matkul: fields[4] as String?,
-      createdOn: fields[5] as DateTime?,
-      editedOn: fields[6] as DateTime?,
+      createdOn: fields[5] as DateTime,
+      editedOn: fields[6] as DateTime,
     );
   }
 

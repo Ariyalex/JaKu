@@ -52,9 +52,12 @@ class _NoteDashboardState extends State<NoteDashboard> {
                   left: 12,
                   bottom: 60,
                 ),
-                child: Obx(
-                  () => noteController.allNote.isNotEmpty
-                      ? NoteGlobal(notes: noteController.allNote)
+                child: Obx(() {
+                  final sortedNote = noteController.allNote
+                    ..sort((a, b) => a.createdOn.compareTo(b.createdOn));
+
+                  return noteController.allNote.isNotEmpty
+                      ? NoteGlobal(notes: sortedNote)
                       : Center(
                           child: Column(
                             children: [
@@ -72,8 +75,8 @@ class _NoteDashboardState extends State<NoteDashboard> {
                               ),
                             ],
                           ),
-                        ),
-                ),
+                        );
+                }),
               ),
             ),
           ],

@@ -29,7 +29,7 @@ class _DetailNoteState extends State<DetailNote> {
     selectedNote = noteC.selectById(noteId);
     noteC.titleC.text = selectedNote?.title ?? '';
     noteC.noteC.text = selectedNote?.desc ?? '';
-    noteC.matkulC.value = selectedNote?.matkul ?? '';
+    noteC.matkulC.value = selectedNote?.matkulId ?? '';
 
     noteC.titleC.addListener(_onAnyChanged);
     noteC.noteC.addListener(_onAnyChanged);
@@ -39,6 +39,7 @@ class _DetailNoteState extends State<DetailNote> {
   }
 
   void _onAnyChanged() {
+    print(noteId);
     noteC.onNoteChanged(noteId!, matkulC);
   }
 
@@ -66,7 +67,9 @@ class _DetailNoteState extends State<DetailNote> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SelectMatkulWidget(matkulId: selectedNote?.matkulId ?? ""),
+            child: matkulC.allMatkul.isNotEmpty
+                ? SelectMatkulWidget(matkulId: selectedNote?.matkulId ?? "")
+                : null,
           ),
           IconButton(
             onPressed: () {

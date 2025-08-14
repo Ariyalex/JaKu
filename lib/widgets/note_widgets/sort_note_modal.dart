@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
+import 'package:jaku/widgets/note_widgets/sort_tile.dart';
 
 class SortNoteModal extends StatelessWidget {
   const SortNoteModal({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final noteC = Get.find<NoteControllers>();
 
     return SafeArea(
       child: Container(
@@ -22,23 +24,53 @@ class SortNoteModal extends StatelessWidget {
                 ),
               ),
               Divider(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ListTile(
-                  onTap: () {},
-                  leading: Icon(LucideIcons.check),
-                  selected: true,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  selectedTileColor: theme.focusColor,
-                  title: Text('Sort by Created Date'),
-                ),
-              ),
-              ListTile(
-                onTap: () {},
-                title: Text('Sort by Modified Date'),
-              ),
+              Obx(() {
+                final activeIndex = noteC.activeIndex;
+                final isAsce = noteC.isAsce;
+                final isSorting = noteC.isSorting;
+
+                return Column(
+                  children: [
+                    SortTile(
+                      isActive: activeIndex.value == 0,
+                      title: 'None',
+                      isSortable: false,
+                      onTap: () {
+                        activeIndex.value = 0;
+                        isSorting.value = false;
+                      },
+                    ),
+                    SortTile(
+                      isActive: activeIndex.value == 1,
+                      title: "Sort by Created Date",
+                      onTap: () {
+                        if (activeIndex.value != 1) {
+                          isAsce.value = true;
+                        } else {
+                          isAsce.value = !isAsce.value;
+                        }
+                        activeIndex.value = 1;
+                        isSorting.value = true;
+                      },
+                      isAsce: isAsce.value,
+                    ),
+                    SortTile(
+                      isActive: activeIndex.value == 2,
+                      title: "Sort by Modified Date",
+                      onTap: () {
+                        if (activeIndex.value != 2) {
+                          isAsce.value = true;
+                        } else {
+                          isAsce.value = !isAsce.value;
+                        }
+                        activeIndex.value = 2;
+                        isSorting.value = true;
+                      },
+                      isAsce: isAsce.value,
+                    ),
+                  ],
+                );
+              }),
             ],
           ),
         ),

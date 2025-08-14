@@ -20,10 +20,10 @@ class Note extends HiveObject {
   String? matkul;
 
   @HiveField(5)
-  DateTime? createdOn;
+  DateTime createdOn;
 
   @HiveField(6)
-  DateTime? editedOn;
+  DateTime editedOn;
 
   Note({
     this.id,
@@ -31,7 +31,7 @@ class Note extends HiveObject {
     this.title,
     this.desc,
     this.matkul,
-    this.createdOn,
-    this.editedOn,
+    required this.createdOn,
+    required this.editedOn,
   });
 }

@@ -28,7 +28,7 @@ class NoteGlobal extends StatelessWidget {
       itemBuilder: (context, index) {
         final Note note = notes[index];
         String? matkulNote;
-        if (note.matkulId != null) {
+        if (note.matkulId != null && note.matkulId != "") {
           matkulNote = matkulC.selectMatkulById(note.matkulId!)!.abbreviation;
         }
         return InkWell(
@@ -55,6 +55,7 @@ class NoteGlobal extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 6),
+
                   if (note.desc != null && note.desc!.isNotEmpty)
                     Text(note.desc!, style: theme.textTheme.bodySmall),
                   if (showMatkul)

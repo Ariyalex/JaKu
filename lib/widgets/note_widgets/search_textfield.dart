@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/widgets/note_widgets/filter_note_modal.dart';
 import 'package:jaku/widgets/note_widgets/sort_note_modal.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -36,6 +38,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteC = Get.find<NoteControllers>();
 
     bool isNotEmpty = searchController.text.trim().isNotEmpty;
     return TextField(
@@ -63,19 +66,31 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: Icon(LucideIcons.arrowDownUp),
-                      onPressed: () {
-                        showBarModalBottomSheet<Map<String, dynamic>>(
-                          barrierColor: Colors.black.withValues(alpha: 0.4),
-                          context: context,
-                          useRootNavigator: true,
-                          bounce: true,
-                          backgroundColor: theme.colorScheme.surfaceContainer,
-                          builder: (context) => const SortNoteModal(),
-                        );
-                      },
-                    ),
+                    Obx(() {
+                      final isAsce = noteC.isAsce.value;
+                      final isSorting = noteC.isSorting.value;
+
+                      return IconButton(
+                        icon: Icon(
+                          !isSorting
+                              ? LucideIcons.arrowDownUp
+                              : (isAsce
+                                    ? LucideIcons.arrowUp
+                                    : LucideIcons.arrowDown),
+                        ),
+                        onPressed: () {
+                          showBarModalBottomSheet<Map<String, dynamic>>(
+                            barrierColor: Colors.black.withValues(alpha: 0.4),
+                            context: context,
+                            useRootNavigator: true,
+                            bounce: true,
+                            backgroundColor: theme.colorScheme.surfaceContainer,
+                            builder: (context) => const SortNoteModal(),
+                          );
+                        },
+                      );
+                    }),
+
                     IconButton(
                       icon: Icon(LucideIcons.funnel),
                       onPressed: () {

@@ -16,6 +16,12 @@ class NoteControllers extends GetxController {
   RxnString matkulC = RxnString(); //ini bersi matkul id
   RxBool isSortByCreatedDate = true.obs;
 
+  //controller untuk sorting
+
+  RxInt activeIndex = 0.obs;
+  RxBool isAsce = true.obs;
+  RxBool isSorting = false.obs;
+
   final RxBool isLoading = false.obs;
 
   final RxList<Note> allNote = <Note>[].obs;
@@ -27,6 +33,8 @@ class NoteControllers extends GetxController {
     if (debounce?.isActive ?? false) debounce!.cancel();
     debounce = Timer(const Duration(milliseconds: 300), () {
       updateNote(id, jadwalKuliahC);
+      final note = selectById(id);
+      print("edited on: ${note!.editedOn}");
       print("debounce save");
     });
   }
@@ -95,32 +103,32 @@ class NoteControllers extends GetxController {
   //update note
   Future<void> updateNote(String id, JadwalkuliahC jadwalkuliahC) async {
     try {
-      Note updatedNote;
-      if (matkulC.value != null) {
-        Matkul? selectedMatkul = jadwalkuliahC.selectMatkulById(matkulC.value!);
-        updatedNote = Note(
-          id: id,
-          matkulId: matkulC.value,
-          title: titleC.text,
-          desc: noteC.text,
-          editedOn: DateTime.now(),
-          matkul: selectedMatkul!.matkul,
-        );
-      } else {
-        updatedNote = Note(
-          id: id,
-          title: titleC.text,
-          desc: noteC.text,
-          editedOn: DateTime.now(),
-        );
-      }
-
       int index = allNote.indexWhere((note) => note.id == id);
+      if (index == -1) return;
 
-      if (index != -1) {
-        allNote[index] = updatedNote;
-        await NoteService.saveNoteService(updatedNote);
+      final oldNote = allNote[index];
+
+      // Update hanya field yang diubah, field lain tetap
+      String? matkulId = matkulC.value;
+      String? matkulName;
+      if (matkulId != null && matkulId != "") {
+        Matkul? selectedMatkul = jadwalkuliahC.selectMatkulById(matkulId);
+        matkulName = selectedMatkul?.matkul;
       }
+
+      final updatedNote = Note(
+        id: oldNote.id,
+        title: titleC.text,
+        desc: noteC.text,
+        createdOn: oldNote.createdOn, // tetap pakai createdOn lama
+        editedOn: DateTime.now(),
+        matkulId: matkulId ?? oldNote.matkulId,
+        matkul: matkulName ?? oldNote.matkul,
+        // tambahkan field lain jika ada
+      );
+
+      allNote[index] = updatedNote;
+      await NoteService.saveNoteService(updatedNote);
     } catch (error) {
       print("error updating note: $error");
       rethrow;

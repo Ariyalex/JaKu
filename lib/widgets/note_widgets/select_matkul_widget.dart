@@ -21,7 +21,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.matkulId != null) {
+    if (widget.matkulId != null && widget.matkulId != "") {
       selectedMatkul = matkulC.selectMatkulById(widget.matkulId!);
     }
   }

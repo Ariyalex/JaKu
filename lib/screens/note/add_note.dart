@@ -73,9 +73,11 @@ class _AddNoteState extends State<AddNote> {
         actions: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
-            child: selectedMatkul == null
-                ? SelectMatkulWidget()
-                : SelectMatkulWidget(matkulId: selectedMatkul!.id),
+            child: matkulC.allMatkul.isNotEmpty
+                ? (selectedMatkul == null
+                      ? SelectMatkulWidget()
+                      : SelectMatkulWidget(matkulId: selectedMatkul!.id))
+                : null,
           ),
         ],
       ),
