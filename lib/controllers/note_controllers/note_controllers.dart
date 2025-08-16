@@ -25,7 +25,8 @@ class NoteControllers extends GetxController {
   RxString filterMatkulId = "all".obs;
   RxList<Note> filteredNotes = <Note>[].obs;
 
-  //controller filter
+  //controller search
+  final searchC = TextEditingController();
 
   final RxBool isLoading = false.obs;
 
@@ -270,6 +271,31 @@ class NoteControllers extends GetxController {
       print(error);
       rethrow;
     }
+  }
+
+  void searchNotes() {
+    try {
+      final lowerQuery = searchC.text.toLowerCase();
+      filteredNotes.clear();
+      filteredNotes.addAll(
+        allNote.where((note) {
+          final title = note.title?.toLowerCase() ?? '';
+          final desc = note.desc?.toLowerCase() ?? '';
+          return title.contains(lowerQuery) || desc.contains(lowerQuery);
+        }),
+      );
+    } catch (error) {
+      print("error searching notes: $error");
+      rethrow;
+    }
+  }
+
+  void onNoteSearch() {
+    if (debounce?.isActive ?? false) debounce!.cancel();
+    debounce = Timer(const Duration(milliseconds: 300), () {
+      searchNotes();
+      // filterByMatkul();
+    });
   }
 
   @override

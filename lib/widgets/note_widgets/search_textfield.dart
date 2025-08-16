@@ -15,12 +15,14 @@ class SearchTextfield extends StatefulWidget {
 
 class _SearchTextfieldState extends State<SearchTextfield> {
   final FocusNode _focusNode = FocusNode();
-  final searchController = TextEditingController();
+  final noteC = Get.find<NoteControllers>();
+  late TextEditingController searchController;
   bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
+    searchController = noteC.searchC;
     _focusNode.addListener(() {
       setState(() {
         _isFocused = _focusNode.hasFocus;
@@ -55,6 +57,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                 icon: Icon(Icons.clear),
                 onPressed: () {
                   searchController.clear();
+                  noteC.searchNotes();
                   setState(() {});
                 },
               );
@@ -132,9 +135,10 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                     IconButton(
                       icon: Icon(Icons.clear),
                       onPressed: () {
-                        setState(() {
-                          searchController.clear();
-                        });
+                        print("clearing search");
+                        searchController.clear();
+                        noteC.searchNotes();
+                        setState(() {});
                       },
                     ),
                     IconButton(
@@ -177,7 +181,10 @@ class _SearchTextfieldState extends State<SearchTextfield> {
         ),
         filled: true,
       ),
-      onChanged: (_) => setState(() {}),
+      onChanged: (_) {
+        noteC.onNoteSearch();
+        setState(() {});
+      },
     );
   }
 }
