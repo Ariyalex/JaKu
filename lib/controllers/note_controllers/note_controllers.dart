@@ -14,13 +14,18 @@ class NoteControllers extends GetxController {
   final titleC = TextEditingController();
   final noteC = TextEditingController();
   RxnString matkulC = RxnString(); //ini bersi matkul id
+
+  //controller for sorting
   RxBool isSortByCreatedDate = true.obs;
-
-  //controller untuk sorting
-
   RxInt activeIndex = 0.obs;
   RxBool isAsce = true.obs;
   RxBool isSorting = false.obs;
+
+  //controller for filtering
+  RxString filterMatkulId = "all".obs;
+  RxList<Note> filteredNotes = <Note>[].obs;
+
+  //controller filter
 
   final RxBool isLoading = false.obs;
 
@@ -36,6 +41,7 @@ class NoteControllers extends GetxController {
       final note = selectById(id);
       print("edited on: ${note!.editedOn}");
       print("debounce save");
+      filterByMatkul();
     });
   }
 
@@ -53,7 +59,6 @@ class NoteControllers extends GetxController {
 
   //load all note and delete empty note
   void loadAllNotes() {
-    isLoading.value = true;
     try {
       allNote.clear();
 
@@ -73,8 +78,6 @@ class NoteControllers extends GetxController {
     } catch (error) {
       print("error load note: $error");
       rethrow;
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -92,6 +95,17 @@ class NoteControllers extends GetxController {
       allNote.add(newNote);
 
       NoteService.saveNoteService(newNote);
+
+      //sorting note
+      if (isSortByCreatedDate.value && isAsce.value) {
+        sortByCreatedAsc();
+      } else if (isSortByCreatedDate.value && !isAsce.value) {
+        sortByCreatedDesc();
+      } else if (!isSortByCreatedDate.value && isAsce.value) {
+        sortByEditedAsc();
+      } else if (!isSortByCreatedDate.value && !isAsce.value) {
+        sortByEditedDesc();
+      }
 
       return newNote.id!;
     } catch (error) {
@@ -129,8 +143,61 @@ class NoteControllers extends GetxController {
 
       allNote[index] = updatedNote;
       await NoteService.saveNoteService(updatedNote);
+
+      //sorting note
+      if (isSortByCreatedDate.value && isAsce.value) {
+        sortByCreatedAsc();
+      } else if (isSortByCreatedDate.value && !isAsce.value) {
+        sortByCreatedDesc();
+      } else if (!isSortByCreatedDate.value && isAsce.value) {
+        sortByEditedAsc();
+      } else if (!isSortByCreatedDate.value && !isAsce.value) {
+        sortByEditedDesc();
+      }
     } catch (error) {
       print("error updating note: $error");
+      rethrow;
+    }
+  }
+
+  Future<void> deleteMatkulRelationFromNotes() async {
+    try {
+      final allMatkul = Get.find<JadwalkuliahC>().allMatkul;
+      final validMatkulIds = allMatkul.map((matkul) => matkul.id).toSet();
+      for (final matkul in allMatkul) {
+        print('Matkul ID: ${matkul.id}');
+      }
+
+      // Update notes yang matkulId-nya tidak valid: hapus relasi matkul
+      final notesToUpdate = allNote
+          .where(
+            (note) =>
+                note.matkulId != null &&
+                !validMatkulIds.contains(note.matkulId),
+          )
+          .toList();
+
+      for (var note in notesToUpdate) {
+        print("note matkul id: ${note.matkulId}");
+      }
+
+      for (final note in notesToUpdate) {
+        final updatedNote = note.copyWith(matkulId: null, matkul: null);
+
+        int index = allNote.indexOf(note);
+        if (index != -1) {
+          allNote[index] = updatedNote; // langsung update RxList
+          await NoteService.saveNoteService(updatedNote);
+        }
+      }
+
+      // Refresh RxList dari Hive jika perlu
+      loadAllNotes();
+
+      print("complete delete matkul relation");
+    } catch (error) {
+      print(error);
+
       rethrow;
     }
   }
@@ -147,11 +214,76 @@ class NoteControllers extends GetxController {
     }
   }
 
+  void sortByCreatedAsc() {
+    try {
+      allNote.sort((a, b) => a.createdOn.compareTo(b.createdOn));
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
+  }
+
+  void sortByCreatedDesc() {
+    try {
+      allNote.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
+  }
+
+  void sortByEditedAsc() {
+    try {
+      allNote.sort((a, b) => b.editedOn.compareTo(a.editedOn));
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
+  }
+
+  void sortByEditedDesc() {
+    try {
+      allNote.sort((a, b) => a.editedOn.compareTo(b.editedOn));
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
+  }
+
+  void filterByMatkul() {
+    try {
+      if (filterMatkulId.value == "all") {
+        filteredNotes.clear();
+        filteredNotes.addAll(allNote);
+      } else if (filterMatkulId.value == "umum") {
+        filteredNotes.clear();
+        filteredNotes.addAll(
+          allNote.where((note) => note.matkulId == null || note.matkulId == ""),
+        );
+      } else {
+        filteredNotes.clear();
+        filteredNotes.addAll(
+          allNote.where((note) => note.matkulId == filterMatkulId.value),
+        );
+      }
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
+  }
+
   @override
-  void onInit() {
+  void onInit() async {
     // TODO: implement onInit
+
     super.onInit();
+    print("run loading");
+    isLoading.value = true;
     loadAllNotes();
+    await deleteMatkulRelationFromNotes();
+    filterByMatkul();
+    isLoading.value = false;
+    print("loading complete");
   }
 
   //dispose debaunce when onclose

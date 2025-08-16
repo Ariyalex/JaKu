@@ -138,6 +138,9 @@ class JadwalkuliahC extends GetxController {
       List<Matkul> matkulData = MatkulService.getAllMatkulService();
       allMatkul.clear();
       allMatkul.addAll(matkulData);
+
+      //remove unused matkul
+      await removeUnusedMatkul();
     } catch (e) {
       print("error loading from local storage: $e");
       errorMsg.value = 'Error: $e';
@@ -267,8 +270,6 @@ class JadwalkuliahC extends GetxController {
     HariKuliahC dayKuliahController,
   ) async {
     try {
-      Jadwal? selectedSchedule = selectById(id);
-
       //hapus dari list local
       allSchedule.removeWhere((product) => product.id == id);
 
@@ -278,23 +279,7 @@ class JadwalkuliahC extends GetxController {
       // Perbarui daftar hari unik setelah menghapus matkul
       dayKuliahController.getUniqueDays(this);
 
-      //check if there is schedule with same matkul name
-      String matkulName = selectedSchedule!.matkul;
-      bool matkulStillExists = allSchedule.any(
-        (item) => item.matkul == matkulName,
-      );
-
-      Matkul? existing;
-      if (!matkulStillExists) {
-        // Jika tidak ada lagi jadwal dengan nama matkul tersebut, hapus dari allMatkul
-        existing = allMatkul.firstWhereOrNull(
-          (item) => item.matkul == matkulName,
-        );
-        if (existing != null) {
-          allMatkul.removeWhere((item) => item.matkul == matkulName);
-          await MatkulService.deleteMatkulService(existing.id!);
-        }
-      }
+      await removeUnusedMatkul();
     } catch (error) {
       print("error deleting matkul: $error");
 
@@ -327,6 +312,8 @@ class JadwalkuliahC extends GetxController {
       allMatkul.clear();
       await MatkulService.deleteAllMatkulService();
 
+      await removeUnusedMatkul();
+
       // Tutup dialog loading
       Get.back();
 
@@ -350,6 +337,32 @@ class JadwalkuliahC extends GetxController {
         backgroundColor: color.colorScheme.error,
         colorText: color.colorScheme.onError,
       );
+    }
+  }
+
+  Future<void> removeUnusedMatkul() async {
+    try {
+      // Ambil semua matkulId yang dipakai di jadwal
+      final usedMatkulIds = allSchedule
+          .map((jadwal) => jadwal.matkulId)
+          .toSet();
+
+      // Cari matkul yang tidak dipakai
+      final unusedMatkul = allMatkul
+          .where((matkul) => !usedMatkulIds.contains(matkul.id))
+          .toList();
+
+      for (final matkul in unusedMatkul) {
+        allMatkul.remove(matkul);
+        await MatkulService.deleteMatkulService(matkul.id!);
+      }
+
+      print(
+        "Matkul tidak terpakai berhasil dihapus: ${unusedMatkul.map((m) => m.matkul).join(', ')}",
+      );
+    } catch (e) {
+      print("Error menghapus matkul tidak terpakai: $e");
+      rethrow;
     }
   }
 }

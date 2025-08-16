@@ -4,7 +4,6 @@ import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/jadwal.dart';
 import 'package:jaku/models/matkul.dart';
-import 'package:jaku/models/note.dart';
 import 'package:jaku/models/task.dart';
 import 'package:jaku/widgets/schedule_widgets/edit_jadwal.dart';
 import 'package:jaku/widgets/schedule_widgets/detail_matkul/informasi_matkul.dart';

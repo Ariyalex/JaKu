@@ -31,6 +31,7 @@ class NoteGlobal extends StatelessWidget {
         if (note.matkulId != null && note.matkulId != "") {
           matkulNote = matkulC.selectMatkulById(note.matkulId!)!.abbreviation;
         }
+        print(note.matkul);
         return InkWell(
           onTap: () {
             Get.toNamed(RouteNamed.detailNote, arguments: note.id);
@@ -55,7 +56,6 @@ class NoteGlobal extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 6),
-
                   if (note.desc != null && note.desc!.isNotEmpty)
                     Text(note.desc!, style: theme.textTheme.bodySmall),
                   if (showMatkul)

@@ -92,7 +92,21 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                     }),
 
                     IconButton(
-                      icon: Icon(LucideIcons.funnel),
+                      icon: Obx(() {
+                        final isFiltering = noteC.filterMatkulId.value != "all";
+                        if (isFiltering) {
+                          return Badge(
+                            child: Icon(
+                              LucideIcons.funnel,
+                              color: theme.colorScheme.primary,
+                            ),
+                            smallSize: 8,
+                            alignment: Alignment.topRight,
+                          );
+                        } else {
+                          return Icon(LucideIcons.funnel);
+                        }
+                      }),
                       onPressed: () {
                         showBarModalBottomSheet<Map<String, dynamic>>(
                           barrierColor: Colors.black.withValues(alpha: 0.4),

@@ -28,6 +28,7 @@ class SortNoteModal extends StatelessWidget {
                 final activeIndex = noteC.activeIndex;
                 final isAsce = noteC.isAsce;
                 final isSorting = noteC.isSorting;
+                final isSortByCreated = noteC.isSortByCreatedDate;
 
                 return Column(
                   children: [
@@ -51,6 +52,7 @@ class SortNoteModal extends StatelessWidget {
                         }
                         activeIndex.value = 1;
                         isSorting.value = true;
+                        isSortByCreated.value = true;
                       },
                       isAsce: isAsce.value,
                     ),
@@ -65,6 +67,7 @@ class SortNoteModal extends StatelessWidget {
                         }
                         activeIndex.value = 2;
                         isSorting.value = true;
+                        isSortByCreated.value = false;
                       },
                       isAsce: isAsce.value,
                     ),

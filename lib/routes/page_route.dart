@@ -9,7 +9,7 @@ import 'package:jaku/screens/guide/guide_schedule.dart';
 import 'package:jaku/screens/guide/guide_pdf.dart';
 import 'package:jaku/screens/schedule/schedule_dashboard.dart';
 import 'package:jaku/screens/schedule/pdf_parsing.dart';
-import 'package:jaku/screens/tesk/task_dashboard.dart';
+import 'package:jaku/screens/task/task_dashboard.dart';
 
 class AppPage {
   static final pages = [

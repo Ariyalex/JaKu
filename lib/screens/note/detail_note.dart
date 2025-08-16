@@ -33,9 +33,7 @@ class _DetailNoteState extends State<DetailNote> {
 
     noteC.titleC.addListener(_onAnyChanged);
     noteC.noteC.addListener(_onAnyChanged);
-    _matkulSub = noteC.matkulC.listen(
-      (_) => noteC.onNoteChanged(noteId, matkulC),
-    );
+    _matkulSub = noteC.matkulC.listen((_) => _onAnyChanged());
   }
 
   void _onAnyChanged() {

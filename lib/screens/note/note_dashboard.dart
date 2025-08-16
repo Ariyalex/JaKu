@@ -14,17 +14,18 @@ class NoteDashboard extends StatefulWidget {
 }
 
 class _NoteDashboardState extends State<NoteDashboard> {
-  late NoteControllers noteController;
+  late NoteControllers noteC;
 
   @override
   void initState() {
     super.initState();
-    noteController = Get.put(NoteControllers());
+    noteC = Get.put(NoteControllers());
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
+    //make sure dispose everything before disposing notecontrollers
     Get.delete<NoteControllers>();
     print("dispose noteC");
     super.dispose();
@@ -33,55 +34,88 @@ class _NoteDashboardState extends State<NoteDashboard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    print(noteController.allNote);
+
+    print(noteC.allNote);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: SearchTextfield(),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  top: 12,
-                  right: 12,
-                  left: 12,
-                  bottom: 60,
+      body: Obx(() {
+        final isLoading = noteC.isLoading.value;
+        if (isLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          return SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SearchTextfield(),
                 ),
-                child: Obx(() {
-                  final sortedNote = noteController.allNote
-                    ..sort((a, b) => a.createdOn.compareTo(b.createdOn));
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      top: 12,
+                      right: 12,
+                      left: 12,
+                      bottom: 60,
+                    ),
+                    child: Obx(() {
+                      final notes = noteC.filteredNotes;
 
-                  return noteController.allNote.isNotEmpty
-                      ? NoteGlobal(notes: sortedNote)
-                      : Center(
-                          child: Column(
-                            children: [
-                              Text(
-                                "Tidak ada note",
-                                style: theme.textTheme.bodyLarge,
-                              ),
-                              Container(
-                                margin: EdgeInsets.all(12),
-                                clipBehavior: Clip.hardEdge,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Image.asset("images/malas.gif"),
-                              ),
-                            ],
-                          ),
+                      try {
+                        if (noteC.isSortByCreatedDate.value &&
+                            noteC.isAsce.value) {
+                          noteC.sortByCreatedAsc();
+                        } else if (noteC.isSortByCreatedDate.value &&
+                            !noteC.isAsce.value) {
+                          noteC.sortByCreatedDesc();
+                        } else if (!noteC.isSortByCreatedDate.value &&
+                            noteC.isAsce.value) {
+                          noteC.sortByEditedAsc();
+                        } else if (!noteC.isSortByCreatedDate.value &&
+                            !noteC.isAsce.value) {
+                          noteC.sortByEditedDesc();
+                        }
+                      } catch (error) {
+                        Get.snackbar(
+                          "Error",
+                          "Gagal menambahkan jadwal: $error",
+                          backgroundColor: theme.colorScheme.error,
+                          colorText: theme.colorScheme.onError,
                         );
-                }),
-              ),
+                      }
+                      print("sort created: ${noteC.isSortByCreatedDate}");
+                      print("sort direction: ${noteC.isAsce}");
+
+                      return notes.isNotEmpty
+                          ? NoteGlobal(notes: notes)
+                          : Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Tidak ada note",
+                                    style: theme.textTheme.bodyLarge,
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.all(12),
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Image.asset("images/malas.gif"),
+                                  ),
+                                ],
+                              ),
+                            );
+                    }),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          );
+        }
+      }),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Get.toNamed(RouteNamed.addNote);

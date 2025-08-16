@@ -7,7 +7,7 @@ import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
-import 'package:jaku/screens/tesk/task_dashboard.dart';
+import 'package:jaku/screens/task/task_dashboard.dart';
 import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/controllers/version_control.dart';
 import 'package:jaku/routes/page_route.dart';
