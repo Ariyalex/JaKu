@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/widgets/note_widgets/filter_note_modal.dart';
 import 'package:jaku/widgets/note_widgets/sort_note_modal.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -13,12 +15,14 @@ class SearchTextfield extends StatefulWidget {
 
 class _SearchTextfieldState extends State<SearchTextfield> {
   final FocusNode _focusNode = FocusNode();
-  final searchController = TextEditingController();
+  final noteC = Get.find<NoteControllers>();
+  late TextEditingController searchController;
   bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
+    searchController = noteC.searchC;
     _focusNode.addListener(() {
       setState(() {
         _isFocused = _focusNode.hasFocus;
@@ -36,6 +40,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteC = Get.find<NoteControllers>();
 
     bool isNotEmpty = searchController.text.trim().isNotEmpty;
     return TextField(
@@ -52,6 +57,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                 icon: Icon(Icons.clear),
                 onPressed: () {
                   searchController.clear();
+                  noteC.searchNotes();
                   setState(() {});
                 },
               );
@@ -63,21 +69,47 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Obx(() {
+                      final isAsce = noteC.isAsce.value;
+                      final isSorting = noteC.isSorting.value;
+
+                      return IconButton(
+                        icon: Icon(
+                          !isSorting
+                              ? LucideIcons.arrowDownUp
+                              : (isAsce
+                                    ? LucideIcons.arrowUp
+                                    : LucideIcons.arrowDown),
+                        ),
+                        onPressed: () {
+                          showBarModalBottomSheet<Map<String, dynamic>>(
+                            barrierColor: Colors.black.withValues(alpha: 0.4),
+                            context: context,
+                            useRootNavigator: true,
+                            bounce: true,
+                            backgroundColor: theme.colorScheme.surfaceContainer,
+                            builder: (context) => const SortNoteModal(),
+                          );
+                        },
+                      );
+                    }),
+
                     IconButton(
-                      icon: Icon(LucideIcons.arrowDownUp),
-                      onPressed: () {
-                        showBarModalBottomSheet<Map<String, dynamic>>(
-                          barrierColor: Colors.black.withValues(alpha: 0.4),
-                          context: context,
-                          useRootNavigator: true,
-                          bounce: true,
-                          backgroundColor: theme.colorScheme.surfaceContainer,
-                          builder: (context) => const SortNoteModal(),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(LucideIcons.funnel),
+                      icon: Obx(() {
+                        final isFiltering = noteC.filterMatkulId.value != "all";
+                        if (isFiltering) {
+                          return Badge(
+                            child: Icon(
+                              LucideIcons.funnel,
+                              color: theme.colorScheme.primary,
+                            ),
+                            smallSize: 8,
+                            alignment: Alignment.topRight,
+                          );
+                        } else {
+                          return Icon(LucideIcons.funnel);
+                        }
+                      }),
                       onPressed: () {
                         showBarModalBottomSheet<Map<String, dynamic>>(
                           barrierColor: Colors.black.withValues(alpha: 0.4),
@@ -103,9 +135,10 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                     IconButton(
                       icon: Icon(Icons.clear),
                       onPressed: () {
-                        setState(() {
-                          searchController.clear();
-                        });
+                        print("clearing search");
+                        searchController.clear();
+                        noteC.searchNotes();
+                        setState(() {});
                       },
                     ),
                     IconButton(
@@ -148,7 +181,10 @@ class _SearchTextfieldState extends State<SearchTextfield> {
         ),
         filled: true,
       ),
-      onChanged: (_) => setState(() {}),
+      onChanged: (_) {
+        noteC.onNoteSearch();
+        setState(() {});
+      },
     );
   }
 }

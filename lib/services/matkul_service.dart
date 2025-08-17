@@ -1,15 +1,13 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/models/jadwal.dart';
+import 'package:jaku/models/matkul.dart';
 
-class JadwalKuliahLocal {
+class MatkulService {
   static const String matkulBoxName = "matkul_box";
 
   //initialize hive
-  static Future<void> initL() async {
-    await Hive.initFlutter();
-
+  static Future<void> iniMatkulService() async {
     //register adapter jika belum tersedia
-    if (!Hive.isAdapterRegistered(0)) {
+    if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(MatkulAdapter());
     }
 
@@ -23,45 +21,45 @@ class JadwalKuliahLocal {
   }
 
   // save single matkul
-  static Future<void> saveMatkulL(Matkul matkul) async {
+  static Future<void> saveMatkulService(Matkul matkul) async {
     final box = getMatkulBox();
 
-    if (matkul.matkulId != null) {
-      await box.put(matkul.matkulId, matkul);
+    if (matkul.id != null) {
+      await box.put(matkul.id, matkul);
     } else {
-      throw Exception("matkul ID harus disediakan dari firebase");
+      throw Exception("matkul ID kosong");
     }
   }
 
-//save multiple matkul
-  static Future<void> saveAllMatkulL(List<Matkul> matkuls) async {
+  //save multiple matkul
+  static Future<void> saveAllMatkulService(List<Matkul> matkuls) async {
     final box = getMatkulBox();
 
     final Map<dynamic, Matkul> matkulMap = {};
 
     for (var matkul in matkuls) {
-      if (matkul.matkulId == null) {
-        throw Exception("matkul ID harus disediakan dari firebase");
+      if (matkul.id == null) {
+        throw Exception("matkul ID harus ada");
       }
-      matkulMap[matkul.matkulId] = matkul;
+      matkulMap[matkul.id] = matkul;
     }
     await box.putAll(matkulMap);
   }
 
   //get all saved matkuls
-  static List<Matkul> getAllMatkulsL() {
+  static List<Matkul> getAllMatkulService() {
     final box = getMatkulBox();
     return box.values.toList();
   }
 
   //delete a matkul by id
-  static Future<void> deleteMatkulL(String id) async {
+  static Future<void> deleteMatkulService(String id) async {
     final box = getMatkulBox();
     await box.delete(id);
   }
 
-//delete all matkul
-  static Future<void> deleteAllMatkulL() async {
+  //delete all matkul
+  static Future<void> deleteAllMatkulService() async {
     final box = getMatkulBox();
     await box.clear();
   }

@@ -1,21 +1,21 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
-import 'package:jaku/screens/tesk/task_dashboard.dart';
-import 'package:jaku/services/jadwal_kuliah_local.dart';
-import 'package:jaku/controllers/pdf_back.dart';
+import 'package:jaku/screens/task/task_dashboard.dart';
+import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/controllers/version_control.dart';
 import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/schedule/schedule_dashboard.dart';
+import 'package:jaku/services/matkul_service.dart';
+import 'package:jaku/services/note_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
-import 'controllers/hari_kuliah_c.dart';
-import 'controllers/jadwal_kuliah_c.dart';
 import './theme/theme.dart';
 
 void main() async {
@@ -25,13 +25,15 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   //inisialisasi hive
-  await JadwalKuliahLocal.initL();
+  await Hive.initFlutter();
+  await JadwalService.initScheduleService();
+  await NoteService.initNoteService();
+  await MatkulService.iniMatkulService();
+  // Hive.registerAdapter(TaskAdapter());
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
-  Get.put(JadwalkuliahC(), permanent: true);
-  Get.put(HariKuliahC(), permanent: true);
-  Get.put(PdfBack(), permanent: true);
-  Get.put(VersionControl());
+  Get.put(MatkulController(), permanent: true);
+  Get.put(VersionControl(), permanent: true);
 
   //init theme
   await Hive.openBox('settings');
@@ -64,6 +66,7 @@ class MyApp extends StatelessWidget {
             tabs: [
               PersistentTabConfig(
                 screen: ScheduleDashboard(),
+
                 item: ItemConfig(
                   activeForegroundColor: themeC.isLight.value
                       ? themeLight.colorScheme.onPrimary
@@ -106,9 +109,10 @@ class MyApp extends StatelessWidget {
               () => Style8BottomNavBar(
                 navBarConfig: navBarConfig,
                 navBarDecoration: NavBarDecoration(
-                    color: themeC.isLight.value
-                        ? themeLight.colorScheme.surface
-                        : themeDark.colorScheme.surface),
+                  color: themeC.isLight.value
+                      ? themeLight.colorScheme.surface
+                      : themeDark.colorScheme.surface,
+                ),
                 height: 60,
               ),
             ),

@@ -1,47 +1,49 @@
 import 'package:hive/hive.dart';
+part 'jadwal.g.dart';
 
-@HiveType(typeId: 1)
-class HariKuliah extends HiveObject {
-  @HiveField(0)
-  String? matkulId;
+class HariKuliah {
+  String? scheduleId;
 
-  @HiveField(1)
   String day;
 
-  HariKuliah({this.matkulId, required this.day});
+  HariKuliah({this.scheduleId, required this.day});
 }
 
 @HiveType(typeId: 0)
-class Matkul extends HiveObject {
+class Jadwal extends HiveObject {
   @HiveField(0)
-  String? matkulId;
+  String? id;
 
   @HiveField(1)
-  String day;
+  String? matkulId;
 
   @HiveField(2)
-  String matkul;
+  String day;
 
   @HiveField(3)
-  String? dosen1;
+  String matkul;
 
   @HiveField(4)
-  String? dosen2;
+  String? dosen1;
 
   @HiveField(5)
-  String? kelas;
+  String? dosen2;
 
   @HiveField(6)
-  String? room;
+  String? kelas;
 
   @HiveField(7)
-  String formattedJamAwal;
+  String? room;
 
   @HiveField(8)
+  String formattedJamAwal;
+
+  @HiveField(9)
   String? formattedJamAkhir;
 
-  Matkul({
+  Jadwal({
     required this.day,
+    this.id,
     this.matkulId,
     required this.matkul,
     this.dosen1,
@@ -51,51 +53,4 @@ class Matkul extends HiveObject {
     this.formattedJamAkhir,
     this.room,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      "day": day,
-      "matkul": matkul,
-      "dosen1": dosen1,
-      "dosen2": dosen2,
-      "kelas": kelas,
-      "formattedJamAwal": formattedJamAwal,
-      "formattedJamAkhir": formattedJamAkhir,
-      "room": room,
-    };
-  }
-}
-
-//adapter matkul
-class MatkulAdapter extends TypeAdapter<Matkul> {
-  @override
-  final int typeId = 0;
-
-  @override
-  Matkul read(BinaryReader reader) {
-    return Matkul(
-      matkulId: reader.read(),
-      day: reader.read(),
-      matkul: reader.read(),
-      dosen1: reader.read(),
-      dosen2: reader.read(),
-      kelas: reader.read(),
-      formattedJamAwal: reader.read(),
-      formattedJamAkhir: reader.read(),
-      room: reader.read(),
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, Matkul obj) {
-    writer.write(obj.matkulId);
-    writer.write(obj.day);
-    writer.write(obj.matkul);
-    writer.write(obj.dosen1);
-    writer.write(obj.dosen2);
-    writer.write(obj.kelas);
-    writer.write(obj.formattedJamAwal);
-    writer.write(obj.formattedJamAkhir);
-    writer.write(obj.room);
-  }
 }

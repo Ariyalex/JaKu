@@ -1,32 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/routes/route_named.dart';
 
-String getInitials(String kalimat) {
-  final words = kalimat
-      .split(' ')
-      .where((word) => word.isNotEmpty && word.toLowerCase() != 'dan')
-      .toList();
-
-  if (words.length <= 2) {
-    // Kembalikan kalimat asli dengan kapitalisasi awal tiap kata
-    return words.map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
-  }
-
-  // Jika lebih dari 2 kata, ambil huruf awal tiap kata
-  return words.map((word) => word[0].toUpperCase()).join();
-}
-
 class NoteGlobal extends StatelessWidget {
-  const NoteGlobal({super.key, required this.notes, this.showMatkul = true});
+  const NoteGlobal({super.key, this.showMatkul = true, required this.notes});
 
-  final List<Note> notes;
   final bool showMatkul;
+  final List<Note> notes;
 
   @override
   Widget build(BuildContext context) {
+    final matkulC = Get.find<MatkulController>();
     final theme = Theme.of(context);
 
     return MasonryGridView.builder(
@@ -40,9 +27,14 @@ class NoteGlobal extends StatelessWidget {
       mainAxisSpacing: 8,
       itemBuilder: (context, index) {
         final Note note = notes[index];
+        String? matkulNote;
+        if (note.matkulId != null && note.matkulId != "") {
+          matkulNote = matkulC.selectMatkulById(note.matkulId!)!.abbreviation;
+        }
+        print(note.matkul);
         return InkWell(
           onTap: () {
-            Get.toNamed(RouteNamed.detailNote, arguments: note);
+            Get.toNamed(RouteNamed.detailNote, arguments: note.id);
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(
@@ -67,9 +59,9 @@ class NoteGlobal extends StatelessWidget {
                   if (note.desc != null && note.desc!.isNotEmpty)
                     Text(note.desc!, style: theme.textTheme.bodySmall),
                   if (showMatkul)
-                    if (note.matkul != null && note.matkul!.isNotEmpty)
+                    if (matkulNote != null && matkulNote.isNotEmpty)
                       Chip(
-                        label: Text(getInitials(note.matkul!)),
+                        label: Text(matkulNote),
                         padding: EdgeInsets.symmetric(
                           vertical: 0,
                           horizontal: 3,

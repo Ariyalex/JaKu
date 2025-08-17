@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/hari_kuliah_c.dart';
-import 'package:jaku/controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/matkul_card.dart';
-import 'package:jaku/widgets/jadwal_kosong.dart';
+import 'package:jaku/widgets/schedule_widgets/jadwal_kosong.dart';
 
 class CardView extends StatelessWidget {
-  const CardView({
-    super.key,
-  });
+  const CardView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +20,7 @@ class CardView extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       } else if (jadwalKuliahC.errorMsg.value.isNotEmpty) {
         return Center(child: Text(jadwalKuliahC.errorMsg.value));
-      } else if (jadwalKuliahC.allMatkul.isEmpty) {
+      } else if (jadwalKuliahC.allSchedule.isEmpty) {
         return const JadwalKosong();
       } else {
         return Flex(
@@ -31,14 +29,16 @@ class CardView extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.only(
-                    top: 5, right: 5, left: 5, bottom: 60),
+                  top: 5,
+                  right: 5,
+                  left: 5,
+                  bottom: 60,
+                ),
                 itemCount: hariKuliahC.jadwalHari.length,
                 itemBuilder: (context, index) {
                   final hariKuliah = hariKuliahC.jadwalHari[index];
-                  final matkulList = jadwalKuliahC.allMatkul
-                      .where(
-                        (matkul) => matkul.day == hariKuliah.day,
-                      )
+                  final matkulList = jadwalKuliahC.allSchedule
+                      .where((matkul) => matkul.day == hariKuliah.day)
                       .toList();
                   return Card(
                     elevation: 0,
@@ -48,14 +48,16 @@ class CardView extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 7),
                           alignment: Alignment.center,
-                          decoration:
-                              BoxDecoration(color: theme.colorScheme.primary),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary,
+                          ),
                           child: Text(
                             hariKuliah.day,
                             style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onPrimary),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onPrimary,
+                            ),
                           ),
                         ),
                         Container(
@@ -64,9 +66,8 @@ class CardView extends StatelessWidget {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: matkulList.length,
-                            separatorBuilder: (context, index) => Container(
-                              height: 3,
-                            ),
+                            separatorBuilder: (context, index) =>
+                                Container(height: 3),
                             itemBuilder: (context, index) {
                               final matkul = matkulList[index];
                               // var id = matkulList[index].matkulId;

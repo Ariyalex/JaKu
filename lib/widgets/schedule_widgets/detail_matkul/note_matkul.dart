@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:jaku/widgets/note_widgets/note_global.dart';
@@ -15,7 +16,7 @@ class NoteMatkul extends StatelessWidget {
 
   final ThemeData theme;
   final List<Note> notes;
-  final String matkul;
+  final Matkul matkul;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class NoteMatkul extends StatelessWidget {
               tooltip: "Tambah Catatan",
               onPressed: () {
                 // TODO: Tambah note
-                print(matkul);
+                print(matkul.id);
                 Get.toNamed(RouteNamed.addNote, arguments: matkul);
               },
             ),
@@ -44,7 +45,7 @@ class NoteMatkul extends StatelessWidget {
         ),
         notes.isEmpty
             ? Text("Belum ada catatan.", style: theme.textTheme.bodyMedium)
-            : NoteGlobal(notes: notes, showMatkul: false),
+            : NoteGlobal(showMatkul: false, notes: notes),
       ],
     );
   }

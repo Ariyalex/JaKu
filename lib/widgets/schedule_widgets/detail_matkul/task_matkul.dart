@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/models/task.dart';
-import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/task_tile.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -43,8 +42,7 @@ class TaskMatkul extends StatelessWidget {
                   useRootNavigator: true,
                   bounce: true,
                   backgroundColor: theme.colorScheme.surfaceContainer,
-                  builder: (context) =>
-                      AddTaskModal(matkul: getInitials(matkul!)),
+                  builder: (context) => AddTaskModal(matkul: matkul!),
                 );
               },
             ),

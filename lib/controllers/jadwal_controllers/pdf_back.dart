@@ -4,14 +4,14 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
-import 'package:jaku/services/jadwal_kuliah_local.dart';
+import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/models/jadwal.dart';
-import 'package:jaku/controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfBack extends GetxController {
-  final RxList<Matkul> _allMatkul = <Matkul>[].obs;
-  List<Matkul> get allMatkul => _allMatkul;
+  final RxList<Jadwal> _allMatkul = <Jadwal>[].obs;
+  List<Jadwal> get allMatkul => _allMatkul;
 
   final String baseUrl = 'https://ariyalexx.pythonanywhere.com/';
 
@@ -50,7 +50,7 @@ class PdfBack extends GetxController {
 
     try {
       // Clear existing data both in Firebase and locally first
-      await JadwalKuliahLocal.deleteAllMatkulL();
+      await JadwalService.deleteAllScheduleService();
       jadwalProvider.clearData(); // Clear data in the JadwalKuliah provider
 
       responseMessage.value = "Mengunggah dan memproses file...";
@@ -78,8 +78,9 @@ class PdfBack extends GetxController {
       // Download JSON yang dihasilkan
       final downloadResponse = await dio.get(
         '$baseUrl/download',
-        options:
-            dio_package.Options(responseType: dio_package.ResponseType.bytes),
+        options: dio_package.Options(
+          responseType: dio_package.ResponseType.bytes,
+        ),
       );
 
       if (downloadResponse.statusCode == 200) {
@@ -117,7 +118,7 @@ class PdfBack extends GetxController {
             String jamAkhir = waktuParts.length > 1 ? waktuParts[1] : "";
 
             // Create Matkul object
-            Matkul matkulObj = Matkul(
+            Jadwal matkulObj = Jadwal(
               day: hari,
               matkul: mataKuliah,
               formattedJamAwal: jamAwal,
@@ -137,7 +138,7 @@ class PdfBack extends GetxController {
 
         // Upload each matkul using the existing provider function
         for (var matkul in _allMatkul) {
-          jadwalProvider.matkulC.text = matkul.matkul;
+          jadwalProvider.matkulNameC.text = matkul.matkul;
           jadwalProvider.kelas.value = matkul.kelas ?? "";
           jadwalProvider.jamAwal.value = matkul.formattedJamAwal;
           jadwalProvider.jamAkhir.value = matkul.formattedJamAkhir ?? "";
@@ -146,11 +147,11 @@ class PdfBack extends GetxController {
           jadwalProvider.ruanganC.text = matkul.room!;
           jadwalProvider.hari.value = matkul.day;
 
-          await jadwalProvider.addMatkuls();
+          await jadwalProvider.addSchedules();
         }
 
         // Refresh the jadwalProvider data
-        jadwalProvider.loadFromLocalStorage();
+        jadwalProvider.loadSchedule();
 
         isLoading.value = false;
         isUploading.value = false;

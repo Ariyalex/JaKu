@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/jadwal_kuliah_c.dart';
+import '../../controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 
-class AddMatkul extends StatefulWidget {
-  const AddMatkul({super.key});
+class AddJadwal extends StatefulWidget {
+  const AddJadwal({super.key});
 
   @override
-  State<AddMatkul> createState() => _AddMatkulState();
+  State<AddJadwal> createState() => _AddJadwalState();
 }
 
-class _AddMatkulState extends State<AddMatkul> {
+class _AddJadwalState extends State<AddJadwal> {
   final allMatkulProvider = Get.find<JadwalkuliahC>();
 
   String divider(String formattedJamAkhir) {
@@ -28,7 +28,7 @@ class _AddMatkulState extends State<AddMatkul> {
   @override
   void initState() {
     super.initState();
-    allMatkulProvider.matkulC.clear();
+    allMatkulProvider.matkulNameC.clear();
     allMatkulProvider.dosen1C.clear();
     allMatkulProvider.dosen2C.clear();
     allMatkulProvider.ruanganC.clear();
@@ -50,7 +50,7 @@ class _AddMatkulState extends State<AddMatkul> {
       );
 
       try {
-        await allMatkulProvider.addMatkuls();
+        await allMatkulProvider.addSchedules();
 
         Get.back();
 
@@ -63,7 +63,7 @@ class _AddMatkulState extends State<AddMatkul> {
         );
 
         //clear controller
-        allMatkulProvider.matkulC.clear();
+        allMatkulProvider.matkulNameC.clear();
         allMatkulProvider.dosen1C.clear();
         allMatkulProvider.dosen2C.clear();
         allMatkulProvider.ruanganC.clear();
@@ -89,10 +89,11 @@ class _AddMatkulState extends State<AddMatkul> {
       child: Container(
         width: mediaQueryWidth,
         padding: EdgeInsets.only(
-            right: 20,
-            left: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom),
+          right: 20,
+          left: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(vertical: 10),
           child: Column(
@@ -104,13 +105,14 @@ class _AddMatkulState extends State<AddMatkul> {
                 children: [
                   TextField(
                     decoration: InputDecoration(
-                        hintText: "Ex: Basis Data",
-                        labelText: "Matkul*",
-                        alignLabelWithHint: true),
+                      hintText: "Ex: Basis Data",
+                      labelText: "Matkul*",
+                      alignLabelWithHint: true,
+                    ),
                     autocorrect: false,
                     style: const TextStyle(fontWeight: FontWeight.normal),
                     textInputAction: TextInputAction.next,
-                    controller: allMatkulProvider.matkulC,
+                    controller: allMatkulProvider.matkulNameC,
                   ),
                   TextField(
                     decoration: const InputDecoration(
@@ -124,10 +126,10 @@ class _AddMatkulState extends State<AddMatkul> {
                   ),
                   TextField(
                     decoration: const InputDecoration(
-                        hintText:
-                            "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
-                        labelText: "Dosen2",
-                        alignLabelWithHint: true),
+                      hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
+                      labelText: "Dosen2",
+                      alignLabelWithHint: true,
+                    ),
                     autocorrect: false,
                     style: const TextStyle(fontWeight: FontWeight.normal),
                     textInputAction: TextInputAction.next,
@@ -135,70 +137,71 @@ class _AddMatkulState extends State<AddMatkul> {
                   ),
                   TextField(
                     decoration: const InputDecoration(
-                        hintText: "Ex: fst-404",
-                        labelText: "Ruang kelas",
-                        alignLabelWithHint: true),
+                      hintText: "Ex: fst-404",
+                      labelText: "Ruang kelas",
+                      alignLabelWithHint: true,
+                    ),
                     autocorrect: false,
                     style: const TextStyle(fontWeight: FontWeight.normal),
                     textInputAction: TextInputAction.next,
                     controller: allMatkulProvider.ruanganC,
                   ),
-                  Obx(() => DropdownSearch<String>(
-                        selectedItem: allMatkulProvider.hari.value,
-                        decoratorProps: DropDownDecoratorProps(
-                          decoration: InputDecoration(hintText: "Pilih hari*"),
-                        ),
-                        popupProps: PopupProps.menu(
-                          constraints: const BoxConstraints(maxHeight: 200),
-                          menuProps: MenuProps(
-                            align: MenuAlign.bottomStart,
-                            backgroundColor: theme.colorScheme.surfaceContainer,
-                            margin: EdgeInsets.only(top: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
+                  Obx(
+                    () => DropdownSearch<String>(
+                      selectedItem: allMatkulProvider.hari.value,
+                      decoratorProps: DropDownDecoratorProps(
+                        decoration: InputDecoration(hintText: "Pilih hari*"),
+                      ),
+                      popupProps: PopupProps.menu(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        menuProps: MenuProps(
+                          align: MenuAlign.bottomStart,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          margin: EdgeInsets.only(top: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                         ),
-                        items: (filter, loadProps) =>
-                            allMatkulProvider.hariList.toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            allMatkulProvider.hari.value = value;
-                          } else {
-                            allMatkulProvider.hari.value = "";
-                          }
-                        },
-                      )),
-                  Obx(() => DropdownSearch<String>(
-                        selectedItem: allMatkulProvider.kelas.value,
-                        decoratorProps: DropDownDecoratorProps(
-                          decoration: InputDecoration(hintText: "Pilih kelas"),
-                        ),
-                        popupProps: PopupProps.menu(
-                          constraints: const BoxConstraints(maxHeight: 225),
-                          menuProps: MenuProps(
-                            align: MenuAlign.topStart,
-                            backgroundColor: theme.colorScheme.surfaceContainer,
-                            margin: EdgeInsets.only(top: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
+                      ),
+                      items: (filter, loadProps) =>
+                          allMatkulProvider.hariList.toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          allMatkulProvider.hari.value = value;
+                        } else {
+                          allMatkulProvider.hari.value = "";
+                        }
+                      },
+                    ),
+                  ),
+                  Obx(
+                    () => DropdownSearch<String>(
+                      selectedItem: allMatkulProvider.kelas.value,
+                      decoratorProps: DropDownDecoratorProps(
+                        decoration: InputDecoration(hintText: "Pilih kelas"),
+                      ),
+                      popupProps: PopupProps.menu(
+                        constraints: const BoxConstraints(maxHeight: 225),
+                        menuProps: MenuProps(
+                          align: MenuAlign.topStart,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          margin: EdgeInsets.only(top: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                         ),
-                        items: (filter, loadProps) =>
-                            allMatkulProvider.kelasList.toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            allMatkulProvider.kelas.value = value;
-                          } else if (value == null || value == "") {
-                            allMatkulProvider.kelas.value = null;
-                          }
-                        },
-                      )),
+                      ),
+                      items: (filter, loadProps) =>
+                          allMatkulProvider.kelasList.toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          allMatkulProvider.kelas.value = value;
+                        } else if (value == null || value == "") {
+                          allMatkulProvider.kelas.value = null;
+                        }
+                      },
+                    ),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -219,11 +222,15 @@ class _AddMatkulState extends State<AddMatkul> {
                         }
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 6, horizontal: 12),
+                            vertical: 6,
+                            horizontal: 12,
+                          ),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: BoxBorder.all(
-                                  color: theme.colorScheme.primary)),
+                            borderRadius: BorderRadius.circular(12),
+                            border: BoxBorder.all(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
                           child: Text(
                             displayText,
                             style: theme.textTheme.bodyLarge,
@@ -255,13 +262,11 @@ class _AddMatkulState extends State<AddMatkul> {
                         },
                         label: Text(
                           "Select",
-                          style: theme.textTheme.bodyLarge!
-                              .copyWith(color: theme.colorScheme.onPrimary),
+                          style: theme.textTheme.bodyLarge!.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                          ),
                         ),
-                        icon: const Icon(
-                          LucideIcons.clockFading500,
-                          size: 20,
-                        ),
+                        icon: const Icon(LucideIcons.clockFading500, size: 20),
                         iconAlignment: IconAlignment.end,
                       ),
                     ],
@@ -273,15 +278,12 @@ class _AddMatkulState extends State<AddMatkul> {
                 spacing: 6,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "(*) wajib diisi",
-                    style: theme.textTheme.labelLarge,
-                  ),
+                  Text("(*) wajib diisi", style: theme.textTheme.labelLarge),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
                       onPressed: () {
-                        if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                        if (allMatkulProvider.matkulNameC.text.isNotEmpty &&
                             allMatkulProvider.hari.value != null &&
                             allMatkulProvider.jamAwal.value != null) {
                           addJadwal();
@@ -290,8 +292,9 @@ class _AddMatkulState extends State<AddMatkul> {
                             contentPadding: EdgeInsets.all(10),
                             titlePadding: EdgeInsets.only(top: 20),
                             title: "Form tidak lengkap",
-                            content:
-                                const Text("Harap Isi Matkul, Hari, dan Jam"),
+                            content: const Text(
+                              "Harap Isi Matkul, Hari, dan Jam",
+                            ),
                             actions: [
                               FilledButton(
                                 onPressed: () {
@@ -301,24 +304,22 @@ class _AddMatkulState extends State<AddMatkul> {
                                   "OK",
                                   style: TextStyle(fontSize: 17),
                                 ),
-                              )
+                              ),
                             ],
                           );
                         }
                       },
                       label: Text(
                         "Save",
-                        style: theme.textTheme.bodyLarge!
-                            .copyWith(color: theme.colorScheme.onPrimary),
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                        ),
                       ),
-                      icon: const Icon(
-                        LucideIcons.save500,
-                        size: 20,
-                      ),
+                      icon: const Icon(LucideIcons.save500, size: 20),
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

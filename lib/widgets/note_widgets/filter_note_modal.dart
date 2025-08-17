@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
+import 'package:jaku/models/matkul.dart';
 
 class FilterNoteModal extends StatefulWidget {
-  final String? initialDeviceType;
-  const FilterNoteModal({
-    super.key,
-    this.initialDeviceType,
-  });
+  const FilterNoteModal({super.key});
 
   @override
   State<FilterNoteModal> createState() => _FilterNoteModalState();
 }
 
 class _FilterNoteModalState extends State<FilterNoteModal> {
+  final matkulC = Get.find<MatkulController>();
+  final noteC = Get.find<NoteControllers>();
+
   // State variables for filter selections
+  String _selectedDeviceType = 'all';
 
-  String _selectedDeviceType = 'All';
-  bool _showActiveOnly = false;
-
-  List<String> get deviceTypesList {
-    return ["All", "IMK", "PBO", "Basis Data", "Umum"];
+  List<Matkul> get deviceTypesList {
+    return [...matkulC.allMatkul];
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _selectedDeviceType = widget.initialDeviceType ?? 'All';
+    _selectedDeviceType = noteC.filterMatkulId.value;
+    print("filtered device id: $_selectedDeviceType");
   }
 
   @override
@@ -56,20 +58,46 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Wrap(
               spacing: 8,
-              children: deviceTypesList.map((type) {
-                return FilterChip(
-                  label: Text(type),
-                  selected: _selectedDeviceType == type,
+              children: [
+                FilterChip(
+                  label: Text("All"),
+                  selected: _selectedDeviceType == "all",
                   onSelected: (selected) {
                     setState(() {
-                      _selectedDeviceType = selected ? type : 'All';
+                      _selectedDeviceType = 'all';
                     });
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                );
-              }).toList(),
+                ),
+                ...deviceTypesList.map((type) {
+                  return FilterChip(
+                    label: Text(type.abbreviation!),
+                    selected: _selectedDeviceType == type.id,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedDeviceType = selected ? type.id! : 'all';
+                      });
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  );
+                }).toList(),
+                FilterChip(
+                  label: Text("Umum"),
+                  selected: _selectedDeviceType == "umum",
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedDeviceType = 'umum';
+                    });
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -82,13 +110,10 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                   child: OutlinedButton(
                     onPressed: () {
                       setState(() {
-                        _selectedDeviceType = 'All';
-                        _showActiveOnly = false;
+                        _selectedDeviceType = 'all';
                       });
                     },
-                    child: Text(
-                      'Reset',
-                    ),
+                    child: Text('Reset'),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -96,10 +121,12 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                   child: FilledButton(
                     onPressed: () {
                       // Return the filter selections to the calling screen
-                      Navigator.of(context).pop({
-                        'deviceType': _selectedDeviceType,
-                        'activeOnly': _showActiveOnly,
-                      });
+                      // Navigator.of(
+                      //   context,
+                      // ).pop({'deviceType': _selectedDeviceType});
+                      noteC.filterMatkulId.value = _selectedDeviceType;
+                      noteC.filterByMatkul();
+                      Get.back();
                     },
                     child: const Text(
                       'Apply',

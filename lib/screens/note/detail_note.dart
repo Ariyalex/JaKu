@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/note.dart';
-import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -13,31 +16,66 @@ class DetailNote extends StatefulWidget {
 }
 
 class _DetailNoteState extends State<DetailNote> {
-  late Note selectedNote;
+  final noteC = Get.find<NoteControllers>();
+  final matkulC = Get.find<MatkulController>();
+  late Note? selectedNote;
+  late final StreamSubscription _matkulSub;
+  final noteId = Get.arguments;
 
   @override
   void initState() {
     super.initState();
     // Ambil selectedNote dari widget atau dari Get.arguments
-    selectedNote = Get.arguments as Note;
+    selectedNote = noteC.selectById(noteId);
+    noteC.titleC.text = selectedNote?.title ?? '';
+    noteC.noteC.text = selectedNote?.desc ?? '';
+    noteC.matkulC.value = selectedNote?.matkulId ?? '';
+
+    noteC.titleC.addListener(_onAnyChanged);
+    noteC.noteC.addListener(_onAnyChanged);
+    _matkulSub = noteC.matkulC.listen((_) => _onAnyChanged());
+  }
+
+  void _onAnyChanged() {
+    print(noteId);
+    noteC.onNoteChanged(noteId!);
+  }
+
+  @override
+  void dispose() {
+    noteC.titleC.removeListener(_onAnyChanged);
+    noteC.noteC.removeListener(_onAnyChanged);
+    _matkulSub.cancel();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      noteC.matkulC.value = "";
+      noteC.titleC.clear();
+      noteC.noteC.clear();
+    });
+
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final titleC = TextEditingController(text: selectedNote.title);
-    final noteC = TextEditingController(text: selectedNote.desc);
 
     return Scaffold(
       appBar: AppBar(
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SelectMatkulWidget(
-              selectedMatkul: getInitials(selectedNote.matkul ?? ""),
-            ),
+            child: matkulC.allMatkul.isNotEmpty
+                ? SelectMatkulWidget(matkulId: selectedNote?.matkulId ?? "")
+                : null,
           ),
-          IconButton(onPressed: () {}, icon: Icon(LucideIcons.trash2)),
+          IconButton(
+            onPressed: () {
+              noteC.deleteNote(noteId);
+              Get.back();
+            },
+            icon: Icon(LucideIcons.trash2),
+          ),
         ],
       ),
       body: SafeArea(
@@ -47,7 +85,7 @@ class _DetailNoteState extends State<DetailNote> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
-                controller: titleC,
+                controller: noteC.titleC,
                 minLines: 1,
                 maxLines: null, // expands vertically when overflow
                 style: theme.textTheme.titleLarge,
@@ -61,7 +99,7 @@ class _DetailNoteState extends State<DetailNote> {
               ),
               Expanded(
                 child: TextField(
-                  controller: noteC,
+                  controller: noteC.noteC,
                   style: theme.textTheme.bodyMedium,
                   decoration: InputDecoration(
                     hintText: 'Note',
