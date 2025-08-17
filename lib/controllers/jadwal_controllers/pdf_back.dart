@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/models/jadwal.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfBack extends GetxController {
@@ -138,7 +138,7 @@ class PdfBack extends GetxController {
 
         // Upload each matkul using the existing provider function
         for (var matkul in _allMatkul) {
-          jadwalProvider.matkulC.text = matkul.matkul;
+          jadwalProvider.matkulNameC.text = matkul.matkul;
           jadwalProvider.kelas.value = matkul.kelas ?? "";
           jadwalProvider.jamAwal.value = matkul.formattedJamAwal;
           jadwalProvider.jamAkhir.value = matkul.formattedJamAkhir ?? "";

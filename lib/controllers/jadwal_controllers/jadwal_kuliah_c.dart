@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/models/matkul.dart';
 import 'package:jaku/services/jadwal_service.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/theme/theme.dart';
 import 'package:uuid/uuid.dart';
@@ -29,7 +30,7 @@ String getInitials(String kalimat) {
 
 class JadwalkuliahC extends GetxController {
   //text controller
-  final matkulC = TextEditingController();
+  final matkulNameC = TextEditingController();
   final dosen1C = TextEditingController();
   final dosen2C = TextEditingController();
   final ruanganC = TextEditingController();
@@ -57,7 +58,6 @@ class JadwalkuliahC extends GetxController {
   final color = AppTheme.dark;
 
   final RxList<Jadwal> allSchedule = <Jadwal>[].obs;
-  final RxList<Matkul> allMatkul = <Matkul>[].obs;
 
   int get jumlahSchedule => allSchedule.length;
 
@@ -69,13 +69,6 @@ class JadwalkuliahC extends GetxController {
     return allSchedule.firstWhere(
       (element) => element.id == id,
       orElse: () => throw Exception("Jadwal degnan ID $id tidak ditemaukan"),
-    );
-  }
-
-  Matkul? selectMatkulById(String id) {
-    return allMatkul.firstWhere(
-      (element) => element.id == id,
-      orElse: () => throw Exception("Matkul degnan ID $id tidak ditemaukan"),
     );
   }
 
@@ -134,11 +127,6 @@ class JadwalkuliahC extends GetxController {
         Get.find<HariKuliahC>().getUniqueDays(this);
       }
 
-      // Load matkul
-      List<Matkul> matkulData = MatkulService.getAllMatkulService();
-      allMatkul.clear();
-      allMatkul.addAll(matkulData);
-
       //remove unused matkul
       await removeUnusedMatkul();
     } catch (e) {
@@ -151,9 +139,10 @@ class JadwalkuliahC extends GetxController {
 
   Future<void> addSchedules() async {
     try {
+      final matkulC = Get.find<MatkulController>();
       //check if there is matkul in allmatkul
-      String matkulName = matkulC.text.trim();
-      Matkul? existing = allMatkul.firstWhereOrNull(
+      String matkulName = matkulNameC.text.trim();
+      Matkul? existing = matkulC.allMatkul.firstWhereOrNull(
         (item) => item.matkul == matkulName,
       );
 
@@ -166,7 +155,7 @@ class JadwalkuliahC extends GetxController {
           matkul: matkulName,
           abbreviation: getInitials(matkulName),
         );
-        allMatkul.add(newMatkul);
+        matkulC.allMatkul.add(newMatkul);
         await MatkulService.saveMatkulService(newMatkul);
       } else {
         matkulId = existing.id!;
@@ -208,9 +197,10 @@ class JadwalkuliahC extends GetxController {
 
   Future<void> updateSchedule(String id) async {
     try {
+      final matkulC = Get.find<MatkulController>();
       //check if there is matkul in allmatkul
-      String matkulName = matkulC.text.trim();
-      Matkul? existing = allMatkul.firstWhereOrNull(
+      String matkulName = matkulNameC.text.trim();
+      Matkul? existing = matkulC.allMatkul.firstWhereOrNull(
         (item) => item.matkul == matkulName,
       );
 
@@ -223,7 +213,7 @@ class JadwalkuliahC extends GetxController {
           matkul: matkulName,
           abbreviation: getInitials(matkulName),
         );
-        allMatkul.add(newMatkul);
+        matkulC.allMatkul.add(newMatkul);
         await MatkulService.saveMatkulService(newMatkul);
       } else {
         matkulId = existing.id!;
@@ -259,6 +249,8 @@ class JadwalkuliahC extends GetxController {
           rethrow;
         }
       }
+
+      await removeUnusedMatkul();
     } catch (error) {
       print("error updating product: $error");
       rethrow;
@@ -291,6 +283,7 @@ class JadwalkuliahC extends GetxController {
   Future<void> clearAllSchedule() async {
     try {
       // Tampilkan loading indicator
+      final matkulC = Get.find<MatkulController>();
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
@@ -309,7 +302,7 @@ class JadwalkuliahC extends GetxController {
       hariKuliahProvider.clearAllDays();
 
       // Hapus semua data matkul dari controller dan local storage
-      allMatkul.clear();
+      matkulC.allMatkul.clear();
       await MatkulService.deleteAllMatkulService();
 
       await removeUnusedMatkul();
@@ -342,18 +335,19 @@ class JadwalkuliahC extends GetxController {
 
   Future<void> removeUnusedMatkul() async {
     try {
+      final matkulC = Get.find<MatkulController>();
       // Ambil semua matkulId yang dipakai di jadwal
       final usedMatkulIds = allSchedule
           .map((jadwal) => jadwal.matkulId)
           .toSet();
 
       // Cari matkul yang tidak dipakai
-      final unusedMatkul = allMatkul
+      final unusedMatkul = matkulC.allMatkul
           .where((matkul) => !usedMatkulIds.contains(matkul.id))
           .toList();
 
       for (final matkul in unusedMatkul) {
-        allMatkul.remove(matkul);
+        matkulC.allMatkul.remove(matkul);
         await MatkulService.deleteMatkulService(matkul.id!);
       }
 

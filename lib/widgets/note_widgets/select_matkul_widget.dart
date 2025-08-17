@@ -1,7 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -15,7 +15,7 @@ class SelectMatkulWidget extends StatefulWidget {
 }
 
 class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
-  final matkulC = Get.find<JadwalkuliahC>();
+  final matkulC = Get.find<MatkulController>();
   Matkul? selectedMatkul;
 
   @override

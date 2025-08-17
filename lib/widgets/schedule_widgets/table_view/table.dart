@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
 
 class Table extends StatefulWidget {

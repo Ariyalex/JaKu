@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
@@ -17,7 +17,7 @@ class DetailNote extends StatefulWidget {
 
 class _DetailNoteState extends State<DetailNote> {
   final noteC = Get.find<NoteControllers>();
-  final matkulC = Get.find<JadwalkuliahC>();
+  final matkulC = Get.find<MatkulController>();
   late Note? selectedNote;
   late final StreamSubscription _matkulSub;
   final noteId = Get.arguments;
@@ -38,7 +38,7 @@ class _DetailNoteState extends State<DetailNote> {
 
   void _onAnyChanged() {
     print(noteId);
-    noteC.onNoteChanged(noteId!, matkulC);
+    noteC.onNoteChanged(noteId!);
   }
 
   @override

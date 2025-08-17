@@ -87,6 +87,14 @@ class _NoteDashboardState extends State<NoteDashboard> {
                       print("sort created: ${noteC.isSortByCreatedDate}");
                       print("sort direction: ${noteC.isAsce}");
 
+                      for (var note in notes) {
+                        if (noteC.isSortByCreatedDate.value) {
+                          print(note.createdOn);
+                        } else {
+                          print(note.editedOn);
+                        }
+                      }
+
                       return notes.isNotEmpty
                           ? NoteGlobal(notes: notes)
                           : Center(

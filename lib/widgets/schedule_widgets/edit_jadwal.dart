@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import '../../controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 
 class EditJadwal extends StatefulWidget {
   const EditJadwal({super.key, required this.jadwalId});
@@ -24,7 +24,7 @@ class _AddMatkulState extends State<EditJadwal> {
   @override
   void initState() {
     super.initState();
-    allMatkulProvider.matkulC.clear();
+    allMatkulProvider.matkulNameC.clear();
     allMatkulProvider.dosen1C.clear();
     allMatkulProvider.dosen2C.clear();
     allMatkulProvider.ruanganC.clear();
@@ -35,8 +35,8 @@ class _AddMatkulState extends State<EditJadwal> {
 
     final selectedMatkul = allMatkulProvider.selectById(widget.jadwalId)!;
 
-    if (allMatkulProvider.matkulC.text.isEmpty) {
-      allMatkulProvider.matkulC.text = selectedMatkul.matkul;
+    if (allMatkulProvider.matkulNameC.text.isEmpty) {
+      allMatkulProvider.matkulNameC.text = selectedMatkul.matkul;
       allMatkulProvider.dosen1C.text = selectedMatkul.dosen1 ?? "";
       allMatkulProvider.dosen2C.text = selectedMatkul.dosen2 ?? "";
       allMatkulProvider.ruanganC.text = selectedMatkul.room ?? "";
@@ -78,7 +78,7 @@ class _AddMatkulState extends State<EditJadwal> {
         );
 
         // Clear form fields
-        allMatkulProvider.matkulC.clear();
+        allMatkulProvider.matkulNameC.clear();
         allMatkulProvider.dosen1C.clear();
         allMatkulProvider.dosen2C.clear();
         allMatkulProvider.ruanganC.clear();
@@ -131,7 +131,7 @@ class _AddMatkulState extends State<EditJadwal> {
                       autocorrect: false,
                       style: const TextStyle(fontWeight: FontWeight.normal),
                       textInputAction: TextInputAction.next,
-                      controller: allMatkulProvider.matkulC,
+                      controller: allMatkulProvider.matkulNameC,
                     ),
                     TextField(
                       decoration: const InputDecoration(
@@ -311,7 +311,7 @@ class _AddMatkulState extends State<EditJadwal> {
                       width: double.infinity,
                       child: FilledButton.icon(
                         onPressed: () {
-                          if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                          if (allMatkulProvider.matkulNameC.text.isNotEmpty &&
                               allMatkulProvider.hari.value != null &&
                               allMatkulProvider.jamAwal.value != null) {
                             editJadwal();

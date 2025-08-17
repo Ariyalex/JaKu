@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/matkul_card.dart';
 import 'package:jaku/widgets/schedule_widgets/jadwal_kosong.dart';
 

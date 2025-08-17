@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/matkul.dart';
 
@@ -12,7 +12,7 @@ class FilterNoteModal extends StatefulWidget {
 }
 
 class _FilterNoteModalState extends State<FilterNoteModal> {
-  final matkulC = Get.find<JadwalkuliahC>();
+  final matkulC = Get.find<MatkulController>();
   final noteC = Get.find<NoteControllers>();
 
   // State variables for filter selections

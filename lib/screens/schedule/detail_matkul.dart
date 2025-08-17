@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/jadwal.dart';
 import 'package:jaku/models/matkul.dart';
@@ -21,6 +22,7 @@ class DetailMatkul extends StatefulWidget {
 
 class _DetailMatkulState extends State<DetailMatkul> {
   final jadwalC = Get.find<JadwalkuliahC>();
+  final matkulC = Get.find<MatkulController>();
   final noteC = Get.find<NoteControllers>();
 
   late Jadwal selectedSchedule;
@@ -36,7 +38,7 @@ class _DetailMatkulState extends State<DetailMatkul> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Matkul? selectedMatkul = jadwalC.selectMatkulById(
+    final Matkul? selectedMatkul = matkulC.selectMatkulById(
       selectedSchedule.matkulId!,
     );
 

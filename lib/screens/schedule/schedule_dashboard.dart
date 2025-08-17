@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:hive/hive.dart';
-import 'package:jaku/controllers/matkul_controllers/pdf_back.dart';
+import 'package:jaku/controllers/jadwal_controllers/pdf_back.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/widgets/schedule_widgets/add_jadwal.dart';
 import 'package:jaku/widgets/schedule_widgets/card_view/card_view.dart';
@@ -10,8 +10,8 @@ import 'package:jaku/widgets/schedule_widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../controllers/matkul_controllers/hari_kuliah_c.dart';
-import '../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import '../../controllers/jadwal_controllers/hari_kuliah_c.dart';
+import '../../controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import '../../routes/route_named.dart';
 
 import 'dart:math' as math;
@@ -26,8 +26,8 @@ class ScheduleDashboard extends StatefulWidget {
 
 class _ScheduleDashboardState extends State<ScheduleDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final JadwalkuliahC jadwalKuliahC = Get.find<JadwalkuliahC>();
-  final HariKuliahC hariKuliahC = Get.find<HariKuliahC>();
+  late JadwalkuliahC jadwalKuliahC;
+  late HariKuliahC hariKuliahC;
 
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
 
@@ -37,12 +37,16 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
   void dispose() {
     // TODO: implement dispose
     Get.delete<PdfBack>();
+    Get.delete<JadwalkuliahC>();
+    Get.delete<HariKuliahC>();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    hariKuliahC = Get.put(HariKuliahC());
+    jadwalKuliahC = Get.put(JadwalkuliahC());
     Get.put(PdfBack());
     loadViewValue();
     hariKuliahC.getOrderedDays();

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import '../../controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 
 class AddJadwal extends StatefulWidget {
   const AddJadwal({super.key});
@@ -28,7 +28,7 @@ class _AddJadwalState extends State<AddJadwal> {
   @override
   void initState() {
     super.initState();
-    allMatkulProvider.matkulC.clear();
+    allMatkulProvider.matkulNameC.clear();
     allMatkulProvider.dosen1C.clear();
     allMatkulProvider.dosen2C.clear();
     allMatkulProvider.ruanganC.clear();
@@ -63,7 +63,7 @@ class _AddJadwalState extends State<AddJadwal> {
         );
 
         //clear controller
-        allMatkulProvider.matkulC.clear();
+        allMatkulProvider.matkulNameC.clear();
         allMatkulProvider.dosen1C.clear();
         allMatkulProvider.dosen2C.clear();
         allMatkulProvider.ruanganC.clear();
@@ -112,7 +112,7 @@ class _AddJadwalState extends State<AddJadwal> {
                     autocorrect: false,
                     style: const TextStyle(fontWeight: FontWeight.normal),
                     textInputAction: TextInputAction.next,
-                    controller: allMatkulProvider.matkulC,
+                    controller: allMatkulProvider.matkulNameC,
                   ),
                   TextField(
                     decoration: const InputDecoration(
@@ -283,7 +283,7 @@ class _AddJadwalState extends State<AddJadwal> {
                     width: double.infinity,
                     child: FilledButton.icon(
                       onPressed: () {
-                        if (allMatkulProvider.matkulC.text.isNotEmpty &&
+                        if (allMatkulProvider.matkulNameC.text.isNotEmpty &&
                             allMatkulProvider.hari.value != null &&
                             allMatkulProvider.jamAwal.value != null) {
                           addJadwal();

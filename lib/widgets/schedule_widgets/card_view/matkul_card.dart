@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
+import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:get/get.dart';
 
 import '../../../models/jadwal.dart';
-import '../../../controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import '../../../controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import '../../../routes/route_named.dart';
 
 class MatkulCard extends StatelessWidget {

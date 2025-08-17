@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/routes/route_named.dart';
 
@@ -13,7 +13,7 @@ class NoteGlobal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final matkulC = Get.find<JadwalkuliahC>();
+    final matkulC = Get.find<MatkulController>();
     final theme = Theme.of(context);
 
     return MasonryGridView.builder(

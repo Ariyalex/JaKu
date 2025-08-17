@@ -2,8 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/controllers/matkul_controllers/hari_kuliah_c.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/screens/note/note_dashboard.dart';
@@ -33,10 +32,8 @@ void main() async {
   // Hive.registerAdapter(TaskAdapter());
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
-
+  Get.put(MatkulController(), permanent: true);
   Get.put(VersionControl(), permanent: true);
-  Get.put(HariKuliahC(), permanent: true);
-  Get.put(JadwalkuliahC(), permanent: true);
 
   //init theme
   await Hive.openBox('settings');

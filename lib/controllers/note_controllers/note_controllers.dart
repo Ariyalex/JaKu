@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controllers/jadwal_kuliah_c.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/note.dart';
 import 'package:jaku/services/note_service.dart';
@@ -35,10 +35,10 @@ class NoteControllers extends GetxController {
   Timer? debounce;
 
   //save note debounce
-  void onNoteChanged(String id, JadwalkuliahC jadwalKuliahC) {
+  void onNoteChanged(String id) {
     if (debounce?.isActive ?? false) debounce!.cancel();
     debounce = Timer(const Duration(milliseconds: 300), () {
-      updateNote(id, jadwalKuliahC);
+      updateNote(id);
       final note = selectById(id);
       print("edited on: ${note!.editedOn}");
       print("debounce save");
@@ -116,8 +116,9 @@ class NoteControllers extends GetxController {
   }
 
   //update note
-  Future<void> updateNote(String id, JadwalkuliahC jadwalkuliahC) async {
+  Future<void> updateNote(String id) async {
     try {
+      final matkulController = Get.find<MatkulController>();
       int index = allNote.indexWhere((note) => note.id == id);
       if (index == -1) return;
 
@@ -127,7 +128,7 @@ class NoteControllers extends GetxController {
       String? matkulId = matkulC.value;
       String? matkulName;
       if (matkulId != null && matkulId != "") {
-        Matkul? selectedMatkul = jadwalkuliahC.selectMatkulById(matkulId);
+        Matkul? selectedMatkul = matkulController.selectMatkulById(matkulId);
         matkulName = selectedMatkul?.matkul;
       }
 
@@ -163,7 +164,7 @@ class NoteControllers extends GetxController {
 
   Future<void> deleteMatkulRelationFromNotes() async {
     try {
-      final allMatkul = Get.find<JadwalkuliahC>().allMatkul;
+      final allMatkul = Get.find<MatkulController>().allMatkul;
       final validMatkulIds = allMatkul.map((matkul) => matkul.id).toSet();
       for (final matkul in allMatkul) {
         print('Matkul ID: ${matkul.id}');
@@ -217,7 +218,8 @@ class NoteControllers extends GetxController {
 
   void sortByCreatedAsc() {
     try {
-      allNote.sort((a, b) => a.createdOn.compareTo(b.createdOn));
+      filteredNotes.sort((a, b) => a.createdOn.compareTo(b.createdOn));
+      print("srot by created asc");
     } catch (error) {
       print(error);
       rethrow;
@@ -226,7 +228,8 @@ class NoteControllers extends GetxController {
 
   void sortByCreatedDesc() {
     try {
-      allNote.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+      filteredNotes.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+      print("sort by created desc");
     } catch (error) {
       print(error);
       rethrow;
@@ -235,7 +238,8 @@ class NoteControllers extends GetxController {
 
   void sortByEditedAsc() {
     try {
-      allNote.sort((a, b) => b.editedOn.compareTo(a.editedOn));
+      filteredNotes.sort((a, b) => b.editedOn.compareTo(a.editedOn));
+      print("srot by edited asc");
     } catch (error) {
       print(error);
       rethrow;
@@ -244,7 +248,8 @@ class NoteControllers extends GetxController {
 
   void sortByEditedDesc() {
     try {
-      allNote.sort((a, b) => a.editedOn.compareTo(b.editedOn));
+      filteredNotes.sort((a, b) => a.editedOn.compareTo(b.editedOn));
+      print("srot by created desc");
     } catch (error) {
       print(error);
       rethrow;
