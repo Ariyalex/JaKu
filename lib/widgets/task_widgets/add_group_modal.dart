@@ -33,7 +33,16 @@ class _AddGroupModalState extends State<AddGroupModal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("New group", style: theme.textTheme.bodyLarge),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("New group", style: theme.textTheme.bodyLarge),
+                TextButton(
+                  onPressed: textC.text.trim().isEmpty ? null : () {},
+                  child: Text("save"),
+                ),
+              ],
+            ),
             const Divider(),
             TextField(
               controller: textC,

@@ -42,48 +42,7 @@ class _DetailMatkulState extends State<DetailMatkul> {
       selectedSchedule.matkulId!,
     );
 
-    final List<Task> tasks = [
-      Task(
-        id: "1",
-        task: "Tugas ERD",
-        status: false,
-        taskDueDate: DateTime(2025, 8, 4, 10, 0),
-        isStared: false,
-        matkul: "IMK",
-      ),
-      Task(
-        id: "2",
-        task: "Presentasi UI/UX",
-        status: true,
-        taskDueDate: DateTime(2025, 8, 11, 13, 30),
-        isStared: false,
-        matkul: "IMK",
-      ),
-      Task(
-        id: "3",
-        task: "Kuis Bab 1-2",
-        status: false,
-        taskDueDate: DateTime(2025, 8, 18, 9, 0),
-        isStared: false,
-        matkul: "IMK",
-      ),
-      Task(
-        id: "4",
-        task: "Tugas Makalah",
-        status: false,
-        taskDueDate: DateTime(2025, 8, 25, 23, 59),
-        isStared: false,
-        matkul: "IMK",
-      ),
-      Task(
-        id: "5",
-        task: "Ujian Tengah Semester",
-        status: false,
-        taskDueDate: DateTime(2025, 9, 1, 8, 0),
-        isStared: false,
-        matkul: "IMK",
-      ),
-    ];
+    final List<Task> tasks = [];
 
     return Scaffold(
       appBar: AppBar(

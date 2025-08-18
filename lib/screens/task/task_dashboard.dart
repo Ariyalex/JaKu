@@ -2,12 +2,17 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:jaku/models/task.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/widgets/task_widgets/add_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/build_task_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 class TaskDashboard extends StatefulWidget {
   const TaskDashboard({super.key});
@@ -16,107 +21,68 @@ class TaskDashboard extends StatefulWidget {
   State<TaskDashboard> createState() => _TaskDashboardState();
 }
 
-class _TaskDashboardState extends State<TaskDashboard> {
+class _TaskDashboardState extends State<TaskDashboard>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
-
-  // Dummy data
-  final List<Task> tasks = [
-    Task(
-      task: "Tugas ERD",
-      desc: "Buat ERD untuk sistem informasi akademik.",
-      matkul: "IMK",
-      isStared: true,
-      status: false,
-      taskDueDate: DateTime(2025, 8, 4),
-      taskDueTime: TimeOfDay(hour: 10, minute: 0),
-    ),
-    Task(
-      task: "Upload tugas ke LMS",
-      desc: "Upload file PDF ke LMS sebelum deadline.",
-      matkul: "IMK",
-      isStared: false,
-      status: false,
-      taskDueDate: DateTime(2025, 8, 5),
-      taskDueTime: TimeOfDay(hour: 23, minute: 59),
-    ),
-    Task(
-      task: "Quiz Bab 1-2",
-      desc:
-          "Kerjakan quiz materi bab 1 dan 2 di kelas fas fadsf dsafdfsa fads fads f sadfads f adsf ads .",
-      matkul: "PBO",
-      isStared: true,
-      status: true,
-      taskDueDate: DateTime(2025, 8, 18),
-      taskDueTime: TimeOfDay(hour: 9, minute: 0),
-    ),
-    Task(
-      task: "Tugas Makalah",
-      matkul: "PBO",
-      isStared: false,
-      status: true,
-      taskDueDate: DateTime(2025, 8, 25),
-      taskDueTime: TimeOfDay(hour: 23, minute: 59),
-    ),
-    Task(
-      task: "Ujian Tengah Semester",
-      matkul: "IMK",
-      isStared: true,
-      status: true,
-      taskDueDate: DateTime(2025, 9, 1),
-      taskDueTime: TimeOfDay(hour: 8, minute: 0),
-    ),
-    Task(
-      task: "Beli alat tulis",
-      matkul: null,
-      isStared: true,
-      status: false,
-      taskDueDate: DateTime(2025, 8, 10),
-      taskDueTime: TimeOfDay(hour: 15, minute: 0),
-    ),
-    Task(task: "Isi KRS", matkul: null, isStared: false, status: true),
-  ];
-
-  late List<String> matkulList;
+  final matkulC = Get.find<MatkulController>();
+  late TabController tabController;
+  late TaskController taskC;
+  late String? selectedMatkul;
 
   @override
   void initState() {
     super.initState();
-    matkulList = [
-      ...{
-        for (var t in tasks)
-          if (t.matkul != null) t.matkul!,
-      },
-    ];
-    matkulList.add("Umum");
+    taskC = Get.put(TaskController());
+    tabController = TabController(
+      length: 2 + matkulC.allMatkul.length,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    Get.delete<TaskController>();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final matkulList = matkulC.allMatkul;
 
     // Buat daftar tab dan konten
     final List<Widget> tabs = [
       const Tab(icon: Icon(Icons.star)),
-      ...matkulList.where((m) => m != "Umum").map((m) => Tab(text: m)),
       const Tab(text: "Umum"),
+      ...matkulList.map((m) => Tab(text: m.abbreviation)),
     ];
 
     final List<Widget> tabViews = [
-      BuildTaskWidget(
-        title: 'Starred',
-        filteredTasks: tasks.where((task) => task.isStared == true).toList(),
+      Obx(
+        () => BuildTaskWidget(
+          title: 'Starred',
+          filteredTasks: taskC.allTask
+              .where((task) => task.isStared == true)
+              .toList(),
+        ),
       ),
-      ...matkulList
-          .where((m) => m != "Umum")
-          .map(
-            (m) => BuildTaskWidget(
-              title: m,
-              filteredTasks: tasks.where((t) => t.matkul == m).toList(),
-            ),
+      Obx(
+        () => BuildTaskWidget(
+          title: 'Umum',
+          filteredTasks: taskC.allTask
+              .where((t) => t.matkulId == null)
+              .toList(),
+        ),
+      ),
+      ...matkulList.map(
+        (m) => Obx(
+          () => BuildTaskWidget(
+            title: m.abbreviation,
+            filteredTasks: taskC.allTask
+                .where((t) => t.matkulId == m.id)
+                .toList(),
           ),
-      BuildTaskWidget(
-        title: 'Umum',
-        filteredTasks: tasks.where((t) => t.matkul == null).toList(),
+        ),
       ),
     ];
 
@@ -127,6 +93,7 @@ class _TaskDashboardState extends State<TaskDashboard> {
         appBar: AppBar(
           title: const Text("Task"),
           bottom: TabBar(
+            controller: tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             splashFactory: InkSparkle.splashFactory,
@@ -137,7 +104,9 @@ class _TaskDashboardState extends State<TaskDashboard> {
             tabs: tabs,
           ),
         ),
-        body: SafeArea(child: TabBarView(children: tabViews)),
+        body: SafeArea(
+          child: TabBarView(children: tabViews, controller: tabController),
+        ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton: ExpandableFab(
           key: fabKey,
@@ -191,6 +160,11 @@ class _TaskDashboardState extends State<TaskDashboard> {
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () async {
+                    final tabIndex = tabController.index;
+                    String? selectedMatkul;
+                    if (tabIndex >= 2) {
+                      selectedMatkul = matkulList[tabIndex - 2].id;
+                    }
                     fabKey.currentState?.close();
                     showBarModalBottomSheet<Map<String, dynamic>>(
                       barrierColor: Colors.black.withValues(alpha: 0.4),
@@ -198,7 +172,8 @@ class _TaskDashboardState extends State<TaskDashboard> {
                       useRootNavigator: true,
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
-                      builder: (context) => const AddTaskModal(),
+                      builder: (context) =>
+                          AddTaskModal(matkul: selectedMatkul),
                     );
                   },
                   child: Icon(Icons.add_task),

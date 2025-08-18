@@ -11,6 +11,6 @@ class Matkul extends HiveObject {
   String matkul;
 
   @HiveField(2)
-  String? abbreviation;
-  Matkul({this.id, required this.matkul, this.abbreviation});
+  String abbreviation;
+  Matkul({this.id, required this.matkul, required this.abbreviation});
 }

@@ -62,11 +62,7 @@ class TaskMatkul extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: TaskTile(
-                          task: task,
-                          completed: task.status,
-                          star: false,
-                        ),
+                        child: TaskTile(taskId: task.id, star: false),
                       ),
                     )
                     .toList(),

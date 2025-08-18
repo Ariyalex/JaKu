@@ -19,7 +19,7 @@ class MatkulAdapter extends TypeAdapter<Matkul> {
     return Matkul(
       id: fields[0] as String?,
       matkul: fields[1] as String,
-      abbreviation: fields[2] as String?,
+      abbreviation: fields[2] as String,
     );
   }
 

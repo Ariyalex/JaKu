@@ -91,6 +91,7 @@ flutter:
   assets:
     - images/bochi.jpg
     - images/malas.gif
+    - images/cihuyy.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

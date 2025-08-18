@@ -13,6 +13,7 @@ import 'package:jaku/routes/page_route.dart';
 import 'package:jaku/screens/schedule/schedule_dashboard.dart';
 import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/services/note_service.dart';
+import 'package:jaku/services/task_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
@@ -29,7 +30,7 @@ void main() async {
   await JadwalService.initScheduleService();
   await NoteService.initNoteService();
   await MatkulService.iniMatkulService();
-  // Hive.registerAdapter(TaskAdapter());
+  await TaskService.initTaskService();
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
   Get.put(MatkulController(), permanent: true);

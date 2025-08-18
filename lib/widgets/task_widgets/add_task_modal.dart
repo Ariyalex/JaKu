@@ -1,5 +1,9 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/task_controllers/task_controller.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AddTaskModal extends StatefulWidget {
@@ -11,39 +15,41 @@ class AddTaskModal extends StatefulWidget {
 }
 
 class _AddTaskModalState extends State<AddTaskModal> {
-  List<String> matkulList = ["IMK", "PBO", "Basis Data"];
+  final taskC = Get.find<TaskController>();
+  final matkulC = Get.find<MatkulController>();
+  late List<Matkul> matkulList;
 
-  final TextEditingController taskController = TextEditingController();
-  final TextEditingController descController = TextEditingController();
+  late TextEditingController taskController;
+  late TextEditingController descController;
 
   bool showDescField = false;
-  bool isStarred = false;
-  DateTime? selectedDate;
-  TimeOfDay? selectedTime;
-  String? selectedMatkul;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (widget.matkul != null && widget.matkul!.isNotEmpty) {
-      selectedMatkul = widget.matkul;
-      if (!matkulList.contains(widget.matkul)) {
-        matkulList.add(widget.matkul!);
-      }
-    }
+    //init controller
+    taskController = taskC.titleC;
+    descController = taskC.descC;
+    taskC.matkulC.value = widget.matkul;
+
+    matkulList = matkulC.allMatkul;
   }
 
   @override
   void dispose() {
-    taskController.dispose();
-    descController.dispose();
+    taskController.clear();
+    descController.clear();
+    taskC.isStaredC.value = false;
+    taskC.dueDateC.value = null;
+    taskC.matkulC.value = null;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return SafeArea(
       child: Container(
         padding: EdgeInsets.only(
@@ -66,9 +72,11 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     spacing: 6,
                     children: [
                       Text(
-                        selectedMatkul == null || selectedMatkul == ""
+                        taskC.matkulC.value == null || taskC.matkulC.value == ""
                             ? "Select matkul"
-                            : selectedMatkul!,
+                            : matkulC
+                                  .selectMatkulById(taskC.matkulC.value!)!
+                                  .abbreviation,
                       ),
                       Icon(LucideIcons.chevronDown),
                     ],
@@ -79,23 +87,26 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                value: selectedMatkul,
+                value: taskC.matkulC.value,
+
                 items: matkulList
                     .map(
                       (item) => DropdownMenuItem<Object>(
-                        value: item,
-                        child: Text(item),
+                        value: item.id,
+                        child: Text(item.abbreviation),
                       ),
                     )
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedMatkul = value as String?;
+                    taskC.matkulC.value = value as String?;
+                    print("selected matkul: ${taskC.matkulC.value}");
                   });
                 },
                 alignment: AlignmentDirectional.centerStart,
                 dropdownStyleData: DropdownStyleData(
                   width: 200,
+                  maxHeight: 200,
                   direction: DropdownDirection.textDirection,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
@@ -129,33 +140,21 @@ class _AddTaskModalState extends State<AddTaskModal> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (selectedDate != null)
+                if (taskC.dueDateC.value != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 4.0),
                     child: Chip(
                       label: Text(
-                        "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                        // Tampilkan tanggal dan jam jika ada
+                        taskC.dueDateC.value!.hour == 0 &&
+                                taskC.dueDateC.value!.minute == 0
+                            ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
+                            : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
                         style: theme.textTheme.bodySmall,
                       ),
                       onDeleted: () {
                         setState(() {
-                          selectedDate = null;
-                          selectedTime = null;
-                        });
-                      },
-                    ),
-                  ),
-                if (selectedTime != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: Chip(
-                      label: Text(
-                        selectedTime!.format(context),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      onDeleted: () {
-                        setState(() {
-                          selectedTime = null;
+                          taskC.dueDateC.value = null;
                         });
                       },
                     ),
@@ -181,29 +180,50 @@ class _AddTaskModalState extends State<AddTaskModal> {
                       onPressed: () async {
                         final date = await showDatePicker(
                           context: context,
-                          initialDate: selectedDate ?? DateTime.now(),
+                          initialDate: taskC.dueDateC.value ?? DateTime.now(),
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
                         if (date != null) {
                           setState(() {
-                            selectedDate = date;
-                            selectedTime = null;
+                            // Jika sebelumnya sudah ada jam, pertahankan jam
+                            if (taskC.dueDateC.value != null) {
+                              final old = taskC.dueDateC.value!;
+                              taskC.dueDateC.value = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                old.hour,
+                                old.minute,
+                              );
+                            } else {
+                              taskC.dueDateC.value = date;
+                            }
                           });
                         }
                       },
                       icon: Icon(LucideIcons.calendar),
                     ),
-                    if (selectedDate != null)
+                    if (taskC.dueDateC.value != null)
                       IconButton(
                         onPressed: () async {
                           final time = await showTimePicker(
                             context: context,
-                            initialTime: selectedTime ?? TimeOfDay.now(),
+                            initialTime: TimeOfDay(
+                              hour: taskC.dueDateC.value!.hour,
+                              minute: taskC.dueDateC.value!.minute,
+                            ),
                           );
                           if (time != null) {
                             setState(() {
-                              selectedTime = time;
+                              final date = taskC.dueDateC.value!;
+                              taskC.dueDateC.value = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              );
                             });
                           }
                         },
@@ -212,10 +232,10 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          isStarred = !isStarred;
+                          taskC.isStaredC.value = !taskC.isStaredC.value;
                         });
                       },
-                      icon: isStarred
+                      icon: taskC.isStaredC.value
                           ? Icon(Icons.star, color: Colors.amberAccent)
                           : Icon(Icons.star_border),
                     ),
@@ -227,6 +247,16 @@ class _AddTaskModalState extends State<AddTaskModal> {
                       ? null // tombol disable
                       : () {
                           // aksi simpan
+                          taskC.addTask();
+                          Get.back();
+                          for (var task in taskC.allTask) {
+                            print(task.task);
+                          }
+
+                          // print("is Starred: $taskC.isStaredC.value");
+                          // print("date: $taskC.dueDateC.value");
+                          // print("time: $taskC.dueTimeC.value");
+                          // print("slected matkul: $taskC.matkulC.value");
                         },
                   child: Text("Save"),
                 ),

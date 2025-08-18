@@ -1,45 +1,55 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/task_controllers/task_controller.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/task.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DetailTaskModal extends StatefulWidget {
-  const DetailTaskModal({super.key, required this.task});
-  final Task task;
+  const DetailTaskModal({super.key, required this.taskId});
+  final String taskId;
 
   @override
   State<DetailTaskModal> createState() => _DetailTaskModalState();
 }
 
 class _DetailTaskModalState extends State<DetailTaskModal> {
-  List<String> matkulList = ["IMK", "PBO", "Basis Data"];
+  final matkulC = Get.find<MatkulController>();
+  final taskC = Get.find<TaskController>();
+  late List<Matkul> matkulList;
 
-  late TextEditingController taskController = TextEditingController();
-  late TextEditingController descController = TextEditingController();
+  late Task selectedTask;
 
   bool showDescField = false;
-  bool isStarred = false;
-  DateTime? selectedDate;
-  TimeOfDay? selectedTime;
-  String? selectedMatkul;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    final task = widget.task;
-    taskController.text = task.task;
-    descController.text = task.desc ?? "";
-    isStarred = task.isStared;
-    selectedDate = task.taskDueDate;
-    selectedTime = task.taskDueTime;
-    selectedMatkul = task.matkul;
+    try {
+      selectedTask = taskC.selectById(widget.taskId)!;
+    } catch (error) {
+      print("error");
+    }
+    matkulList = matkulC.allMatkul;
+
+    taskC.titleC.text = selectedTask.task;
+    taskC.descC.text = selectedTask.desc ?? "";
+    taskC.matkulC.value = selectedTask.matkulId;
+    taskC.dueDateC.value = selectedTask.taskDueDate;
+    taskC.isStaredC.value = selectedTask.isStared;
   }
 
   @override
   void dispose() {
-    taskController.dispose();
-    descController.dispose();
+    // TODO: implement dispose
+    taskC.titleC.clear();
+    taskC.descC.clear();
+    taskC.isStaredC.value = false;
+    taskC.dueDateC.value = null;
+    taskC.matkulC.value = null;
     super.dispose();
   }
 
@@ -71,9 +81,12 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         spacing: 6,
                         children: [
                           Text(
-                            selectedMatkul == null || selectedMatkul == ""
+                            taskC.matkulC.value == null ||
+                                    taskC.matkulC.value == ""
                                 ? "Select matkul"
-                                : selectedMatkul!,
+                                : matkulC
+                                      .selectMatkulById(taskC.matkulC.value!)!
+                                      .abbreviation,
                           ),
                           Icon(LucideIcons.chevronDown),
                         ],
@@ -84,18 +97,18 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    value: selectedMatkul,
+                    value: taskC.matkulC.value,
                     items: matkulList
                         .map(
                           (item) => DropdownMenuItem<Object>(
-                            value: item,
-                            child: Text(item),
+                            value: item.id,
+                            child: Text(item.abbreviation),
                           ),
                         )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        selectedMatkul = value as String?;
+                        taskC.matkulC.value = value as String?;
                       });
                     },
                     alignment: AlignmentDirectional.centerStart,
@@ -112,7 +125,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
               ],
             ),
             TextField(
-              controller: taskController,
+              controller: taskC.titleC,
               style: theme.textTheme.titleLarge,
               decoration: const InputDecoration(
                 hintText: 'Task',
@@ -121,9 +134,9 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                 contentPadding: EdgeInsets.symmetric(vertical: 8),
               ),
             ),
-            if (showDescField || descController.text.isNotEmpty)
+            if (showDescField || taskC.descC.text.isNotEmpty)
               TextField(
-                controller: descController,
+                controller: taskC.descC,
                 style: theme.textTheme.titleMedium,
                 minLines: 1,
                 maxLines: null, // expands vertically when overflow
@@ -137,33 +150,21 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (selectedDate != null)
+                if (taskC.dueDateC.value != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 4.0),
                     child: Chip(
                       label: Text(
-                        "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                        // Tampilkan tanggal dan waktu jika ada
+                        taskC.dueDateC.value!.hour == 0 &&
+                                taskC.dueDateC.value!.minute == 0
+                            ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
+                            : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
                         style: theme.textTheme.bodySmall,
                       ),
                       onDeleted: () {
                         setState(() {
-                          selectedDate = null;
-                          selectedTime = null;
-                        });
-                      },
-                    ),
-                  ),
-                if (selectedTime != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: Chip(
-                      label: Text(
-                        selectedTime!.format(context),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      onDeleted: () {
-                        setState(() {
-                          selectedTime = null;
+                          taskC.dueDateC.value = null;
                         });
                       },
                     ),
@@ -187,31 +188,46 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                     ),
                     IconButton(
                       onPressed: () async {
-                        final date = await showDatePicker(
+                        DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: selectedDate ?? DateTime.now(),
+                          initialDate: taskC.dueDateC.value ?? DateTime.now(),
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
-                        if (date != null) {
+                        if (pickedDate != null) {
                           setState(() {
-                            selectedDate = date;
-                            selectedTime = null;
+                            // Jika sebelumnya sudah ada jam/menit, pertahankan
+                            if (taskC.dueDateC.value != null &&
+                                pickedDate != null) {
+                              pickedDate = pickedDate!.copyWith(
+                                hour: taskC.dueDateC.value!.hour,
+                                minute: taskC.dueDateC.value!.minute,
+                              );
+                            }
+                            taskC.dueDateC.value = pickedDate;
                           });
                         }
                       },
                       icon: Icon(LucideIcons.calendar),
                     ),
-                    if (selectedDate != null)
+                    if (taskC.dueDateC.value != null)
                       IconButton(
                         onPressed: () async {
                           final time = await showTimePicker(
                             context: context,
-                            initialTime: selectedTime ?? TimeOfDay.now(),
+                            initialTime: TimeOfDay(
+                              hour: taskC.dueDateC.value!.hour,
+                              minute: taskC.dueDateC.value!.minute,
+                            ),
                           );
                           if (time != null) {
                             setState(() {
-                              selectedTime = time;
+                              // Update jam/menit pada dueDateC
+                              taskC.dueDateC.value = taskC.dueDateC.value!
+                                  .copyWith(
+                                    hour: time.hour,
+                                    minute: time.minute,
+                                  );
                             });
                           }
                         },
@@ -220,10 +236,10 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          isStarred = !isStarred;
+                          taskC.isStaredC.value = !taskC.isStaredC.value;
                         });
                       },
-                      icon: isStarred
+                      icon: taskC.isStaredC.value
                           ? Icon(Icons.star, color: Colors.amberAccent)
                           : Icon(Icons.star_border),
                     ),
@@ -231,10 +247,15 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                 ),
 
                 TextButton(
-                  onPressed: taskController.text.trim().isEmpty
+                  onPressed: taskC.titleC.text.trim().isEmpty
                       ? null // tombol disable
                       : () {
-                          // aksi simpan
+                          try {
+                            taskC.updateTask(widget.taskId);
+                            Get.back();
+                          } catch (error) {
+                            print(error);
+                          }
                         },
                   child: Text("Save"),
                 ),

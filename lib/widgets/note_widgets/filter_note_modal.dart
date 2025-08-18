@@ -73,7 +73,7 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                 ),
                 ...deviceTypesList.map((type) {
                   return FilterChip(
-                    label: Text(type.abbreviation!),
+                    label: Text(type.abbreviation),
                     selected: _selectedDeviceType == type.id,
                     onSelected: (selected) {
                       setState(() {
