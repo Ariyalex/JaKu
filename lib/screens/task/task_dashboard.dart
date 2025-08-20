@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/notification_controller.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/widgets/task_widgets/add_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
@@ -25,6 +26,8 @@ class _TaskDashboardState extends State<TaskDashboard>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
   final matkulC = Get.find<MatkulController>();
+  final notifC = Get.find<NotificationController>();
+
   late TabController tabController;
   late TaskController taskC;
   late String? selectedMatkul;
@@ -41,6 +44,7 @@ class _TaskDashboardState extends State<TaskDashboard>
 
   @override
   void dispose() {
+    tabController.dispose();
     Get.delete<TaskController>();
     super.dispose();
   }
@@ -86,6 +90,24 @@ class _TaskDashboardState extends State<TaskDashboard>
       ),
     ];
 
+    if (notifC.payload.value.isNotEmpty) {
+      print("note id: ${notifC.payload.value}");
+      final matkulId = taskC.selectById(notifC.payload.value)!.matkulId;
+      print("matkul id: $matkulId");
+      final matkulIndex = matkulList.indexWhere(
+        (matkul) => matkul.id == matkulId,
+      );
+
+      print("matkul index: $matkulIndex");
+      if (matkulIndex != -1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          print("harusnya routing ke: ${1 + (matkulIndex + 1)}");
+          tabController.animateTo(1 + (matkulIndex + 1));
+          notifC.payload.value = ""; // reset agar tidak pindah tab terus
+        });
+      }
+    }
+
     return DefaultTabController(
       length: tabs.length,
       child: Scaffold(
@@ -105,7 +127,7 @@ class _TaskDashboardState extends State<TaskDashboard>
           ),
         ),
         body: SafeArea(
-          child: TabBarView(children: tabViews, controller: tabController),
+          child: TabBarView(controller: tabController, children: tabViews),
         ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton: ExpandableFab(

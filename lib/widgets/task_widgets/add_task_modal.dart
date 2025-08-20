@@ -31,7 +31,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
     //init controller
     taskController = taskC.titleC;
     descController = taskC.descC;
-    taskC.matkulC.value = widget.matkul;
+    taskC.matkulIdC.value = widget.matkul;
 
     matkulList = matkulC.allMatkul;
   }
@@ -42,7 +42,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
     descController.clear();
     taskC.isStaredC.value = false;
     taskC.dueDateC.value = null;
-    taskC.matkulC.value = null;
+    taskC.matkulIdC.value = null;
     super.dispose();
   }
 
@@ -72,10 +72,11 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     spacing: 6,
                     children: [
                       Text(
-                        taskC.matkulC.value == null || taskC.matkulC.value == ""
+                        taskC.matkulIdC.value == null ||
+                                taskC.matkulIdC.value == ""
                             ? "Select matkul"
                             : matkulC
-                                  .selectMatkulById(taskC.matkulC.value!)!
+                                  .selectMatkulById(taskC.matkulIdC.value!)!
                                   .abbreviation,
                       ),
                       Icon(LucideIcons.chevronDown),
@@ -87,7 +88,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                value: taskC.matkulC.value,
+                value: taskC.matkulIdC.value,
 
                 items: matkulList
                     .map(
@@ -99,8 +100,8 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    taskC.matkulC.value = value as String?;
-                    print("selected matkul: ${taskC.matkulC.value}");
+                    taskC.matkulIdC.value = value as String?;
+                    print("selected matkul: ${taskC.matkulIdC.value}");
                   });
                 },
                 alignment: AlignmentDirectional.centerStart,

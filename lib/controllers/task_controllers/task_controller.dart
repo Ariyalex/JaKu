@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/notification_controller.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/task.dart';
 import 'package:jaku/services/task_service.dart';
 import 'package:uuid/uuid.dart';
@@ -9,7 +12,7 @@ var uuid = const Uuid();
 class TaskController extends GetxController {
   final titleC = TextEditingController();
   final descC = TextEditingController();
-  RxnString matkulC = RxnString(); //ini berisi matkul id
+  RxnString matkulIdC = RxnString(); //ini berisi matkul id
   Rxn<DateTime> dueDateC = Rxn<DateTime>();
   RxBool isStaredC = false.obs;
 
@@ -49,19 +52,37 @@ class TaskController extends GetxController {
 
   void addTask() {
     try {
+      final matkulC = Get.find<MatkulController>();
       Task newTask = Task(
         id: uuid.v4(),
         task: titleC.text,
         status: false,
         isStared: isStaredC.value,
         desc: descC.text,
-        matkulId: matkulC.value,
+        matkulId: matkulIdC.value,
         taskDueDate: dueDateC.value,
       );
 
       allTask.add(newTask);
 
       TaskService.saveTaskService(newTask);
+
+      Matkul? matkul;
+      //get matkul
+      if (matkulIdC.value != null) {
+        matkul = matkulC.selectMatkulById(matkulIdC.value!)!;
+      }
+
+      if (dueDateC.value != null) {
+        final notifC = Get.find<NotificationController>();
+        notifC.scheduleNotification(
+          matkul != null ? "${matkul.matkul} Task" : "General Task",
+          titleC.text,
+          dueDateC.value!,
+          newTask.id.hashCode,
+          newTask.id,
+        );
+      }
 
       print("starred: ${newTask.isStared}");
       print("dueDate: ${newTask.taskDueDate}");
@@ -73,6 +94,7 @@ class TaskController extends GetxController {
 
   void updateTask(String id) {
     try {
+      final matkulC = Get.find<MatkulController>();
       int index = allTask.indexWhere((task) => task.id == id);
       if (index == -1) return;
 
@@ -82,20 +104,41 @@ class TaskController extends GetxController {
         task: titleC.text,
         desc: descC.text,
         isStared: isStaredC.value,
-        matkulId: matkulC.value,
+        matkulId: matkulIdC.value,
         taskDueDate: dueDateC.value,
       );
 
       allTask[index] = updatedTask;
       TaskService.saveTaskService(updatedTask);
+
+      Matkul? matkul;
+      //get matkul
+      if (matkulIdC.value != null) {
+        matkul = matkulC.selectMatkulById(matkulIdC.value!)!;
+      }
+
+      if (dueDateC.value != null) {
+        final notifC = Get.find<NotificationController>();
+        notifC.scheduleNotification(
+          matkul != null ? "${matkul.matkul} Task" : "General Task",
+          titleC.text,
+          dueDateC.value!,
+          updatedTask.id.hashCode,
+          updatedTask.id,
+        );
+      }
     } catch (error) {
       print("error update task: $error");
       rethrow;
     }
   }
 
-  void deleteNote(String id) {
+  void deleteTask(String id) {
     try {
+      final notifC = Get.find<NotificationController>();
+
+      notifC.cancelNotification(id.hashCode);
+
       allTask.removeWhere((task) => task.id == id);
       TaskService.deleteTaskService(id);
     } catch (error) {

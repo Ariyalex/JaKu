@@ -37,7 +37,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
 
     taskC.titleC.text = selectedTask.task;
     taskC.descC.text = selectedTask.desc ?? "";
-    taskC.matkulC.value = selectedTask.matkulId;
+    taskC.matkulIdC.value = selectedTask.matkulId;
     taskC.dueDateC.value = selectedTask.taskDueDate;
     taskC.isStaredC.value = selectedTask.isStared;
   }
@@ -49,7 +49,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
     taskC.descC.clear();
     taskC.isStaredC.value = false;
     taskC.dueDateC.value = null;
-    taskC.matkulC.value = null;
+    taskC.matkulIdC.value = null;
     super.dispose();
   }
 
@@ -81,11 +81,11 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         spacing: 6,
                         children: [
                           Text(
-                            taskC.matkulC.value == null ||
-                                    taskC.matkulC.value == ""
+                            taskC.matkulIdC.value == null ||
+                                    taskC.matkulIdC.value == ""
                                 ? "Select matkul"
                                 : matkulC
-                                      .selectMatkulById(taskC.matkulC.value!)!
+                                      .selectMatkulById(taskC.matkulIdC.value!)!
                                       .abbreviation,
                           ),
                           Icon(LucideIcons.chevronDown),
@@ -97,7 +97,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    value: taskC.matkulC.value,
+                    value: taskC.matkulIdC.value,
                     items: matkulList
                         .map(
                           (item) => DropdownMenuItem<Object>(
@@ -108,7 +108,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        taskC.matkulC.value = value as String?;
+                        taskC.matkulIdC.value = value as String?;
                       });
                     },
                     alignment: AlignmentDirectional.centerStart,
@@ -121,7 +121,13 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                     ),
                   ),
                 ),
-                IconButton(onPressed: () {}, icon: Icon(LucideIcons.trash2)),
+                IconButton(
+                  onPressed: () {
+                    taskC.deleteTask(widget.taskId);
+                    Get.back();
+                  },
+                  icon: Icon(LucideIcons.trash2),
+                ),
               ],
             ),
             TextField(
