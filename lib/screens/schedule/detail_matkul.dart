@@ -5,7 +5,6 @@ import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/jadwal.dart';
 import 'package:jaku/models/matkul.dart';
-import 'package:jaku/models/task.dart';
 import 'package:jaku/widgets/schedule_widgets/edit_jadwal.dart';
 import 'package:jaku/widgets/schedule_widgets/detail_matkul/informasi_matkul.dart';
 import 'package:jaku/widgets/schedule_widgets/detail_matkul/note_matkul.dart';
@@ -41,8 +40,6 @@ class _DetailMatkulState extends State<DetailMatkul> {
     final Matkul? selectedMatkul = matkulC.selectMatkulById(
       selectedSchedule.matkulId!,
     );
-
-    final List<Task> tasks = [];
 
     return Scaffold(
       appBar: AppBar(
@@ -91,8 +88,8 @@ class _DetailMatkulState extends State<DetailMatkul> {
                 // Section Tasks
                 TaskMatkul(
                   theme: theme,
-                  tasks: tasks,
-                  matkul: selectedMatkul!.matkul,
+                  matkulId: selectedMatkul!.id!,
+                  matkul: selectedMatkul.matkul,
                 ),
               ],
             ),

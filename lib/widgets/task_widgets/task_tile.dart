@@ -19,7 +19,6 @@ class TaskTile extends StatelessWidget {
       if (task == null) return SizedBox.shrink();
 
       return ListTile(
-        key: ValueKey(task.id),
         onTap: () {
           showBarModalBottomSheet<Map<String, dynamic>>(
             barrierColor: Colors.black.withValues(alpha: 0.4),

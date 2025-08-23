@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/notification_controller.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
@@ -23,12 +24,15 @@ class TaskDashboard extends StatefulWidget {
 }
 
 class _TaskDashboardState extends State<TaskDashboard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  //fabKey untuk controller floating action button
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
   final matkulC = Get.find<MatkulController>();
   final notifC = Get.find<NotificationController>();
+  final tabC = Get.find<MainTabController>();
 
   late TabController tabController;
+  int _tabLength = 0;
   late TaskController taskC;
   late String? selectedMatkul;
 
@@ -36,10 +40,9 @@ class _TaskDashboardState extends State<TaskDashboard>
   void initState() {
     super.initState();
     taskC = Get.put(TaskController());
-    tabController = TabController(
-      length: 2 + matkulC.allMatkul.length,
-      vsync: this,
-    );
+    //init
+    _tabLength = getTabLength();
+    tabController = TabController(length: _tabLength, vsync: this);
   }
 
   @override
@@ -49,50 +52,19 @@ class _TaskDashboardState extends State<TaskDashboard>
     super.dispose();
   }
 
+  int getTabLength() {
+    final matkulList = matkulC.allMatkul;
+    return 2 + tabC.taskTabs.length + matkulList.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final matkulList = matkulC.allMatkul;
 
-    // Buat daftar tab dan konten
-    final List<Widget> tabs = [
-      const Tab(icon: Icon(Icons.star)),
-      const Tab(text: "Umum"),
-      ...matkulList.map((m) => Tab(text: m.abbreviation)),
-    ];
-
-    final List<Widget> tabViews = [
-      Obx(
-        () => BuildTaskWidget(
-          title: 'Starred',
-          filteredTasks: taskC.allTask
-              .where((task) => task.isStared == true)
-              .toList(),
-        ),
-      ),
-      Obx(
-        () => BuildTaskWidget(
-          title: 'Umum',
-          filteredTasks: taskC.allTask
-              .where((t) => t.matkulId == null)
-              .toList(),
-        ),
-      ),
-      ...matkulList.map(
-        (m) => Obx(
-          () => BuildTaskWidget(
-            title: m.abbreviation,
-            filteredTasks: taskC.allTask
-                .where((t) => t.matkulId == m.id)
-                .toList(),
-          ),
-        ),
-      ),
-    ];
-
     if (notifC.payload.value.isNotEmpty) {
       print("note id: ${notifC.payload.value}");
-      final matkulId = taskC.selectById(notifC.payload.value)!.matkulId;
+      final matkulId = taskC.selectById(notifC.payload.value)!.groupId;
       print("matkul id: $matkulId");
       final matkulIndex = matkulList.indexWhere(
         (matkul) => matkul.id == matkulId,
@@ -108,9 +80,41 @@ class _TaskDashboardState extends State<TaskDashboard>
       }
     }
 
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
+    return Obx(() {
+      // Buat daftar tab dan konten
+      final List<Widget> tabs = [
+        const Tab(icon: Icon(Icons.star)),
+        const Tab(text: "Umum"),
+        ...tabC.taskTabs.map((tab) => Tab(text: tab.tabName)),
+        ...matkulList.map((m) => Tab(text: m.abbreviation)),
+      ];
+
+      final List<Widget> tabViews = [
+        BuildTaskWidget(group: 'Starred', groupId: "0"),
+        BuildTaskWidget(group: 'Umum', groupId: "1"),
+        ...tabC.taskTabs.map(
+          (tab) => BuildTaskWidget(group: tab.tabName, groupId: tab.id),
+        ),
+        ...matkulList.map(
+          (m) => BuildTaskWidget(group: m.abbreviation, groupId: m.id),
+        ),
+      ];
+
+      void updateTabs() async {
+        try {
+          await tabC.addTaskTab();
+
+          final newLength = getTabLength();
+          print("tab length after: ${newLength}");
+          tabController = TabController(length: newLength, vsync: this);
+          print("menjalankan update tabs");
+          setState(() {});
+        } catch (on) {
+          print(on); // TODO: rem
+        }
+      }
+
+      return Scaffold(
         backgroundColor: theme.colorScheme.surface,
         appBar: AppBar(
           title: const Text("Task"),
@@ -168,7 +172,8 @@ class _TaskDashboardState extends State<TaskDashboard>
                       useRootNavigator: true,
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
-                      builder: (context) => const AddGroupModal(),
+                      builder: (context) =>
+                          AddGroupModal(onUpdateTabs: updateTabs),
                     );
                   },
                   child: Icon(Icons.playlist_add),
@@ -195,7 +200,7 @@ class _TaskDashboardState extends State<TaskDashboard>
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
                       builder: (context) =>
-                          AddTaskModal(matkul: selectedMatkul),
+                          AddTaskModal(matkulId: selectedMatkul),
                     );
                   },
                   child: Icon(Icons.add_task),
@@ -204,7 +209,7 @@ class _TaskDashboardState extends State<TaskDashboard>
             ),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }

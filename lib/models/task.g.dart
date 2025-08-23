@@ -22,7 +22,7 @@ class TaskAdapter extends TypeAdapter<Task> {
       status: fields[3] as bool,
       desc: fields[2] as String?,
       taskDueDate: fields[4] as DateTime?,
-      matkulId: fields[5] as String?,
+      groupId: fields[5] as String?,
       isStared: fields[6] as bool,
       matkulOrder: fields[7] as int?,
       starredOrder: fields[8] as int?,
@@ -44,7 +44,7 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(4)
       ..write(obj.taskDueDate)
       ..writeByte(5)
-      ..write(obj.matkulId)
+      ..write(obj.groupId)
       ..writeByte(6)
       ..write(obj.isStared)
       ..writeByte(7)

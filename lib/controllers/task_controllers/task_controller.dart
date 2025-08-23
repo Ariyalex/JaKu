@@ -31,7 +31,7 @@ class TaskController extends GetxController {
       for (var task in tasks) {
         print("starred: ${task.isStared}");
         print("dueDate: ${task.taskDueDate}");
-        print("matkul: ${task.matkulId}");
+        print("matkul: ${task.groupId}");
       }
     } catch (error) {
       print("error load all notes: $error");
@@ -59,7 +59,7 @@ class TaskController extends GetxController {
         status: false,
         isStared: isStaredC.value,
         desc: descC.text,
-        matkulId: matkulIdC.value,
+        groupId: matkulIdC.value,
         taskDueDate: dueDateC.value,
       );
 
@@ -86,7 +86,7 @@ class TaskController extends GetxController {
 
       print("starred: ${newTask.isStared}");
       print("dueDate: ${newTask.taskDueDate}");
-      print("matkul: ${newTask.matkulId}");
+      print("matkul: ${newTask.groupId}");
     } catch (error) {
       print("error add task: $error");
     }
@@ -104,7 +104,7 @@ class TaskController extends GetxController {
         task: titleC.text,
         desc: descC.text,
         isStared: isStaredC.value,
-        matkulId: matkulIdC.value,
+        groupId: matkulIdC.value,
         taskDueDate: dueDateC.value,
       );
 
@@ -152,7 +152,7 @@ class TaskController extends GetxController {
     if (index != -1) {
       allTask[index] = allTask[index].copyWith(
         status: status,
-        matkulId: allTask[index].matkulId,
+        groupId: allTask[index].groupId,
       );
       TaskService.saveTaskService(allTask[index]);
     }
@@ -163,9 +163,51 @@ class TaskController extends GetxController {
     if (index != -1) {
       allTask[index] = allTask[index].copyWith(
         isStared: isStared,
-        matkulId: allTask[index].matkulId,
+        groupId: allTask[index].groupId,
       );
       TaskService.saveTaskService(allTask[index]);
+    }
+  }
+
+  void updateTaskOrder(String id, int order, bool isStarredGroup) {
+    final index = allTask.indexWhere((t) => t.id == id);
+    if (index != -1) {
+      if (isStarredGroup) {
+        allTask[index] = allTask[index].copyWith(
+          groupId: allTask[index].groupId,
+          starredOrder: order,
+        );
+      } else {
+        allTask[index] = allTask[index].copyWith(
+          groupId: allTask[index].groupId,
+          matkulOrder: order,
+        );
+      }
+      TaskService.saveTaskService(allTask[index]);
+    }
+    update();
+  }
+
+  void reorderTasks(
+    List<Task> tasks,
+    int oldIndex,
+    int newIndex,
+    String? groupId,
+  ) {
+    final Task task = tasks.removeAt(oldIndex);
+    tasks.insert(newIndex, task);
+
+    for (var i = 0; i < tasks.length; i++) {
+      final task = tasks[i];
+      if (groupId == "0") {
+        task.starredOrder = i;
+        updateTaskOrder(task.id, task.starredOrder!, true);
+        print("Starred ${tasks[i].task}: ${tasks[i].starredOrder}");
+      } else {
+        task.matkulOrder = i;
+        updateTaskOrder(task.id, task.matkulOrder!, false);
+        print("${tasks[i].task}: ${tasks[i].matkulOrder}");
+      }
     }
   }
 

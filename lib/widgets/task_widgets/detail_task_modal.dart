@@ -37,7 +37,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
 
     taskC.titleC.text = selectedTask.task;
     taskC.descC.text = selectedTask.desc ?? "";
-    taskC.matkulIdC.value = selectedTask.matkulId;
+    taskC.matkulIdC.value = selectedTask.groupId;
     taskC.dueDateC.value = selectedTask.taskDueDate;
     taskC.isStaredC.value = selectedTask.isStared;
   }
@@ -73,58 +73,96 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 DropdownButtonHideUnderline(
-                  child: DropdownButton2(
-                    customButton: Container(
-                      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 6,
-                        children: [
-                          Text(
+                  child: Obx(
+                    () => DropdownButton2(
+                      customButton: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 3,
+                          horizontal: 6,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 6,
+                          children: [
+                            Text(
+                              taskC.matkulIdC.value == null ||
+                                      taskC.matkulIdC.value == ""
+                                  ? "Select matkul"
+                                  : matkulC
+                                        .selectMatkulById(
+                                          taskC.matkulIdC.value!,
+                                        )!
+                                        .abbreviation,
+                            ),
                             taskC.matkulIdC.value == null ||
                                     taskC.matkulIdC.value == ""
-                                ? "Select matkul"
-                                : matkulC
-                                      .selectMatkulById(taskC.matkulIdC.value!)!
-                                      .abbreviation,
-                          ),
-                          Icon(LucideIcons.chevronDown),
-                        ],
+                                ? SizedBox.shrink()
+                                : IconButton(
+                                    onPressed: () {
+                                      taskC.matkulIdC.value = null;
+                                    },
+                                    icon: Icon(LucideIcons.x),
+                                  ),
+                            Icon(LucideIcons.chevronDown),
+                          ],
+                        ),
                       ),
-                    ),
-                    buttonStyleData: ButtonStyleData(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                      buttonStyleData: ButtonStyleData(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    value: taskC.matkulIdC.value,
-                    items: matkulList
-                        .map(
-                          (item) => DropdownMenuItem<Object>(
-                            value: item.id,
-                            child: Text(item.abbreviation),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
+                      value: taskC.matkulIdC.value,
+                      items: matkulList
+                          .map(
+                            (item) => DropdownMenuItem<Object>(
+                              value: item.id,
+                              child: Text(item.abbreviation),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
                         taskC.matkulIdC.value = value as String?;
-                      });
-                    },
-                    alignment: AlignmentDirectional.centerStart,
-                    dropdownStyleData: DropdownStyleData(
-                      direction: DropdownDirection.textDirection,
-                      width: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                      },
+                      alignment: AlignmentDirectional.centerStart,
+                      dropdownStyleData: DropdownStyleData(
+                        direction: DropdownDirection.textDirection,
+                        width: 200,
+                        maxHeight: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
                 ),
                 IconButton(
                   onPressed: () {
-                    taskC.deleteTask(widget.taskId);
-                    Get.back();
+                    Get.defaultDialog(
+                      title: "Hapus task?",
+                      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).dialogTheme.backgroundColor,
+                      content: Text(
+                        "Yakin ingin menghapus task ${taskC.titleC.text}?",
+                        textAlign: TextAlign.center,
+                      ),
+                      cancel: FilledButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: const Text("Tidak"),
+                      ),
+                      confirm: OutlinedButton(
+                        onPressed: () {
+                          Get.back();
+                          taskC.deleteTask(widget.taskId);
+                          Get.back();
+                        },
+                        child: const Text("Ya"),
+                      ),
+                    );
                   },
                   icon: Icon(LucideIcons.trash2),
                 ),
@@ -153,103 +191,98 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (taskC.dueDateC.value != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: Chip(
-                      label: Text(
-                        // Tampilkan tanggal dan waktu jika ada
-                        taskC.dueDateC.value!.hour == 0 &&
-                                taskC.dueDateC.value!.minute == 0
-                            ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
-                            : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      onDeleted: () {
-                        setState(() {
+            Obx(
+              () => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (taskC.dueDateC.value != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4.0),
+                      child: Chip(
+                        label: Text(
+                          // Tampilkan tanggal dan waktu jika ada
+                          taskC.dueDateC.value!.hour == 0 &&
+                                  taskC.dueDateC.value!.minute == 0
+                              ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
+                              : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        onDeleted: () {
                           taskC.dueDateC.value = null;
-                        });
-                      },
+                        },
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          showDescField = true;
-                        });
-                      },
-                      icon: Icon(LucideIcons.alignLeft),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: taskC.dueDateC.value ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (pickedDate != null) {
+                Obx(
+                  () => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
                           setState(() {
+                            showDescField = true;
+                          });
+                        },
+                        icon: Icon(LucideIcons.alignLeft),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: taskC.dueDateC.value ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (pickedDate != null) {
                             // Jika sebelumnya sudah ada jam/menit, pertahankan
-                            if (taskC.dueDateC.value != null &&
-                                pickedDate != null) {
-                              pickedDate = pickedDate!.copyWith(
+                            if (taskC.dueDateC.value != null) {
+                              pickedDate = pickedDate.copyWith(
                                 hour: taskC.dueDateC.value!.hour,
                                 minute: taskC.dueDateC.value!.minute,
                               );
                             }
                             taskC.dueDateC.value = pickedDate;
-                          });
-                        }
-                      },
-                      icon: Icon(LucideIcons.calendar),
-                    ),
-                    if (taskC.dueDateC.value != null)
-                      IconButton(
-                        onPressed: () async {
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay(
-                              hour: taskC.dueDateC.value!.hour,
-                              minute: taskC.dueDateC.value!.minute,
-                            ),
-                          );
-                          if (time != null) {
-                            setState(() {
+                          }
+                        },
+                        icon: Icon(LucideIcons.calendar),
+                      ),
+                      if (taskC.dueDateC.value != null)
+                        IconButton(
+                          onPressed: () async {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay(
+                                hour: taskC.dueDateC.value!.hour,
+                                minute: taskC.dueDateC.value!.minute,
+                              ),
+                            );
+                            if (time != null) {
                               // Update jam/menit pada dueDateC
                               taskC.dueDateC.value = taskC.dueDateC.value!
                                   .copyWith(
                                     hour: time.hour,
                                     minute: time.minute,
                                   );
-                            });
-                          }
-                        },
-                        icon: Icon(LucideIcons.clock),
-                      ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
+                            }
+                          },
+                          icon: Icon(LucideIcons.clock),
+                        ),
+                      IconButton(
+                        onPressed: () {
                           taskC.isStaredC.value = !taskC.isStaredC.value;
-                        });
-                      },
-                      icon: taskC.isStaredC.value
-                          ? Icon(Icons.star, color: Colors.amberAccent)
-                          : Icon(Icons.star_border),
-                    ),
-                  ],
+                        },
+                        icon: taskC.isStaredC.value
+                            ? Icon(Icons.star, color: Colors.amberAccent)
+                            : Icon(Icons.star_border),
+                      ),
+                    ],
+                  ),
                 ),
 
                 TextButton(

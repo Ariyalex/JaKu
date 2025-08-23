@@ -17,6 +17,7 @@ import 'package:jaku/screens/schedule/schedule_dashboard.dart';
 import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/services/note_service.dart';
 import 'package:jaku/services/task_service.dart';
+import 'package:jaku/services/task_tab_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -37,6 +38,7 @@ void main() async {
   await NoteService.initNoteService();
   await MatkulService.iniMatkulService();
   await TaskService.initTaskService();
+  await TaskTabService.initTaskTabService();
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
   Get.put(MatkulController(), permanent: true);
@@ -73,7 +75,6 @@ class MyApp extends StatelessWidget {
     final tabC = Get.find<MainTabController>();
     final notifC = Get.find<NotificationController>();
 
-    print("payload: ${notifC.payload.value}");
     if (notifC.payload.value.isNotEmpty) {
       print("payload ada isinya: ${notifC.payload.value}");
       Future.microtask(() {

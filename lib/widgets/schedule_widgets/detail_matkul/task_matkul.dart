@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/models/task.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/task_tile.dart';
@@ -9,65 +11,74 @@ class TaskMatkul extends StatelessWidget {
   const TaskMatkul({
     super.key,
     required this.theme,
-    required this.tasks,
+    required this.matkulId,
     this.matkul,
   });
 
   final ThemeData theme;
-  final List<Task> tasks;
   final String? matkul;
+  final String matkulId;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Tugas",
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    final taskC = Get.find<TaskController>();
+
+    return Obx(() {
+      late List<Task> tasks;
+      tasks = taskC.allTask.where((t) => t.groupId == matkulId).toList();
+      //order tasks according to matkulOrder
+      tasks = tasks.reversed.toList();
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Tugas",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(LucideIcons.plus),
-              tooltip: "Tambah Tugas",
-              onPressed: () {
-                // TODO: Tambah task
-                showBarModalBottomSheet<Map<String, dynamic>>(
-                  barrierColor: Colors.black.withValues(alpha: 0.4),
-                  context: context,
-                  useRootNavigator: true,
-                  bounce: true,
-                  backgroundColor: theme.colorScheme.surfaceContainer,
-                  builder: (context) => AddTaskModal(matkul: matkul!),
-                );
-              },
-            ),
-          ],
-        ),
-        tasks.isEmpty
-            ? Text("Belum ada tugas.", style: theme.textTheme.bodyMedium)
-            : Column(
-                children: tasks
-                    .map(
-                      (task) => Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: theme.dividerColor,
-                            width: 1.2,
+              IconButton(
+                icon: const Icon(LucideIcons.plus),
+                tooltip: "Tambah Tugas",
+                onPressed: () {
+                  // TODO: Tambah task
+                  showBarModalBottomSheet<Map<String, dynamic>>(
+                    barrierColor: Colors.black.withValues(alpha: 0.4),
+                    context: context,
+                    useRootNavigator: true,
+                    bounce: true,
+                    backgroundColor: theme.colorScheme.surfaceContainer,
+                    builder: (context) => AddTaskModal(matkulId: matkulId),
+                  );
+                },
+              ),
+            ],
+          ),
+          tasks.isEmpty
+              ? Text("Belum ada tugas.", style: theme.textTheme.bodyMedium)
+              : Column(
+                  children: tasks
+                      .map(
+                        (task) => Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.dividerColor,
+                              width: 1.2,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          borderRadius: BorderRadius.circular(12),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: TaskTile(taskId: task.id, star: false),
                         ),
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: TaskTile(taskId: task.id, star: false),
-                      ),
-                    )
-                    .toList(),
-              ),
-      ],
-    );
+                      )
+                      .toList(),
+                ),
+        ],
+      );
+    });
   }
 }

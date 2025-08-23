@@ -10,7 +10,7 @@ class Task extends HiveObject {
     String? desc,
     bool? status,
     DateTime? taskDueDate,
-    Object? matkulId,
+    Object? groupId,
     bool? isStared,
     int? matkulOrder,
     int? starredOrder,
@@ -21,9 +21,9 @@ class Task extends HiveObject {
       desc: desc ?? this.desc,
       status: status ?? this.status,
       taskDueDate: taskDueDate ?? this.taskDueDate,
-      matkulId: identical(matkulId, null)
+      groupId: identical(groupId, null)
           ? null
-          : (matkulId as String?) ?? this.matkulId,
+          : (groupId as String?) ?? this.groupId,
       isStared: isStared ?? this.isStared,
       matkulOrder: matkulOrder ?? this.matkulOrder,
       starredOrder: starredOrder ?? this.starredOrder,
@@ -46,7 +46,7 @@ class Task extends HiveObject {
   DateTime? taskDueDate;
 
   @HiveField(5)
-  String? matkulId;
+  String? groupId;
 
   @HiveField(6)
   bool isStared;
@@ -63,7 +63,7 @@ class Task extends HiveObject {
     required this.status,
     this.desc,
     this.taskDueDate,
-    this.matkulId,
+    this.groupId,
     required this.isStared,
     this.matkulOrder,
     this.starredOrder,
