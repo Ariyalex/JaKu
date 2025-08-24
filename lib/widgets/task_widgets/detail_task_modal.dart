@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/models/matkul.dart';
@@ -18,6 +19,7 @@ class DetailTaskModal extends StatefulWidget {
 class _DetailTaskModalState extends State<DetailTaskModal> {
   final matkulC = Get.find<MatkulController>();
   final taskC = Get.find<TaskController>();
+  final tabC = Get.find<MainTabController>();
   late List<Matkul> matkulList;
 
   late Task selectedTask;
@@ -81,13 +83,18 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                           horizontal: 6,
                         ),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           spacing: 6,
                           children: [
                             Text(
                               taskC.matkulIdC.value == null ||
                                       taskC.matkulIdC.value == ""
-                                  ? "Select matkul"
+                                  ? "Select group"
+                                  : (taskC.matkulIdC.value!.startsWith("tab"))
+                                  ? tabC
+                                        .selectTabById(taskC.matkulIdC.value!)!
+                                        .tabName
                                   : matkulC
                                         .selectMatkulById(
                                           taskC.matkulIdC.value!,
@@ -103,7 +110,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                                     },
                                     icon: Icon(LucideIcons.x),
                                   ),
-                            Icon(LucideIcons.chevronDown),
+                            const Icon(LucideIcons.chevronDown),
                           ],
                         ),
                       ),
@@ -113,22 +120,30 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         ),
                       ),
                       value: taskC.matkulIdC.value,
-                      items: matkulList
-                          .map(
-                            (item) => DropdownMenuItem<Object>(
-                              value: item.id,
-                              child: Text(item.abbreviation),
-                            ),
-                          )
-                          .toList(),
+
+                      items: [
+                        ...matkulList.map(
+                          (item) => DropdownMenuItem<Object>(
+                            value: item.id,
+                            child: Text(item.abbreviation),
+                          ),
+                        ),
+                        ...tabC.taskTabs.map(
+                          (item) => DropdownMenuItem<Object>(
+                            value: item.id,
+                            child: Text(item.tabName),
+                          ),
+                        ),
+                      ],
                       onChanged: (value) {
                         taskC.matkulIdC.value = value as String?;
+                        print("selected matkul: ${taskC.matkulIdC.value}");
                       },
                       alignment: AlignmentDirectional.centerStart,
                       dropdownStyleData: DropdownStyleData(
-                        direction: DropdownDirection.textDirection,
                         width: 200,
                         maxHeight: 200,
+                        direction: DropdownDirection.textDirection,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                         ),

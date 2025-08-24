@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/models/matkul.dart';
@@ -17,6 +18,7 @@ class AddTaskModal extends StatefulWidget {
 class _AddTaskModalState extends State<AddTaskModal> {
   final taskC = Get.find<TaskController>();
   final matkulC = Get.find<MatkulController>();
+  final tabC = Get.find<MainTabController>();
   late List<Matkul> matkulList;
 
   bool showDescField = false;
@@ -71,6 +73,10 @@ class _AddTaskModalState extends State<AddTaskModal> {
                           taskC.matkulIdC.value == null ||
                                   taskC.matkulIdC.value == ""
                               ? "Select group"
+                              : (taskC.matkulIdC.value!.startsWith("tab"))
+                              ? tabC
+                                    .selectTabById(taskC.matkulIdC.value!)!
+                                    .tabName
                               : matkulC
                                     .selectMatkulById(taskC.matkulIdC.value!)!
                                     .abbreviation,
@@ -95,14 +101,20 @@ class _AddTaskModalState extends State<AddTaskModal> {
                   ),
                   value: taskC.matkulIdC.value,
 
-                  items: matkulList
-                      .map(
-                        (item) => DropdownMenuItem<Object>(
-                          value: item.id,
-                          child: Text(item.abbreviation),
-                        ),
-                      )
-                      .toList(),
+                  items: [
+                    ...matkulList.map(
+                      (item) => DropdownMenuItem<Object>(
+                        value: item.id,
+                        child: Text(item.abbreviation),
+                      ),
+                    ),
+                    ...tabC.taskTabs.map(
+                      (item) => DropdownMenuItem<Object>(
+                        value: item.id,
+                        child: Text(item.tabName),
+                      ),
+                    ),
+                  ],
                   onChanged: (value) {
                     taskC.matkulIdC.value = value as String?;
                     print("selected matkul: ${taskC.matkulIdC.value}");

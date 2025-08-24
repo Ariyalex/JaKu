@@ -62,6 +62,7 @@ class _TaskDashboardState extends State<TaskDashboard>
     final theme = Theme.of(context);
     final matkulList = matkulC.allMatkul;
 
+    //function for routing when click notification
     if (notifC.payload.value.isNotEmpty) {
       print("note id: ${notifC.payload.value}");
       final matkulId = taskC.selectById(notifC.payload.value)!.groupId;
@@ -74,6 +75,8 @@ class _TaskDashboardState extends State<TaskDashboard>
       if (matkulIndex != -1) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           print("harusnya routing ke: ${1 + (matkulIndex + 1)}");
+
+          //routing to designated tab
           tabController.animateTo(1 + (matkulIndex + 1));
           notifC.payload.value = ""; // reset agar tidak pindah tab terus
         });
@@ -81,7 +84,39 @@ class _TaskDashboardState extends State<TaskDashboard>
     }
 
     return Obx(() {
-      // Buat daftar tab dan konten
+      //fungction for deleting tab
+      void deleteTabs(String groupId) async {
+        try {
+          tabC.deleteTaskTab(groupId);
+
+          final newLength = getTabLength();
+          print("tab length after delete: ${newLength}");
+          tabController = TabController(length: newLength, vsync: this);
+          tabController.index = 1 + tabC.taskTabs.length; //move to tabs before
+          print("menjalankan update tabs");
+          setState(() {});
+        } catch (on) {
+          print(on); // TODO: rem
+        }
+      }
+
+      //fungction for adding tab
+      void addTabs() async {
+        try {
+          await tabC.addTaskTab();
+
+          final newLength = getTabLength();
+          print("tab length after: ${newLength}");
+          tabController = TabController(length: newLength, vsync: this);
+          tabController.index = 1 + tabC.taskTabs.length;
+          print("menjalankan update tabs");
+          setState(() {});
+        } catch (on) {
+          print(on); // TODO: rem
+        }
+      }
+
+      //list of tabs
       final List<Widget> tabs = [
         const Tab(icon: Icon(Icons.star)),
         const Tab(text: "Umum"),
@@ -89,30 +124,23 @@ class _TaskDashboardState extends State<TaskDashboard>
         ...matkulList.map((m) => Tab(text: m.abbreviation)),
       ];
 
+      //list of tabs content
       final List<Widget> tabViews = [
-        BuildTaskWidget(group: 'Starred', groupId: "0"),
-        BuildTaskWidget(group: 'Umum', groupId: "1"),
+        const BuildTaskWidget(group: 'Starred', groupId: "0"),
+        const BuildTaskWidget(group: 'Umum', groupId: "1"),
         ...tabC.taskTabs.map(
-          (tab) => BuildTaskWidget(group: tab.tabName, groupId: tab.id),
+          (tab) => BuildTaskWidget(
+            group: tab.tabName,
+            groupId: tab.id,
+            deleteTabFunction: (groupId) {
+              deleteTabs(groupId);
+            },
+          ),
         ),
         ...matkulList.map(
           (m) => BuildTaskWidget(group: m.abbreviation, groupId: m.id),
         ),
       ];
-
-      void updateTabs() async {
-        try {
-          await tabC.addTaskTab();
-
-          final newLength = getTabLength();
-          print("tab length after: ${newLength}");
-          tabController = TabController(length: newLength, vsync: this);
-          print("menjalankan update tabs");
-          setState(() {});
-        } catch (on) {
-          print(on); // TODO: rem
-        }
-      }
 
       return Scaffold(
         backgroundColor: theme.colorScheme.surface,
@@ -173,7 +201,7 @@ class _TaskDashboardState extends State<TaskDashboard>
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
                       builder: (context) =>
-                          AddGroupModal(onUpdateTabs: updateTabs),
+                          AddGroupModal(onUpdateTabs: addTabs),
                     );
                   },
                   child: Icon(Icons.playlist_add),
@@ -190,7 +218,13 @@ class _TaskDashboardState extends State<TaskDashboard>
                     final tabIndex = tabController.index;
                     String? selectedMatkul;
                     if (tabIndex >= 2) {
-                      selectedMatkul = matkulList[tabIndex - 2].id;
+                      if (tabIndex >= (2 + tabC.taskTabs.length)) {
+                        selectedMatkul =
+                            matkulList[tabIndex - (2 + tabC.taskTabs.length)]
+                                .id;
+                      } else {
+                        selectedMatkul = tabC.taskTabs[tabIndex - 2].id;
+                      }
                     }
                     fabKey.currentState?.close();
                     showBarModalBottomSheet<Map<String, dynamic>>(

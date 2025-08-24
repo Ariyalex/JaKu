@@ -16,6 +16,13 @@ class MainTabController extends GetxController {
     initialIndex: 0,
   );
 
+  TaskTab? selectTabById(String id) {
+    return taskTabs.firstWhere(
+      (element) => element.id == id,
+      orElse: () => throw Exception("tab dengan ID $id tidak ditemaukan"),
+    );
+  }
+
   Future<void> addTaskTab() async {
     try {
       if (taskTabC.text != "") {
@@ -24,6 +31,23 @@ class MainTabController extends GetxController {
           tabName: taskTabC.text,
         );
         taskTabs.add(newTab);
+        await TaskTabService.saveTaskTabService(newTab);
+      }
+    } catch (error) {
+      print("error adding tab: $error");
+      rethrow;
+    }
+  }
+
+  Future<void> editTaskTab(String id) async {
+    try {
+      int index = taskTabs.indexWhere((tab) => tab.id == id);
+      if (index == -1) return;
+
+      if (taskTabC.text != "") {
+        TaskTab newTab = TaskTab(id: id, tabName: taskTabC.text);
+
+        taskTabs[index] = newTab;
         await TaskTabService.saveTaskTabService(newTab);
       }
     } catch (error) {

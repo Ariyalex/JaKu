@@ -1,15 +1,27 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/models/task.dart';
+import 'package:jaku/widgets/task_widgets/edit_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/task_tile.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:reorderables/reorderables.dart';
 
 class BuildTaskWidget extends StatefulWidget {
-  const BuildTaskWidget({super.key, required this.group, this.groupId});
+  const BuildTaskWidget({
+    super.key,
+    required this.group,
+    this.groupId,
+    this.deleteTabFunction,
+  });
 
   final String group;
   final String? groupId;
+  final void Function(String groupId)? deleteTabFunction;
 
   @override
   State<BuildTaskWidget> createState() => _BuildTaskWidgetState();
@@ -17,8 +29,40 @@ class BuildTaskWidget extends StatefulWidget {
 
 class _BuildTaskWidgetState extends State<BuildTaskWidget> {
   final taskC = Get.find<TaskController>();
+  final tabC = Get.find<MainTabController>();
+  final matkulC = Get.find<MatkulController>();
 
   bool showCompleted = false;
+
+  void deleteTab() {
+    Get.defaultDialog(
+      title: "Hapus task?",
+      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+      content: Text(
+        "Yakin ingin menghapus task ${taskC.titleC.text}?",
+        textAlign: TextAlign.center,
+      ),
+      cancel: FilledButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: const Text("Tidak"),
+      ),
+      confirm: OutlinedButton(
+        onPressed: () {
+          try {
+            Get.back();
+            widget.deleteTabFunction!(widget.groupId!);
+            Get.back();
+          } catch (error) {
+            print(error);
+          }
+        },
+        child: const Text("Ya"),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +124,68 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                     horizontal: 20,
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(widget.group, style: theme.textTheme.bodyLarge),
+                      if (widget.groupId!.startsWith("tab"))
+                        DropdownButton2(
+                          customButton: Icon(LucideIcons.ellipsisVertical),
+                          buttonStyleData: ButtonStyleData(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+
+                          items: [
+                            DropdownMenuItem<Object>(
+                              value: 0,
+                              child: Row(
+                                spacing: 6,
+                                children: [
+                                  Icon(LucideIcons.pencilLine),
+                                  Text("Edit tab"),
+                                ],
+                              ),
+                            ),
+                            DropdownMenuItem<Object>(
+                              value: 1,
+                              child: Row(
+                                spacing: 6,
+                                children: [
+                                  Icon(LucideIcons.trash2),
+                                  Text("Delete tab"),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value == 0) {
+                              showBarModalBottomSheet<Map<String, dynamic>>(
+                                barrierColor: Colors.black.withValues(
+                                  alpha: 0.4,
+                                ),
+                                context: context,
+                                useRootNavigator: true,
+                                bounce: true,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainer,
+                                builder: (context) =>
+                                    EditGroupModal(groupId: widget.groupId!),
+                              );
+                            } else if (value == 1) {
+                              deleteTab();
+                            }
+                          },
+                          alignment: AlignmentDirectional.bottomStart,
+                          dropdownStyleData: DropdownStyleData(
+                            width: 150,
+                            maxHeight: 200,
+                            direction: DropdownDirection.textDirection,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
