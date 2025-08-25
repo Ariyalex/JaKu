@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/main_tab_controller.dart';
+import 'package:jaku/models/task_tab.dart';
 
-class AddGroupModal extends StatefulWidget {
-  const AddGroupModal({super.key, this.onUpdateTabs});
-  final VoidCallback? onUpdateTabs;
+class EditGroupModal extends StatefulWidget {
+  const EditGroupModal({super.key, required this.groupId});
+  final String groupId;
 
   @override
-  State<AddGroupModal> createState() => _AddGroupModalState();
+  State<EditGroupModal> createState() => _EditGroupModalState();
 }
 
-class _AddGroupModalState extends State<AddGroupModal> {
+class _EditGroupModalState extends State<EditGroupModal> {
   final tabC = Get.find<MainTabController>();
   late TextEditingController textC;
+  late TaskTab selectedTab;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     textC = tabC.taskTabC;
+    selectedTab = tabC.selectTabById(widget.groupId)!;
+    textC.text = selectedTab.tabName;
   }
 
   @override
@@ -32,9 +36,9 @@ class _AddGroupModalState extends State<AddGroupModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    void addTab() {
+    void editTab() {
       try {
-        if (widget.onUpdateTabs != null) widget.onUpdateTabs!();
+        tabC.editTaskTab(widget.groupId);
         Get.back();
       } catch (error) {
         print("error add tab: $error");
@@ -56,9 +60,9 @@ class _AddGroupModalState extends State<AddGroupModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("New group", style: theme.textTheme.bodyLarge),
+                Text("Edit group", style: theme.textTheme.bodyLarge),
                 TextButton(
-                  onPressed: textC.text.trim().isEmpty ? null : addTab,
+                  onPressed: textC.text.trim().isEmpty ? null : editTab,
                   child: Text("save"),
                 ),
               ],

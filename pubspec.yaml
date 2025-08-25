@@ -61,6 +61,8 @@ dependencies:
   reorderables: ^0.6.0
   omni_datetime_picker: ^2.3.1
   date_time_format: ^2.0.1
+  flutter_local_notifications: ^19.4.0
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +93,7 @@ flutter:
   assets:
     - images/bochi.jpg
     - images/malas.gif
+    - images/cihuyy.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

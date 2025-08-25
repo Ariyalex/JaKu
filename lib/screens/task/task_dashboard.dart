@@ -2,12 +2,19 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:jaku/models/task.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/notification_controller.dart';
+import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/widgets/task_widgets/add_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/build_task_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 class TaskDashboard extends StatefulWidget {
   const TaskDashboard({super.key});
@@ -16,117 +23,131 @@ class TaskDashboard extends StatefulWidget {
   State<TaskDashboard> createState() => _TaskDashboardState();
 }
 
-class _TaskDashboardState extends State<TaskDashboard> {
+class _TaskDashboardState extends State<TaskDashboard>
+    with TickerProviderStateMixin {
+  //fabKey untuk controller floating action button
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
+  final matkulC = Get.find<MatkulController>();
+  final notifC = Get.find<NotificationController>();
+  final tabC = Get.find<MainTabController>();
 
-  // Dummy data
-  final List<Task> tasks = [
-    Task(
-      task: "Tugas ERD",
-      desc: "Buat ERD untuk sistem informasi akademik.",
-      matkul: "IMK",
-      isStared: true,
-      status: false,
-      taskDueDate: DateTime(2025, 8, 4),
-      taskDueTime: TimeOfDay(hour: 10, minute: 0),
-    ),
-    Task(
-      task: "Upload tugas ke LMS",
-      desc: "Upload file PDF ke LMS sebelum deadline.",
-      matkul: "IMK",
-      isStared: false,
-      status: false,
-      taskDueDate: DateTime(2025, 8, 5),
-      taskDueTime: TimeOfDay(hour: 23, minute: 59),
-    ),
-    Task(
-      task: "Quiz Bab 1-2",
-      desc:
-          "Kerjakan quiz materi bab 1 dan 2 di kelas fas fadsf dsafdfsa fads fads f sadfads f adsf ads .",
-      matkul: "PBO",
-      isStared: true,
-      status: true,
-      taskDueDate: DateTime(2025, 8, 18),
-      taskDueTime: TimeOfDay(hour: 9, minute: 0),
-    ),
-    Task(
-      task: "Tugas Makalah",
-      matkul: "PBO",
-      isStared: false,
-      status: true,
-      taskDueDate: DateTime(2025, 8, 25),
-      taskDueTime: TimeOfDay(hour: 23, minute: 59),
-    ),
-    Task(
-      task: "Ujian Tengah Semester",
-      matkul: "IMK",
-      isStared: true,
-      status: true,
-      taskDueDate: DateTime(2025, 9, 1),
-      taskDueTime: TimeOfDay(hour: 8, minute: 0),
-    ),
-    Task(
-      task: "Beli alat tulis",
-      matkul: null,
-      isStared: true,
-      status: false,
-      taskDueDate: DateTime(2025, 8, 10),
-      taskDueTime: TimeOfDay(hour: 15, minute: 0),
-    ),
-    Task(task: "Isi KRS", matkul: null, isStared: false, status: true),
-  ];
-
-  late List<String> matkulList;
+  late TabController tabController;
+  int _tabLength = 0;
+  late TaskController taskC;
+  late String? selectedMatkul;
 
   @override
   void initState() {
     super.initState();
-    matkulList = [
-      ...{
-        for (var t in tasks)
-          if (t.matkul != null) t.matkul!,
-      },
-    ];
-    matkulList.add("Umum");
+    taskC = Get.put(TaskController());
+    //init
+    _tabLength = getTabLength();
+    tabController = TabController(length: _tabLength, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    Get.delete<TaskController>();
+    super.dispose();
+  }
+
+  int getTabLength() {
+    final matkulList = matkulC.allMatkul;
+    return 2 + tabC.taskTabs.length + matkulList.length;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final matkulList = matkulC.allMatkul;
 
-    // Buat daftar tab dan konten
-    final List<Widget> tabs = [
-      const Tab(icon: Icon(Icons.star)),
-      ...matkulList.where((m) => m != "Umum").map((m) => Tab(text: m)),
-      const Tab(text: "Umum"),
-    ];
+    //function for routing when click notification
+    if (notifC.payload.value.isNotEmpty) {
+      print("note id: ${notifC.payload.value}");
+      final matkulId = taskC.selectById(notifC.payload.value)!.groupId;
+      print("matkul id: $matkulId");
+      final matkulIndex = matkulList.indexWhere(
+        (matkul) => matkul.id == matkulId,
+      );
 
-    final List<Widget> tabViews = [
-      BuildTaskWidget(
-        title: 'Starred',
-        filteredTasks: tasks.where((task) => task.isStared == true).toList(),
-      ),
-      ...matkulList
-          .where((m) => m != "Umum")
-          .map(
-            (m) => BuildTaskWidget(
-              title: m,
-              filteredTasks: tasks.where((t) => t.matkul == m).toList(),
-            ),
+      print("matkul index: $matkulIndex");
+      if (matkulIndex != -1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          print("harusnya routing ke: ${1 + (matkulIndex + 1)}");
+
+          //routing to designated tab
+          tabController.animateTo(1 + (matkulIndex + 1));
+          notifC.payload.value = ""; // reset agar tidak pindah tab terus
+        });
+      }
+    }
+
+    return Obx(() {
+      //fungction for deleting tab
+      void deleteTabs(String groupId) async {
+        try {
+          tabC.deleteTaskTab(groupId);
+
+          final newLength = getTabLength();
+          print("tab length after delete: ${newLength}");
+          tabController = TabController(length: newLength, vsync: this);
+          tabController.index = 1 + tabC.taskTabs.length; //move to tabs before
+          print("menjalankan update tabs");
+          setState(() {});
+        } catch (on) {
+          print(on); // TODO: rem
+        }
+      }
+
+      //fungction for adding tab
+      void addTabs() async {
+        try {
+          await tabC.addTaskTab();
+
+          final newLength = getTabLength();
+          print("tab length after: ${newLength}");
+          tabController = TabController(length: newLength, vsync: this);
+          tabController.index = 1 + tabC.taskTabs.length;
+          print("menjalankan update tabs");
+          setState(() {});
+        } catch (on) {
+          print(on); // TODO: rem
+        }
+      }
+
+      //list of tabs
+      final List<Widget> tabs = [
+        const Tab(icon: Icon(Icons.star)),
+        const Tab(text: "Umum"),
+        ...tabC.taskTabs.map((tab) => Tab(text: tab.tabName)),
+        ...matkulList.map((m) => Tab(text: m.abbreviation)),
+      ];
+
+      //list of tabs content
+      final List<Widget> tabViews = [
+        const BuildTaskWidget(group: 'Starred', groupId: "0"),
+        const BuildTaskWidget(group: 'Umum', groupId: "1"),
+        ...tabC.taskTabs.map(
+          (tab) => BuildTaskWidget(
+            group: tab.tabName,
+            groupId: tab.id,
+            deleteTabFunction: (groupId) {
+              deleteTabs(groupId);
+            },
           ),
-      BuildTaskWidget(
-        title: 'Umum',
-        filteredTasks: tasks.where((t) => t.matkul == null).toList(),
-      ),
-    ];
+        ),
+        ...matkulList.map(
+          (m) => BuildTaskWidget(group: m.abbreviation, groupId: m.id),
+        ),
+      ];
 
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
+      return Scaffold(
         backgroundColor: theme.colorScheme.surface,
         appBar: AppBar(
           title: const Text("Task"),
           bottom: TabBar(
+            controller: tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             splashFactory: InkSparkle.splashFactory,
@@ -137,7 +158,9 @@ class _TaskDashboardState extends State<TaskDashboard> {
             tabs: tabs,
           ),
         ),
-        body: SafeArea(child: TabBarView(children: tabViews)),
+        body: SafeArea(
+          child: TabBarView(controller: tabController, children: tabViews),
+        ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton: ExpandableFab(
           key: fabKey,
@@ -177,7 +200,8 @@ class _TaskDashboardState extends State<TaskDashboard> {
                       useRootNavigator: true,
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
-                      builder: (context) => const AddGroupModal(),
+                      builder: (context) =>
+                          AddGroupModal(onUpdateTabs: addTabs),
                     );
                   },
                   child: Icon(Icons.playlist_add),
@@ -191,6 +215,17 @@ class _TaskDashboardState extends State<TaskDashboard> {
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () async {
+                    final tabIndex = tabController.index;
+                    String? selectedMatkul;
+                    if (tabIndex >= 2) {
+                      if (tabIndex >= (2 + tabC.taskTabs.length)) {
+                        selectedMatkul =
+                            matkulList[tabIndex - (2 + tabC.taskTabs.length)]
+                                .id;
+                      } else {
+                        selectedMatkul = tabC.taskTabs[tabIndex - 2].id;
+                      }
+                    }
                     fabKey.currentState?.close();
                     showBarModalBottomSheet<Map<String, dynamic>>(
                       barrierColor: Colors.black.withValues(alpha: 0.4),
@@ -198,7 +233,8 @@ class _TaskDashboardState extends State<TaskDashboard> {
                       useRootNavigator: true,
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
-                      builder: (context) => const AddTaskModal(),
+                      builder: (context) =>
+                          AddTaskModal(matkulId: selectedMatkul),
                     );
                   },
                   child: Icon(Icons.add_task),
@@ -207,7 +243,7 @@ class _TaskDashboardState extends State<TaskDashboard> {
             ),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }

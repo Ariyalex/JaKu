@@ -32,9 +32,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
     final noteC = Get.find<NoteControllers>();
     final List<Matkul> matkulList = matkulC.allMatkul;
 
-    bool isMatkulSelected =
-        selectedMatkul != null &&
-        (selectedMatkul!.abbreviation?.isNotEmpty ?? false);
+    bool isMatkulSelected = selectedMatkul != null;
     return DropdownButtonHideUnderline(
       child: DropdownButton2(
         customButton: Container(
@@ -55,7 +53,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
               const SizedBox(width: 8),
               Text(
                 isMatkulSelected
-                    ? selectedMatkul!.abbreviation!
+                    ? selectedMatkul!.abbreviation
                     : "Select matkul",
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.primary,
@@ -83,7 +81,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
             .map(
               (item) => DropdownMenuItem<Object>(
                 value: item,
-                child: Text(item.abbreviation!),
+                child: Text(item.abbreviation),
               ),
             )
             .toList(),

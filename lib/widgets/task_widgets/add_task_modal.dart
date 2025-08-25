@@ -1,49 +1,52 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
+import 'package:jaku/controllers/matkul_controllers.dart';
+import 'package:jaku/controllers/task_controllers/task_controller.dart';
+import 'package:jaku/models/matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AddTaskModal extends StatefulWidget {
-  const AddTaskModal({super.key, this.matkul});
-  final String? matkul;
+  const AddTaskModal({super.key, this.matkulId});
+  final String? matkulId;
 
   @override
   State<AddTaskModal> createState() => _AddTaskModalState();
 }
 
 class _AddTaskModalState extends State<AddTaskModal> {
-  List<String> matkulList = ["IMK", "PBO", "Basis Data"];
-
-  final TextEditingController taskController = TextEditingController();
-  final TextEditingController descController = TextEditingController();
+  final taskC = Get.find<TaskController>();
+  final matkulC = Get.find<MatkulController>();
+  final tabC = Get.find<MainTabController>();
+  late List<Matkul> matkulList;
 
   bool showDescField = false;
-  bool isStarred = false;
-  DateTime? selectedDate;
-  TimeOfDay? selectedTime;
-  String? selectedMatkul;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (widget.matkul != null && widget.matkul!.isNotEmpty) {
-      selectedMatkul = widget.matkul;
-      if (!matkulList.contains(widget.matkul)) {
-        matkulList.add(widget.matkul!);
-      }
-    }
+    //init controller
+    taskC.matkulIdC.value = widget.matkulId;
+
+    matkulList = matkulC.allMatkul;
   }
 
   @override
   void dispose() {
-    taskController.dispose();
-    descController.dispose();
+    taskC.titleC.clear();
+    taskC.descC.clear();
+    taskC.isStaredC.value = false;
+    taskC.dueDateC.value = null;
+    taskC.matkulIdC.value = null;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return SafeArea(
       child: Container(
         padding: EdgeInsets.only(
@@ -57,54 +60,79 @@ class _AddTaskModalState extends State<AddTaskModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonHideUnderline(
-              child: DropdownButton2(
-                customButton: Container(
-                  padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    spacing: 6,
-                    children: [
-                      Text(
-                        selectedMatkul == null || selectedMatkul == ""
-                            ? "Select matkul"
-                            : selectedMatkul!,
-                      ),
-                      Icon(LucideIcons.chevronDown),
-                    ],
+              child: Obx(
+                () => DropdownButton2(
+                  customButton: Container(
+                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 6,
+                      children: [
+                        Text(
+                          taskC.matkulIdC.value == null ||
+                                  taskC.matkulIdC.value == ""
+                              ? "Select group"
+                              : (taskC.matkulIdC.value!.startsWith("tab"))
+                              ? tabC
+                                    .selectTabById(taskC.matkulIdC.value!)!
+                                    .tabName
+                              : matkulC
+                                    .selectMatkulById(taskC.matkulIdC.value!)!
+                                    .abbreviation,
+                        ),
+                        taskC.matkulIdC.value == null ||
+                                taskC.matkulIdC.value == ""
+                            ? SizedBox.shrink()
+                            : IconButton(
+                                onPressed: () {
+                                  taskC.matkulIdC.value = null;
+                                },
+                                icon: Icon(LucideIcons.x),
+                              ),
+                        Icon(LucideIcons.chevronDown),
+                      ],
+                    ),
                   ),
-                ),
-                buttonStyleData: ButtonStyleData(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                  buttonStyleData: ButtonStyleData(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                value: selectedMatkul,
-                items: matkulList
-                    .map(
+                  value: taskC.matkulIdC.value,
+
+                  items: [
+                    ...matkulList.map(
                       (item) => DropdownMenuItem<Object>(
-                        value: item,
-                        child: Text(item),
+                        value: item.id,
+                        child: Text(item.abbreviation),
                       ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedMatkul = value as String?;
-                  });
-                },
-                alignment: AlignmentDirectional.centerStart,
-                dropdownStyleData: DropdownStyleData(
-                  width: 200,
-                  direction: DropdownDirection.textDirection,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    ),
+                    ...tabC.taskTabs.map(
+                      (item) => DropdownMenuItem<Object>(
+                        value: item.id,
+                        child: Text(item.tabName),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    taskC.matkulIdC.value = value as String?;
+                    print("selected matkul: ${taskC.matkulIdC.value}");
+                  },
+                  alignment: AlignmentDirectional.centerStart,
+                  dropdownStyleData: DropdownStyleData(
+                    width: 200,
+                    maxHeight: 200,
+                    direction: DropdownDirection.textDirection,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
             ),
             TextField(
-              controller: taskController,
+              controller: taskC.titleC,
               style: theme.textTheme.titleLarge,
               decoration: const InputDecoration(
                 hintText: 'Task',
@@ -115,7 +143,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
             ),
             if (showDescField)
               TextField(
-                controller: descController,
+                controller: taskC.descC,
                 minLines: 1,
                 maxLines: null, // expands vertically when overflow
                 style: theme.textTheme.titleMedium,
@@ -126,107 +154,117 @@ class _AddTaskModalState extends State<AddTaskModal> {
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (selectedDate != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: Chip(
-                      label: Text(
-                        "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                        style: theme.textTheme.bodySmall,
+            Obx(
+              () => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (taskC.dueDateC.value != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4.0),
+                      child: Chip(
+                        label: Text(
+                          // Tampilkan tanggal dan jam jika ada
+                          taskC.dueDateC.value!.hour == 0 &&
+                                  taskC.dueDateC.value!.minute == 0
+                              ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
+                              : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        onDeleted: () {
+                          taskC.dueDateC.value = null;
+                        },
                       ),
-                      onDeleted: () {
-                        setState(() {
-                          selectedDate = null;
-                          selectedTime = null;
-                        });
-                      },
                     ),
-                  ),
-                if (selectedTime != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: Chip(
-                      label: Text(
-                        selectedTime!.format(context),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      onDeleted: () {
-                        setState(() {
-                          selectedTime = null;
-                        });
-                      },
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          showDescField = true;
-                        });
-                      },
-                      icon: Icon(LucideIcons.alignLeft),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (date != null) {
+                Obx(
+                  () => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
                           setState(() {
-                            selectedDate = date;
-                            selectedTime = null;
+                            showDescField = true;
                           });
-                        }
-                      },
-                      icon: Icon(LucideIcons.calendar),
-                    ),
-                    if (selectedDate != null)
+                        },
+                        icon: Icon(LucideIcons.alignLeft),
+                      ),
                       IconButton(
                         onPressed: () async {
-                          final time = await showTimePicker(
+                          final date = await showDatePicker(
                             context: context,
-                            initialTime: selectedTime ?? TimeOfDay.now(),
+                            initialDate: taskC.dueDateC.value ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
                           );
-                          if (time != null) {
-                            setState(() {
-                              selectedTime = time;
-                            });
+                          if (date != null) {
+                            // Jika sebelumnya sudah ada jam, pertahankan jam
+                            if (taskC.dueDateC.value != null) {
+                              final old = taskC.dueDateC.value!;
+                              taskC.dueDateC.value = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                old.hour,
+                                old.minute,
+                              );
+                            } else {
+                              taskC.dueDateC.value = date;
+                            }
                           }
                         },
-                        icon: Icon(LucideIcons.clock),
+                        icon: Icon(LucideIcons.calendar),
                       ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isStarred = !isStarred;
-                        });
-                      },
-                      icon: isStarred
-                          ? Icon(Icons.star, color: Colors.amberAccent)
-                          : Icon(Icons.star_border),
-                    ),
-                  ],
+                      if (taskC.dueDateC.value != null)
+                        IconButton(
+                          onPressed: () async {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay(
+                                hour: taskC.dueDateC.value!.hour,
+                                minute: taskC.dueDateC.value!.minute,
+                              ),
+                            );
+                            if (time != null) {
+                              final date = taskC.dueDateC.value!;
+                              taskC.dueDateC.value = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              );
+                            }
+                          },
+                          icon: Icon(LucideIcons.clock),
+                        ),
+                      IconButton(
+                        onPressed: () {
+                          taskC.isStaredC.value = !taskC.isStaredC.value;
+                        },
+                        icon: taskC.isStaredC.value
+                            ? Icon(Icons.star, color: Colors.amberAccent)
+                            : Icon(Icons.star_border),
+                      ),
+                    ],
+                  ),
                 ),
 
                 TextButton(
-                  onPressed: taskController.text.trim().isEmpty
+                  onPressed: taskC.titleC.text.trim().isEmpty
                       ? null // tombol disable
                       : () {
                           // aksi simpan
+                          taskC.addTask();
+                          Get.back();
+                          for (var task in taskC.allTask) {
+                            print(task.task);
+                          }
                         },
                   child: Text("Save"),
                 ),
