@@ -8,13 +8,11 @@ import 'package:uuid/uuid.dart';
 var uuid = const Uuid();
 
 class MainTabController extends GetxController {
-  RxList<TaskTab> taskTabs = <TaskTab>[].obs;
+  RxList<TaskTab> taskTabs = <TaskTab>[].obs; //alltabs
 
-  final taskTabC = TextEditingController();
+  late TextEditingController taskTabC;
 
-  PersistentTabController mainTabController = PersistentTabController(
-    initialIndex: 0,
-  );
+  late PersistentTabController mainTabController;
 
   TaskTab? selectTabById(String id) {
     return taskTabs.firstWhere(
@@ -87,6 +85,15 @@ class MainTabController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
+    mainTabController = PersistentTabController(initialIndex: 0);
+    taskTabC = TextEditingController();
     loadAllTaskTabs();
+  }
+
+  @override
+  void onClose() {
+    taskTabC.dispose();
+    mainTabController.dispose();
+    super.onClose();
   }
 }

@@ -11,8 +11,8 @@ import 'package:uuid/uuid.dart';
 var uuid = const Uuid();
 
 class NoteControllers extends GetxController {
-  final titleC = TextEditingController();
-  final noteC = TextEditingController();
+  late TextEditingController titleC;
+  late TextEditingController noteC;
   RxnString matkulC = RxnString(); //ini bersi matkul id
 
   //controller for sorting
@@ -305,9 +305,11 @@ class NoteControllers extends GetxController {
 
   @override
   void onInit() async {
-    // TODO: implement onInit
-
     super.onInit();
+    //init texteditingcontroller
+    titleC = TextEditingController();
+    noteC = TextEditingController();
+
     print("run loading");
     isLoading.value = true;
     loadAllNotes();
@@ -320,8 +322,12 @@ class NoteControllers extends GetxController {
   //dispose debaunce when onclose
   @override
   void onClose() {
-    // TODO: implement onClose
+    //dispose debounce
     debounce?.cancel();
+
+    //dispose textEditingController
+    titleC.dispose();
+    noteC.dispose();
     super.onClose();
   }
 }

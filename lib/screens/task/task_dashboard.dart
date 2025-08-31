@@ -23,38 +23,25 @@ class TaskDashboard extends StatefulWidget {
   State<TaskDashboard> createState() => _TaskDashboardState();
 }
 
-class _TaskDashboardState extends State<TaskDashboard>
-    with TickerProviderStateMixin {
+class _TaskDashboardState extends State<TaskDashboard> {
   //fabKey untuk controller floating action button
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
   final matkulC = Get.find<MatkulController>();
   final notifC = Get.find<NotificationController>();
   final tabC = Get.find<MainTabController>();
 
-  late TabController tabController;
-  int _tabLength = 0;
   late TaskController taskC;
-  late String? selectedMatkul;
 
   @override
   void initState() {
     super.initState();
     taskC = Get.put(TaskController());
-    //init
-    _tabLength = getTabLength();
-    tabController = TabController(length: _tabLength, vsync: this);
   }
 
   @override
   void dispose() {
-    tabController.dispose();
     Get.delete<TaskController>();
     super.dispose();
-  }
-
-  int getTabLength() {
-    final matkulList = matkulC.allMatkul;
-    return 2 + tabC.taskTabs.length + matkulList.length;
   }
 
   @override
@@ -77,7 +64,7 @@ class _TaskDashboardState extends State<TaskDashboard>
           print("harusnya routing ke: ${1 + (matkulIndex + 1)}");
 
           //routing to designated tab
-          tabController.animateTo(1 + (matkulIndex + 1));
+          taskC.tabController.animateTo(1 + (matkulIndex + 1));
           notifC.payload.value = ""; // reset agar tidak pindah tab terus
         });
       }
@@ -89,12 +76,11 @@ class _TaskDashboardState extends State<TaskDashboard>
         try {
           tabC.deleteTaskTab(groupId);
 
-          final newLength = getTabLength();
-          print("tab length after delete: ${newLength}");
-          tabController = TabController(length: newLength, vsync: this);
-          tabController.index = 1 + tabC.taskTabs.length; //move to tabs before
+          taskC.updateTabLength();
+
+          taskC.tabController.index =
+              1 + tabC.taskTabs.length; //move to tabs before
           print("menjalankan update tabs");
-          setState(() {});
         } catch (on) {
           print(on); // TODO: rem
         }
@@ -105,12 +91,9 @@ class _TaskDashboardState extends State<TaskDashboard>
         try {
           await tabC.addTaskTab();
 
-          final newLength = getTabLength();
-          print("tab length after: ${newLength}");
-          tabController = TabController(length: newLength, vsync: this);
-          tabController.index = 1 + tabC.taskTabs.length;
-          print("menjalankan update tabs");
-          setState(() {});
+          taskC.updateTabLength();
+
+          taskC.tabController.index = 1 + tabC.taskTabs.length;
         } catch (on) {
           print(on); // TODO: rem
         }
@@ -147,7 +130,7 @@ class _TaskDashboardState extends State<TaskDashboard>
         appBar: AppBar(
           title: const Text("Task"),
           bottom: TabBar(
-            controller: tabController,
+            controller: taskC.tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             splashFactory: InkSparkle.splashFactory,
@@ -159,7 +142,10 @@ class _TaskDashboardState extends State<TaskDashboard>
           ),
         ),
         body: SafeArea(
-          child: TabBarView(controller: tabController, children: tabViews),
+          child: TabBarView(
+            controller: taskC.tabController,
+            children: tabViews,
+          ),
         ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton: ExpandableFab(
@@ -215,7 +201,7 @@ class _TaskDashboardState extends State<TaskDashboard>
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () async {
-                    final tabIndex = tabController.index;
+                    final tabIndex = taskC.tabController.index;
                     String? selectedMatkul;
                     if (tabIndex >= 2) {
                       if (tabIndex >= (2 + tabC.taskTabs.length)) {

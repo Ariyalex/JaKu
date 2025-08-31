@@ -30,10 +30,10 @@ String getInitials(String kalimat) {
 
 class JadwalkuliahC extends GetxController {
   //text controller
-  final matkulNameC = TextEditingController();
-  final dosen1C = TextEditingController();
-  final dosen2C = TextEditingController();
-  final ruanganC = TextEditingController();
+  late TextEditingController matkulNameC;
+  late TextEditingController dosen1C;
+  late TextEditingController dosen2C;
+  late TextEditingController ruanganC;
   RxnString hari = RxnString();
   RxnString kelas = RxnString();
   RxnString jamAwal = RxnString();
@@ -79,12 +79,6 @@ class JadwalkuliahC extends GetxController {
 
   void clearData() {
     allSchedule.clear();
-  }
-
-  @override
-  void onInit() async {
-    super.onInit();
-    loadSchedule();
   }
 
   //fungsi mebandingkan dua matkul saat sorting
@@ -358,5 +352,28 @@ class JadwalkuliahC extends GetxController {
       print("Error menghapus matkul tidak terpakai: $e");
       rethrow;
     }
+  }
+
+  @override
+  void onInit() async {
+    super.onInit();
+    // init textEditingController
+    matkulNameC = TextEditingController();
+    dosen1C = TextEditingController();
+    dosen2C = TextEditingController();
+    ruanganC = TextEditingController();
+
+    //load all schedule
+    loadSchedule();
+  }
+
+  @override
+  void onClose() {
+    // dispose textEditingController
+    matkulNameC.dispose();
+    dosen1C.dispose();
+    dosen2C.dispose();
+    ruanganC.dispose();
+    super.onClose();
   }
 }
