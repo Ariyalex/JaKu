@@ -7,6 +7,7 @@ import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/notification_controller.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:jaku/widgets/task_widgets/add_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/build_task_widget.dart';
@@ -81,21 +82,40 @@ class _TaskDashboardState extends State<TaskDashboard> {
           taskC.tabController.index =
               1 + tabC.taskTabs.length; //move to tabs before
           print("menjalankan update tabs");
-        } catch (on) {
-          print(on); // TODO: rem
+
+          showAppSnackbar(title: "Success!", message: "Berhasil menghapus tab");
+        } catch (error) {
+          print(error);
+          showAppSnackbar(
+            title: "Error!",
+            message: "Error: $error",
+            isSuccess: false,
+          );
         }
       }
 
       //fungction for adding tab
-      void addTabs() async {
+      void addTabs() {
         try {
-          await tabC.addTaskTab();
+          tabC.addTaskTab();
 
           taskC.updateTabLength();
 
           taskC.tabController.index = 1 + tabC.taskTabs.length;
-        } catch (on) {
-          print(on); // TODO: rem
+
+          Get.back();
+
+          showAppSnackbar(
+            title: "Success!",
+            message: "Berhasil menambahkan tab baru",
+          );
+        } catch (error) {
+          print(error);
+          showAppSnackbar(
+            title: "Error!",
+            message: "Error: $error",
+            isSuccess: false,
+          );
         }
       }
 
@@ -134,7 +154,7 @@ class _TaskDashboardState extends State<TaskDashboard> {
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             splashFactory: InkSparkle.splashFactory,
-            splashBorderRadius: BorderRadius.only(
+            splashBorderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
@@ -219,8 +239,10 @@ class _TaskDashboardState extends State<TaskDashboard> {
                       useRootNavigator: true,
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
-                      builder: (context) =>
-                          AddTaskModal(matkulId: selectedMatkul),
+                      builder: (context) => AddTaskModal(
+                        matkulId: selectedMatkul,
+                        starred: tabIndex == 0,
+                      ),
                     );
                   },
                   child: Icon(Icons.add_task),

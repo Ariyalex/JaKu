@@ -2,6 +2,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/theme/theme.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,10 +11,12 @@ class VersionControl extends GetxController {
     final remoteConfig = FirebaseRemoteConfig.instance;
     try {
       // atur interval fetch agar tidak terlalu sering
-      await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(hours: 1),
-      ));
+      await remoteConfig.setConfigSettings(
+        RemoteConfigSettings(
+          fetchTimeout: const Duration(minutes: 1),
+          minimumFetchInterval: const Duration(hours: 1),
+        ),
+      );
 
       //ambil data terbaru dari firebase
       await remoteConfig.fetchAndActivate();
@@ -43,31 +46,33 @@ class VersionControl extends GetxController {
 
   void showUpdateDialog(String versionName, String url, bool isMandatory) {
     Get.defaultDialog(
-        barrierDismissible: false,
-        backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        titlePadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        title: "Update tersedia!",
-        content: Text(
-            "Jaku versi $versionName telah dirilis. Mohon perbarui aplikasi untuk mendapatkan fitur terbaru."),
-        cancel: !isMandatory
-            ? TextButton(onPressed: () => Get.back(), child: Text("Nanti"))
-            : null,
-        confirm: FilledButton(
-          onPressed: () async {
-            final Uri downloadUrl = Uri.parse(url);
-            if (await canLaunchUrl(downloadUrl)) {
-              await launchUrl(downloadUrl,
-                  mode: LaunchMode.externalApplication);
-            } else {
-              Get.snackbar("Error", "Tidak dapat membuka link download",
-                  backgroundColor: AppTheme.dark.colorScheme.error,
-                  colorText: AppTheme.dark.colorScheme.onError);
-            }
-          },
-          child: const Text("Update Sekarang"),
-        ));
+      barrierDismissible: false,
+      backgroundColor: AppTheme.dark.dialogTheme.backgroundColor,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      titlePadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      title: "Update tersedia!",
+      content: Text(
+        "Jaku versi $versionName telah dirilis. Mohon perbarui aplikasi untuk mendapatkan fitur terbaru.",
+      ),
+      cancel: !isMandatory
+          ? TextButton(onPressed: () => Get.back(), child: Text("Nanti"))
+          : null,
+      confirm: FilledButton(
+        onPressed: () async {
+          final Uri downloadUrl = Uri.parse(url);
+          if (await canLaunchUrl(downloadUrl)) {
+            await launchUrl(downloadUrl, mode: LaunchMode.externalApplication);
+          } else {
+            showAppSnackbar(
+              title: "Error",
+              message: "Tidak dapat membuka link download",
+              isSuccess: false,
+            );
+          }
+        },
+        child: const Text("Update Sekarang"),
+      ),
+    );
   }
 
   @override

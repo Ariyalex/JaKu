@@ -136,7 +136,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                             ),
                           ),
 
-                          items: [
+                          items: const [
                             DropdownMenuItem<Object>(
                               value: 0,
                               child: Row(

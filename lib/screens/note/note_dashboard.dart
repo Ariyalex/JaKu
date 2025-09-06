@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:jaku/widgets/note_widgets/note_global.dart';
 import 'package:jaku/widgets/note_widgets/search_textfield.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -40,6 +41,36 @@ class _NoteDashboardState extends State<NoteDashboard> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Obx(() {
+        final notes = noteC.filteredNotes;
+
+        try {
+          if (noteC.isSortByCreatedDate.value && noteC.isAsce.value) {
+            noteC.sortByCreatedAsc();
+          } else if (noteC.isSortByCreatedDate.value && !noteC.isAsce.value) {
+            noteC.sortByCreatedDesc();
+          } else if (!noteC.isSortByCreatedDate.value && noteC.isAsce.value) {
+            noteC.sortByEditedAsc();
+          } else if (!noteC.isSortByCreatedDate.value && !noteC.isAsce.value) {
+            noteC.sortByEditedDesc();
+          }
+        } catch (error) {
+          showAppSnackbar(
+            title: "Error!",
+            message: "Gagal menambahkan note: $error",
+            isSuccess: false,
+          );
+        }
+        print("sort created: ${noteC.isSortByCreatedDate}");
+        print("sort direction: ${noteC.isAsce}");
+
+        for (var note in notes) {
+          if (noteC.isSortByCreatedDate.value) {
+            print(note.createdOn);
+          } else {
+            print(note.editedOn);
+          }
+        }
+
         final isLoading = noteC.isLoading.value;
         if (isLoading) {
           return Center(child: CircularProgressIndicator());
@@ -59,63 +90,26 @@ class _NoteDashboardState extends State<NoteDashboard> {
                       left: 12,
                       bottom: 60,
                     ),
-                    child: Obx(() {
-                      final notes = noteC.filteredNotes;
-
-                      try {
-                        if (noteC.isSortByCreatedDate.value &&
-                            noteC.isAsce.value) {
-                          noteC.sortByCreatedAsc();
-                        } else if (noteC.isSortByCreatedDate.value &&
-                            !noteC.isAsce.value) {
-                          noteC.sortByCreatedDesc();
-                        } else if (!noteC.isSortByCreatedDate.value &&
-                            noteC.isAsce.value) {
-                          noteC.sortByEditedAsc();
-                        } else if (!noteC.isSortByCreatedDate.value &&
-                            !noteC.isAsce.value) {
-                          noteC.sortByEditedDesc();
-                        }
-                      } catch (error) {
-                        Get.snackbar(
-                          "Error",
-                          "Gagal menambahkan jadwal: $error",
-                          backgroundColor: theme.colorScheme.error,
-                          colorText: theme.colorScheme.onError,
-                        );
-                      }
-                      print("sort created: ${noteC.isSortByCreatedDate}");
-                      print("sort direction: ${noteC.isAsce}");
-
-                      for (var note in notes) {
-                        if (noteC.isSortByCreatedDate.value) {
-                          print(note.createdOn);
-                        } else {
-                          print(note.editedOn);
-                        }
-                      }
-
-                      return notes.isNotEmpty
-                          ? NoteGlobal(notes: notes)
-                          : Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "Tidak ada note",
-                                    style: theme.textTheme.bodyLarge,
+                    child: notes.isNotEmpty
+                        ? NoteGlobal(notes: notes)
+                        : Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Tidak ada note",
+                                  style: theme.textTheme.bodyLarge,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.all(12),
+                                  clipBehavior: Clip.hardEdge,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                  Container(
-                                    margin: EdgeInsets.all(12),
-                                    clipBehavior: Clip.hardEdge,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Image.asset("images/malas.gif"),
-                                  ),
-                                ],
-                              ),
-                            );
-                    }),
+                                  child: Image.asset("images/malas.gif"),
+                                ),
+                              ],
+                            ),
+                          ),
                   ),
                 ),
               ],

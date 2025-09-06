@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
@@ -70,12 +71,7 @@ class _AddMatkulState extends State<EditJadwal> {
         dayKuliahController.getUniqueDays(allMatkulProvider);
 
         // Show success message
-        Get.snackbar(
-          "Success",
-          "Jadwal berhasil diedit",
-          backgroundColor: Colors.green.shade400,
-          colorText: Colors.white,
-        );
+        showAppSnackbar(title: "Success", message: "Jadwal berhasil diedit");
 
         // Clear form fields
         allMatkulProvider.matkulNameC.clear();
@@ -93,12 +89,10 @@ class _AddMatkulState extends State<EditJadwal> {
         // Close loading dialog
         Get.back();
 
-        // Show error message
-        Get.snackbar(
-          "Error",
-          "Gagal mengedit jadwal: ${e.toString()}",
-          backgroundColor: theme.colorScheme.error,
-          colorText: theme.colorScheme.onError,
+        showAppSnackbar(
+          title: "Error!",
+          message: "Gagal mengedit jadwal: $e",
+          isSuccess: false,
         );
       }
     }

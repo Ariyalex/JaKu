@@ -7,6 +7,7 @@ import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/theme/theme.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/jadwal.dart';
@@ -304,25 +305,21 @@ class JadwalkuliahC extends GetxController {
       // Tutup dialog loading
       Get.back();
 
-      // Tampilkan notifikasi sukses
-      Get.snackbar(
-        'Berhasil',
-        'Semua data berhasil dihapus',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green.shade400,
-        colorText: Colors.white,
+      // Tampilkan snackbar sukses
+      showAppSnackbar(
+        title: "Berhasil",
+        message: "Semua data berhasil dihapus",
+        isSuccess: true,
       );
     } catch (e) {
       // Tutup dialog loading jika terjadi error
       Get.back();
 
       // Tampilkan pesan error
-      Get.snackbar(
-        'Gagal',
-        'Terjadi kesalahan saat menghapus data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: color.colorScheme.error,
-        colorText: color.colorScheme.onError,
+      showAppSnackbar(
+        title: "Gagal!",
+        message: "Terjadi kesalahan saat menghapus data: $e",
+        isSuccess: false,
       );
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -55,11 +56,10 @@ class _AddJadwalState extends State<AddJadwal> {
         Get.back();
 
         Get.find<HariKuliahC>().getUniqueDays(allMatkulProvider);
-        Get.snackbar(
-          "Success",
-          "Jadwal berhasil ditambahkan",
-          backgroundColor: Colors.green.shade400,
-          colorText: Colors.white,
+
+        showAppSnackbar(
+          title: "Success",
+          message: "Jadwal berhasil ditambahkan",
         );
 
         //clear controller
@@ -76,11 +76,10 @@ class _AddJadwalState extends State<AddJadwal> {
         Get.back();
 
         // Show error message
-        Get.snackbar(
-          "Error",
-          "Gagal menambahkan jadwal: ${error.toString()}",
-          backgroundColor: theme.colorScheme.error,
-          colorText: theme.colorScheme.onError,
+        showAppSnackbar(
+          title: "Error",
+          message: "Gagal menambahkan jadwal: ${error.toString()}",
+          isSuccess: false,
         );
       }
     }

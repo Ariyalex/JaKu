@@ -34,7 +34,7 @@ class NoteControllers extends GetxController {
 
   Timer? debounce;
 
-  //save note debounce
+  ///save note with debounce
   void onNoteChanged(String id) {
     if (debounce?.isActive ?? false) debounce!.cancel();
     debounce = Timer(const Duration(milliseconds: 300), () {
@@ -46,7 +46,7 @@ class NoteControllers extends GetxController {
     });
   }
 
-  //select note by id
+  ///select note by id
   Note? selectById(String id) {
     if (allNote.isEmpty) {
       debugPrint("data kosong, pastikan sudah memanggil getonce");
@@ -58,7 +58,7 @@ class NoteControllers extends GetxController {
     );
   }
 
-  //load all note and delete empty note
+  ///load all note and delete empty note
   void loadAllNotes() {
     try {
       allNote.clear();
@@ -82,7 +82,7 @@ class NoteControllers extends GetxController {
     }
   }
 
-  //add note with return note id
+  ///add note with return note id
   String addNote() {
     try {
       Note newNote = Note(
@@ -115,7 +115,7 @@ class NoteControllers extends GetxController {
     }
   }
 
-  //update note
+  ///update note by id
   Future<void> updateNote(String id) async {
     try {
       final matkulController = Get.find<MatkulController>();
@@ -162,6 +162,7 @@ class NoteControllers extends GetxController {
     }
   }
 
+  ///delete matkul relation in allnotes
   Future<void> deleteMatkulRelationFromNotes() async {
     try {
       final allMatkul = Get.find<MatkulController>().allMatkul;
@@ -204,10 +205,12 @@ class NoteControllers extends GetxController {
     }
   }
 
-  //delete note by id
+  ///delete note by id
   Future<void> deleteNote(String id) async {
     try {
+      //delete note in allnotes and filteredNotes
       allNote.removeWhere((note) => note.id == id);
+      filteredNotes.removeWhere((note) => note.id == id);
 
       await NoteService.deleteNoteService(id);
     } catch (error) {

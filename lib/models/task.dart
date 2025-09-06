@@ -20,7 +20,9 @@ class Task extends HiveObject {
       task: task ?? this.task,
       desc: desc ?? this.desc,
       status: status ?? this.status,
-      taskDueDate: taskDueDate ?? this.taskDueDate,
+      taskDueDate: identical(taskDueDate, null)
+          ? null
+          : (taskDueDate as DateTime?) ?? this.taskDueDate,
       groupId: identical(groupId, null)
           ? null
           : (groupId as String?) ?? this.groupId,

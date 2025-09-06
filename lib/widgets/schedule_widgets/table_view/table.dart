@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:jaku/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 
 class Table extends StatefulWidget {
   const Table({super.key});
@@ -249,19 +250,15 @@ class _TableState extends State<Table> {
 
                     Get.back();
 
-                    Get.snackbar(
-                      "Success",
-                      "Jadwal berhasil ditambahkan",
-                      backgroundColor: Colors.green.shade400,
-                      colorText: Colors.white,
+                    showAppSnackbar(
+                      title: "Success",
+                      message: "Jadwal berhasil ditambahkan",
                     );
                   } catch (error) {
-                    Get.snackbar(
-                      'Error',
-                      'Gagal menghapus mata kuliah: $error',
-                      snackPosition: SnackPosition.TOP,
-                      backgroundColor: theme.colorScheme.error,
-                      colorText: theme.colorScheme.onError,
+                    showAppSnackbar(
+                      title: "Error!",
+                      message: "Gagal menghapus jadwal: $error",
+                      isSuccess: false,
                     );
                   }
 

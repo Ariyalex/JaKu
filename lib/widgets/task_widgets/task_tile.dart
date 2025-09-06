@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/widgets/task_widgets/detail_task_modal.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class TaskTile extends StatelessWidget {
   const TaskTile({super.key, required this.taskId, this.star = true});
@@ -13,10 +14,71 @@ class TaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final taskC = Get.find<TaskController>();
+    final theme = Theme.of(context);
+
+    bool isToday(DateTime date) {
+      final now = DateTime.now();
+      return date.year == now.year &&
+          date.month == now.month &&
+          date.day == now.day;
+    }
+
+    bool isTomorrow(DateTime date) {
+      final tomorrow = DateTime.now().add(Duration(days: 1));
+      return date.year == tomorrow.year &&
+          date.month == tomorrow.month &&
+          date.day == tomorrow.day;
+    }
 
     return Obx(() {
       final task = taskC.selectById(taskId);
-      if (task == null) return SizedBox.shrink();
+      if (task == null) return const SizedBox.shrink();
+
+      Text showTime(DateTime dateTime) {
+        if (dateTime.isBefore(DateTime.now())) {
+          return Text(
+            timeago.format(dateTime),
+            style: TextStyle(
+              color: Colors.redAccent.shade200,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        } else if (isTomorrow(dateTime)) {
+          return Text(
+            "Tomorrow, ${dateTime.hour}:${dateTime.minute}",
+            style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+          );
+        } else if (isToday(dateTime)) {
+          return Text(
+            "Today, ${dateTime.hour}:${dateTime.minute}",
+            style: TextStyle(
+              color: theme.colorScheme.secondary,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        } else {
+          return Text(
+            DateTimeFormat.format(
+              DateTime(
+                task.taskDueDate!.year,
+                task.taskDueDate!.month,
+                task.taskDueDate!.day,
+                task.taskDueDate?.hour ?? 0,
+                task.taskDueDate?.minute ?? 0,
+              ),
+              format:
+                  task.taskDueDate?.hour == null ||
+                      (task.taskDueDate?.hour == 0 &&
+                          task.taskDueDate?.minute == 0)
+                  ? "d F Y"
+                  : "d F Y, H:i",
+            ),
+            style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+          );
+        }
+      }
 
       return ListTile(
         onTap: () {
@@ -63,21 +125,7 @@ class TaskTile extends StatelessWidget {
                   if (task.taskDueDate != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 2.0),
-                      child: Text(
-                        DateTimeFormat.format(
-                          DateTime(
-                            task.taskDueDate!.year,
-                            task.taskDueDate!.month,
-                            task.taskDueDate!.day,
-                            task.taskDueDate?.hour ?? 0,
-                            task.taskDueDate?.minute ?? 0,
-                          ),
-                          format: task.taskDueDate?.hour == null
-                              ? "d F Y"
-                              : "d F Y, H:i",
-                        ),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                      ),
+                      child: showTime(task.taskDueDate!),
                     ),
                 ],
               )

@@ -79,14 +79,16 @@ class TaskController extends GetxController with GetTickerProviderStateMixin {
       }
 
       if (dueDateC.value != null) {
-        final notifC = Get.find<NotificationController>();
-        notifC.scheduleNotification(
-          matkul != null ? "${matkul.matkul} Task" : "General Task",
-          titleC.text,
-          dueDateC.value!,
-          newTask.id.hashCode,
-          newTask.id,
-        );
+        if (dueDateC.value!.isAfter(DateTime.now())) {
+          final notifC = Get.find<NotificationController>();
+          notifC.scheduleNotification(
+            matkul != null ? "${matkul.matkul} Task" : "General Task",
+            titleC.text,
+            dueDateC.value!,
+            newTask.id.hashCode,
+            newTask.id,
+          );
+        }
       }
 
       print("starred: ${newTask.isStared}");
@@ -123,14 +125,16 @@ class TaskController extends GetxController with GetTickerProviderStateMixin {
       }
 
       if (dueDateC.value != null) {
-        final notifC = Get.find<NotificationController>();
-        notifC.scheduleNotification(
-          matkul != null ? "${matkul.matkul} Task" : "General Task",
-          titleC.text,
-          dueDateC.value!,
-          updatedTask.id.hashCode,
-          updatedTask.id,
-        );
+        if (dueDateC.value!.isAfter(DateTime.now())) {
+          final notifC = Get.find<NotificationController>();
+          notifC.scheduleNotification(
+            matkul != null ? "${matkul.matkul} Task" : "General Task",
+            titleC.text,
+            dueDateC.value!,
+            updatedTask.id.hashCode,
+            updatedTask.id,
+          );
+        }
       }
     } catch (error) {
       print("error update task: $error");
@@ -242,7 +246,11 @@ class TaskController extends GetxController with GetTickerProviderStateMixin {
     super.onInit();
     //init tab controller
     tabLength.value = getTabLength();
-    tabController = TabController(length: tabLength.value, vsync: this);
+    tabController = TabController(
+      length: tabLength.value,
+      vsync: this,
+      initialIndex: 1,
+    );
 
     //init text editing controller
     titleC = TextEditingController();

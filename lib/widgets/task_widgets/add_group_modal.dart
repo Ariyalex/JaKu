@@ -16,14 +16,12 @@ class _AddGroupModalState extends State<AddGroupModal> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     textC = tabC.taskTabC;
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     textC.clear();
     super.dispose();
   }
@@ -31,15 +29,6 @@ class _AddGroupModalState extends State<AddGroupModal> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    void addTab() {
-      try {
-        if (widget.onUpdateTabs != null) widget.onUpdateTabs!();
-        Get.back();
-      } catch (error) {
-        print("error add tab: $error");
-      }
-    }
 
     return SafeArea(
       child: Container(
@@ -58,7 +47,11 @@ class _AddGroupModalState extends State<AddGroupModal> {
               children: [
                 Text("New group", style: theme.textTheme.bodyLarge),
                 TextButton(
-                  onPressed: textC.text.trim().isEmpty ? null : addTab,
+                  onPressed: textC.text.trim().isEmpty
+                      ? null
+                      : widget.onUpdateTabs != null
+                      ? () => widget.onUpdateTabs!()
+                      : null,
                   child: Text("save"),
                 ),
               ],

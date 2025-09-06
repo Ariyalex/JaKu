@@ -5,11 +5,13 @@ import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/models/matkul.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AddTaskModal extends StatefulWidget {
-  const AddTaskModal({super.key, this.matkulId});
+  const AddTaskModal({super.key, this.matkulId, this.starred = false});
   final String? matkulId;
+  final bool starred;
 
   @override
   State<AddTaskModal> createState() => _AddTaskModalState();
@@ -31,6 +33,10 @@ class _AddTaskModalState extends State<AddTaskModal> {
     taskC.matkulIdC.value = widget.matkulId;
 
     matkulList = matkulC.allMatkul;
+    print("starred value: ${widget.starred}");
+    if (widget.starred) {
+      taskC.isStaredC.value = true;
+    }
   }
 
   @override
@@ -46,6 +52,24 @@ class _AddTaskModalState extends State<AddTaskModal> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    String showGroup() {
+      try {
+        if (taskC.matkulIdC.value == null || taskC.matkulIdC.value == "") {
+          return "Select group";
+        } else {
+          if (taskC.matkulIdC.value!.startsWith("tab")) {
+            return tabC.selectTabById(taskC.matkulIdC.value!)!.tabName;
+          } else {
+            return matkulC
+                .selectMatkulById(taskC.matkulIdC.value!)!
+                .abbreviation;
+          }
+        }
+      } catch (e) {
+        return "Error showing group";
+      }
+    }
 
     return SafeArea(
       child: Container(
@@ -69,18 +93,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       spacing: 6,
                       children: [
-                        Text(
-                          taskC.matkulIdC.value == null ||
-                                  taskC.matkulIdC.value == ""
-                              ? "Select group"
-                              : (taskC.matkulIdC.value!.startsWith("tab"))
-                              ? tabC
-                                    .selectTabById(taskC.matkulIdC.value!)!
-                                    .tabName
-                              : matkulC
-                                    .selectMatkulById(taskC.matkulIdC.value!)!
-                                    .abbreviation,
-                        ),
+                        Text(showGroup()),
                         taskC.matkulIdC.value == null ||
                                 taskC.matkulIdC.value == ""
                             ? SizedBox.shrink()
@@ -259,11 +272,18 @@ class _AddTaskModalState extends State<AddTaskModal> {
                   onPressed: taskC.titleC.text.trim().isEmpty
                       ? null // tombol disable
                       : () {
-                          // aksi simpan
-                          taskC.addTask();
-                          Get.back();
-                          for (var task in taskC.allTask) {
-                            print(task.task);
+                          try {
+                            taskC.addTask();
+                            Get.back();
+                            showAppSnackbar(
+                              title: "Sucess!",
+                              message: "Berhasil menambahkan task",
+                            );
+                          } catch (error) {
+                            showAppSnackbar(
+                              title: "Error!",
+                              message: "Error: $error",
+                            );
                           }
                         },
                   child: Text("Save"),
