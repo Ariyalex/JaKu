@@ -128,12 +128,12 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             Text(showGroup()),
                             taskC.matkulIdC.value == null ||
                                     taskC.matkulIdC.value == ""
-                                ? SizedBox.shrink()
+                                ? const SizedBox.shrink()
                                 : IconButton(
                                     onPressed: () {
                                       taskC.matkulIdC.value = null;
                                     },
-                                    icon: Icon(LucideIcons.x),
+                                    icon: const Icon(LucideIcons.x),
                                   ),
                             const Icon(LucideIcons.chevronDown),
                           ],
@@ -180,7 +180,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                   onPressed: () {
                     Get.defaultDialog(
                       title: "Hapus task?",
-                      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+                      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
                       backgroundColor: Theme.of(
                         context,
                       ).dialogTheme.backgroundColor,
@@ -200,7 +200,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                       ),
                     );
                   },
-                  icon: Icon(LucideIcons.trash2),
+                  icon: const Icon(LucideIcons.trash2),
                 ),
               ],
             ),
@@ -276,7 +276,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             showDescField = true;
                           });
                         },
-                        icon: Icon(LucideIcons.alignLeft),
+                        icon: const Icon(LucideIcons.alignLeft),
                       ),
                       IconButton(
                         onPressed: () async {
@@ -297,7 +297,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             taskC.dueDateC.value = pickedDate;
                           }
                         },
-                        icon: Icon(LucideIcons.calendar),
+                        icon: const Icon(LucideIcons.calendar),
                       ),
                       if (taskC.dueDateC.value != null)
                         IconButton(
@@ -318,15 +318,15 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                                   );
                             }
                           },
-                          icon: Icon(LucideIcons.clock),
+                          icon: const Icon(LucideIcons.clock),
                         ),
                       IconButton(
                         onPressed: () {
                           taskC.isStaredC.value = !taskC.isStaredC.value;
                         },
                         icon: taskC.isStaredC.value
-                            ? Icon(Icons.star, color: Colors.amberAccent)
-                            : Icon(Icons.star_border),
+                            ? const Icon(Icons.star, color: Colors.amberAccent)
+                            : const Icon(Icons.star_border),
                       ),
                     ],
                   ),
@@ -353,7 +353,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             print(error);
                           }
                         },
-                  child: Text("Save"),
+                  child: const Text("Save"),
                 ),
               ],
             ),

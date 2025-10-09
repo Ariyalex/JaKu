@@ -69,7 +69,7 @@ class _EditGroupModalState extends State<EditGroupModal> {
                 Text("Edit group", style: theme.textTheme.bodyLarge),
                 TextButton(
                   onPressed: textC.text.trim().isEmpty ? null : editTab,
-                  child: Text("save"),
+                  child: const Text("save"),
                 ),
               ],
             ),
@@ -77,7 +77,7 @@ class _EditGroupModalState extends State<EditGroupModal> {
             TextField(
               controller: textC,
               decoration: InputDecoration(
-                hint: Text("Nama group"),
+                hint: const Text("Nama group"),
                 helper: Text(
                   "group tidak termasuk ke dalam matkul",
                   style: theme.textTheme.labelLarge,

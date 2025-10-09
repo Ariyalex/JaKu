@@ -87,7 +87,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
               child: Obx(
                 () => DropdownButton2(
                   customButton: Container(
-                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+                    padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -96,14 +96,14 @@ class _AddTaskModalState extends State<AddTaskModal> {
                         Text(showGroup()),
                         taskC.matkulIdC.value == null ||
                                 taskC.matkulIdC.value == ""
-                            ? SizedBox.shrink()
+                            ? const SizedBox.shrink()
                             : IconButton(
                                 onPressed: () {
                                   taskC.matkulIdC.value = null;
                                 },
-                                icon: Icon(LucideIcons.x),
+                                icon: const Icon(LucideIcons.x),
                               ),
-                        Icon(LucideIcons.chevronDown),
+                        const Icon(LucideIcons.chevronDown),
                       ],
                     ),
                   ),
@@ -205,7 +205,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                             showDescField = true;
                           });
                         },
-                        icon: Icon(LucideIcons.alignLeft),
+                        icon: const Icon(LucideIcons.alignLeft),
                       ),
                       IconButton(
                         onPressed: () async {
@@ -231,7 +231,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                             }
                           }
                         },
-                        icon: Icon(LucideIcons.calendar),
+                        icon: const Icon(LucideIcons.calendar),
                       ),
                       if (taskC.dueDateC.value != null)
                         IconButton(
@@ -254,15 +254,15 @@ class _AddTaskModalState extends State<AddTaskModal> {
                               );
                             }
                           },
-                          icon: Icon(LucideIcons.clock),
+                          icon: const Icon(LucideIcons.clock),
                         ),
                       IconButton(
                         onPressed: () {
                           taskC.isStaredC.value = !taskC.isStaredC.value;
                         },
                         icon: taskC.isStaredC.value
-                            ? Icon(Icons.star, color: Colors.amberAccent)
-                            : Icon(Icons.star_border),
+                            ? const Icon(Icons.star, color: Colors.amberAccent)
+                            : const Icon(Icons.star_border),
                       ),
                     ],
                   ),
@@ -286,7 +286,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                             );
                           }
                         },
-                  child: Text("Save"),
+                  child: const Text("Save"),
                 ),
               ],
             ),

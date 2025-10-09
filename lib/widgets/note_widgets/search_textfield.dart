@@ -48,13 +48,13 @@ class _SearchTextfieldState extends State<SearchTextfield> {
       controller: searchController,
       decoration: InputDecoration(
         hintText: 'Cari catatan',
-        prefixIcon: Icon(Icons.search),
+        prefixIcon: const Icon(Icons.search),
         suffixIcon: Builder(
           builder: (context) {
             // 1. Jika controller not empty & focused: clear
             if (isNotEmpty && _isFocused) {
               return IconButton(
-                icon: Icon(Icons.clear),
+                icon: const Icon(Icons.clear),
                 onPressed: () {
                   searchController.clear();
                   noteC.searchNotes();
@@ -65,7 +65,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
             // 2. Jika controller empty & not focused: sort + filter
             if (!isNotEmpty && !_isFocused) {
               return Container(
-                margin: EdgeInsets.only(right: 10),
+                margin: const EdgeInsets.only(right: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -99,15 +99,15 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                         final isFiltering = noteC.filterMatkulId.value != "all";
                         if (isFiltering) {
                           return Badge(
+                            smallSize: 8,
+                            alignment: Alignment.topRight,
                             child: Icon(
                               LucideIcons.funnel,
                               color: theme.colorScheme.primary,
                             ),
-                            smallSize: 8,
-                            alignment: Alignment.topRight,
                           );
                         } else {
-                          return Icon(LucideIcons.funnel);
+                          return const Icon(LucideIcons.funnel);
                         }
                       }),
                       onPressed: () {
@@ -128,12 +128,12 @@ class _SearchTextfieldState extends State<SearchTextfield> {
             // 3. Jika controller not empty & not focused: clear + sort + filter
             if (isNotEmpty && !_isFocused) {
               return Container(
-                margin: EdgeInsets.only(right: 10),
+                margin: const EdgeInsets.only(right: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: () {
                         print("clearing search");
                         searchController.clear();
@@ -142,7 +142,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(LucideIcons.arrowDownUp),
+                      icon: const Icon(LucideIcons.arrowDownUp),
                       onPressed: () {
                         showBarModalBottomSheet<Map<String, dynamic>>(
                           barrierColor: Colors.black.withValues(alpha: 0.4),
@@ -155,7 +155,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(LucideIcons.funnel),
+                      icon: const Icon(LucideIcons.funnel),
                       onPressed: () {
                         showBarModalBottomSheet<Map<String, dynamic>>(
                           barrierColor: Colors.black.withValues(alpha: 0.4),
@@ -172,7 +172,7 @@ class _SearchTextfieldState extends State<SearchTextfield> {
               );
             }
             // 4. Jika controller empty & focused: tidak ada tombol
-            return SizedBox.shrink();
+            return const SizedBox.shrink();
           },
         ),
         border: OutlineInputBorder(

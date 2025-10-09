@@ -62,7 +62,7 @@ class NotificationController extends GetxController {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('notif_icon');
 
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
     flutterLocalNotificationsPlugin.initialize(initializationSettings);

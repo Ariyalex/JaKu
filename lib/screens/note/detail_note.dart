@@ -91,7 +91,7 @@ class _DetailNoteState extends State<DetailNote> {
             onPressed: () {
               Get.defaultDialog(
                 title: "Hapus note?",
-                titleStyle: TextStyle(fontWeight: FontWeight.bold),
+                titleStyle: const TextStyle(fontWeight: FontWeight.bold),
                 backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
                 content: const Text(
                   "Yakin ingin menghapus note ini?",
@@ -109,7 +109,7 @@ class _DetailNoteState extends State<DetailNote> {
                 ),
               );
             },
-            icon: Icon(LucideIcons.trash2),
+            icon: const Icon(LucideIcons.trash2),
           ),
         ],
       ),
@@ -129,7 +129,7 @@ class _DetailNoteState extends State<DetailNote> {
                   hintStyle: theme.textTheme.titleLarge,
                   border: InputBorder.none,
                   filled: false,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
               Expanded(

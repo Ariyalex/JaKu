@@ -47,7 +47,7 @@ class InformasiMatkul extends StatelessWidget {
                         alpha: 0.1,
                       ),
                     )
-                  : SizedBox.shrink(),
+                  : const SizedBox.shrink(),
             ],
           ),
           const SizedBox(height: 12),

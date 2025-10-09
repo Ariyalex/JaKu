@@ -52,7 +52,7 @@ class _AddGroupModalState extends State<AddGroupModal> {
                       : widget.onUpdateTabs != null
                       ? () => widget.onUpdateTabs!()
                       : null,
-                  child: Text("save"),
+                  child: const Text("save"),
                 ),
               ],
             ),
@@ -60,7 +60,7 @@ class _AddGroupModalState extends State<AddGroupModal> {
             TextField(
               controller: textC,
               decoration: InputDecoration(
-                hint: Text("Nama group"),
+                hint: const Text("Nama group"),
                 helper: Text(
                   "group tidak termasuk ke dalam matkul",
                   style: theme.textTheme.labelLarge,

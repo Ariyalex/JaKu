@@ -60,7 +60,7 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
               spacing: 8,
               children: [
                 FilterChip(
-                  label: Text("All"),
+                  label: const Text("All"),
                   selected: _selectedDeviceType == "all",
                   onSelected: (selected) {
                     setState(() {
@@ -84,9 +84,9 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   );
-                }).toList(),
+                }),
                 FilterChip(
-                  label: Text("Umum"),
+                  label: const Text("Umum"),
                   selected: _selectedDeviceType == "umum",
                   onSelected: (selected) {
                     setState(() {
@@ -113,7 +113,7 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                         _selectedDeviceType = 'all';
                       });
                     },
-                    child: Text('Reset'),
+                    child: const Text('Reset'),
                   ),
                 ),
                 const SizedBox(width: 16),

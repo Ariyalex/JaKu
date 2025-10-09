@@ -55,7 +55,7 @@ class VersionControl extends GetxController {
         "Jaku versi $versionName telah dirilis. Mohon perbarui aplikasi untuk mendapatkan fitur terbaru.",
       ),
       cancel: !isMandatory
-          ? TextButton(onPressed: () => Get.back(), child: Text("Nanti"))
+          ? TextButton(onPressed: () => Get.back(), child: const Text("Nanti"))
           : null,
       confirm: FilledButton(
         onPressed: () async {

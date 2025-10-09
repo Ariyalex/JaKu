@@ -185,7 +185,7 @@ class _TaskDashboardState extends State<TaskDashboard> {
             shape: const CircleBorder(),
           ),
           type: ExpandableFabType.up,
-          duration: Duration(milliseconds: 340),
+          duration: const Duration(milliseconds: 340),
           childrenAnimation: ExpandableFabAnimation.none,
           distance: 70,
           overlayStyle: ExpandableFabOverlayStyle(
@@ -195,7 +195,7 @@ class _TaskDashboardState extends State<TaskDashboard> {
             Row(
               children: [
                 Text('Add Group', style: theme.textTheme.bodyLarge),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () {
@@ -210,14 +210,14 @@ class _TaskDashboardState extends State<TaskDashboard> {
                           AddGroupModal(onUpdateTabs: addTabs),
                     );
                   },
-                  child: Icon(Icons.playlist_add),
+                  child: const Icon(Icons.playlist_add),
                 ),
               ],
             ),
             Row(
               children: [
                 Text('Add Task', style: theme.textTheme.bodyLarge),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () async {
@@ -245,7 +245,7 @@ class _TaskDashboardState extends State<TaskDashboard> {
                       ),
                     );
                   },
-                  child: Icon(Icons.add_task),
+                  child: const Icon(Icons.add_task),
                 ),
               ],
             ),

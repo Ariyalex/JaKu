@@ -73,18 +73,18 @@ class _NoteDashboardState extends State<NoteDashboard> {
 
         final isLoading = noteC.isLoading.value;
         if (isLoading) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else {
           return SafeArea(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
+                const Padding(
+                  padding: EdgeInsets.all(12.0),
                   child: SearchTextfield(),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 12,
                       right: 12,
                       left: 12,
@@ -100,7 +100,7 @@ class _NoteDashboardState extends State<NoteDashboard> {
                                   style: theme.textTheme.bodyLarge,
                                 ),
                                 Container(
-                                  margin: EdgeInsets.all(12),
+                                  margin: const EdgeInsets.all(12),
                                   clipBehavior: Clip.hardEdge,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
@@ -123,7 +123,7 @@ class _NoteDashboardState extends State<NoteDashboard> {
           Get.toNamed(RouteNamed.addNote);
         },
         shape: const CircleBorder(),
-        child: Icon(LucideIcons.plus),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
