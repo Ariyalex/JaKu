@@ -134,17 +134,24 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ],
-            navBarBuilder: (navBarConfig) => Obx(
-              () => Style8BottomNavBar(
-                navBarConfig: navBarConfig,
-                navBarDecoration: NavBarDecoration(
-                  color: themeC.isLight.value
-                      ? themeLight.colorScheme.surface
-                      : themeDark.colorScheme.surface,
+            navBarBuilder: (navBarConfig) => Obx(() {
+              final bgColor = themeC.isLight.value
+                  ? themeLight.colorScheme.surface
+                  : themeDark.colorScheme.surface;
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.ease,
+                color: bgColor,
+                child: Style8BottomNavBar(
+                  navBarConfig: navBarConfig,
+                  navBarDecoration: const NavBarDecoration(
+                    color: Colors.transparent,
+                  ),
+                  height: 60,
                 ),
-                height: 60,
-              ),
-            ),
+              );
+            }),
           ),
         ),
         getPages: AppPage.pages,

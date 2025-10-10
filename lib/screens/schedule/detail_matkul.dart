@@ -42,6 +42,7 @@ class _DetailMatkulState extends State<DetailMatkul> {
     );
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         leadingWidth: 50,
         actions: [

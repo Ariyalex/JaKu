@@ -261,20 +261,33 @@ class NoteControllers extends GetxController {
 
   void filterByMatkul() {
     try {
-      if (filterMatkulId.value == "all") {
-        filteredNotes.clear();
-        filteredNotes.addAll(allNote);
-      } else if (filterMatkulId.value == "umum") {
-        filteredNotes.clear();
-        filteredNotes.addAll(
-          allNote.where((note) => note.matkulId == null || note.matkulId == ""),
-        );
-      } else {
-        filteredNotes.clear();
-        filteredNotes.addAll(
-          allNote.where((note) => note.matkulId == filterMatkulId.value),
-        );
+      final raw = filterMatkulId.value;
+      if (raw.trim().isEmpty || raw == 'all') {
+        filteredNotes
+          ..clear()
+          ..addAll(allNote);
+        return;
       }
+
+      final parts = raw
+          .split(',')
+          .map((e) => e.trim())
+          .where((element) => element.isNotEmpty)
+          .toList();
+      final includeUmum = parts.contains('umum');
+      final specificIds = parts.where((element) => element != 'umum').toSet();
+
+      final result = allNote.where((note) {
+        if (includeUmum && (note.matkulId == null || note.matkulId == ""))
+          return true;
+        if (specificIds.isNotEmpty && specificIds.contains(note.matkulId))
+          return true;
+        return false;
+      }).toList();
+
+      filteredNotes
+        ..clear()
+        ..addAll(result);
     } catch (error) {
       print(error);
       rethrow;

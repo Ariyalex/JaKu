@@ -75,7 +75,7 @@ class TaskTile extends StatelessWidget {
                   ? "d F Y"
                   : "d F Y, H:i",
             ),
-            style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+            style: TextStyle(color: Colors.white70, fontSize: 14),
           );
         }
       }

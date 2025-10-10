@@ -94,33 +94,54 @@ class _SearchTextfieldState extends State<SearchTextfield> {
                       );
                     }),
 
-                    IconButton(
-                      icon: Obx(() {
-                        final isFiltering = noteC.filterMatkulId.value != "all";
-                        if (isFiltering) {
-                          return Badge(
+                    Obx(() {
+                      final isFiltering = noteC.filterMatkulId.value != "all";
+
+                      if (isFiltering) {
+                        return RawMaterialButton(
+                          onPressed: () {
+                            showBarModalBottomSheet<Map<String, dynamic>>(
+                              barrierColor: Colors.black.withValues(alpha: 0.4),
+                              context: context,
+                              useRootNavigator: true,
+                              bounce: true,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainer,
+                              builder: (context) => const FilterNoteModal(),
+                            );
+                          },
+                          fillColor: theme.colorScheme.tertiary,
+                          shape: const CircleBorder(),
+                          constraints: const BoxConstraints(
+                            minWidth: 40,
+                            minHeight: 40,
+                          ),
+                          elevation: 0,
+                          child: Badge(
                             smallSize: 8,
                             alignment: Alignment.topRight,
                             child: Icon(
                               LucideIcons.funnel,
-                              color: theme.colorScheme.primary,
+                              color: theme.colorScheme.onTertiary,
                             ),
-                          );
-                        } else {
-                          return const Icon(LucideIcons.funnel);
-                        }
-                      }),
-                      onPressed: () {
-                        showBarModalBottomSheet<Map<String, dynamic>>(
-                          barrierColor: Colors.black.withValues(alpha: 0.4),
-                          context: context,
-                          useRootNavigator: true,
-                          bounce: true,
-                          backgroundColor: theme.colorScheme.surfaceContainer,
-                          builder: (context) => const FilterNoteModal(),
+                          ),
                         );
-                      },
-                    ),
+                      }
+                      return IconButton(
+                        icon: const Icon(LucideIcons.funnel),
+
+                        onPressed: () {
+                          showBarModalBottomSheet<Map<String, dynamic>>(
+                            barrierColor: Colors.black.withValues(alpha: 0.4),
+                            context: context,
+                            useRootNavigator: true,
+                            bounce: true,
+                            backgroundColor: theme.colorScheme.surfaceContainer,
+                            builder: (context) => const FilterNoteModal(),
+                          );
+                        },
+                      );
+                    }),
                   ],
                 ),
               );
