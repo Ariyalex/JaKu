@@ -87,7 +87,10 @@ class _AddTaskModalState extends State<AddTaskModal> {
               child: Obx(
                 () => DropdownButton2(
                   customButton: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 3,
+                      horizontal: 6,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -205,7 +208,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                             showDescField = true;
                           });
                         },
-                        icon: const Icon(LucideIcons.alignLeft),
+                        icon: const Icon(LucideIcons.textAlignStart),
                       ),
                       IconButton(
                         onPressed: () async {

@@ -88,7 +88,9 @@ class TaskTile extends StatelessWidget {
             useRootNavigator: true,
             bounce: true,
             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-            builder: (context) => DetailTaskModal(taskId: task.id),
+            builder: (context) {
+              return DetailTaskModal(taskId: task.id);
+            },
           );
         },
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -5,6 +5,7 @@ import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/notification_controller.dart';
 import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/task.dart';
+import 'package:jaku/models/task_tab.dart';
 import 'package:jaku/services/task_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -73,17 +74,28 @@ class TaskController extends GetxController with GetTickerProviderStateMixin {
       TaskService.saveTaskService(newTask);
 
       Matkul? matkul;
+      TaskTab? taskTab;
+
+      bool isCustomTab =
+          matkulIdC.value != null && matkulIdC.value!.startsWith("tab");
       //get matkul
       if (matkulIdC.value != null) {
-        matkul = matkulC.selectMatkulById(matkulIdC.value!)!;
+        if (isCustomTab) {
+          final tabC = Get.find<MainTabController>();
+          taskTab = tabC.selectTabById(matkulIdC.value!);
+        } else {
+          matkul = matkulC.selectMatkulById(matkulIdC.value!)!;
+        }
       }
 
       if (dueDateC.value != null) {
         if (dueDateC.value!.isAfter(DateTime.now())) {
           final notifC = Get.find<NotificationController>();
           notifC.scheduleNotification(
-            matkul != null ? "${matkul.matkul} Task" : "General Task",
             titleC.text,
+            matkul == null
+                ? (taskTab != null ? "${taskTab.tabName} Task" : "General Task")
+                : "${matkul.matkul} Task",
             dueDateC.value!,
             newTask.id.hashCode,
             newTask.id,
@@ -103,6 +115,12 @@ class TaskController extends GetxController with GetTickerProviderStateMixin {
     try {
       final matkulC = Get.find<MatkulController>();
       int index = allTask.indexWhere((task) => task.id == id);
+
+      // for (var task in allTask) {
+      //   print("task id:${task.id}");
+      //   print("task group:${task.groupId}");
+      // }
+
       if (index == -1) return;
 
       final oldTask = allTask[index];
@@ -119,17 +137,28 @@ class TaskController extends GetxController with GetTickerProviderStateMixin {
       TaskService.saveTaskService(updatedTask);
 
       Matkul? matkul;
+      TaskTab? taskTab;
+
+      bool isCustomTab =
+          matkulIdC.value != null && matkulIdC.value!.startsWith("tab");
       //get matkul
       if (matkulIdC.value != null) {
-        matkul = matkulC.selectMatkulById(matkulIdC.value!)!;
+        if (isCustomTab) {
+          final tabC = Get.find<MainTabController>();
+          taskTab = tabC.selectTabById(matkulIdC.value!);
+        } else {
+          matkul = matkulC.selectMatkulById(matkulIdC.value!)!;
+        }
       }
 
       if (dueDateC.value != null) {
         if (dueDateC.value!.isAfter(DateTime.now())) {
           final notifC = Get.find<NotificationController>();
           notifC.scheduleNotification(
-            matkul != null ? "${matkul.matkul} Task" : "General Task",
             titleC.text,
+            matkul == null
+                ? (taskTab != null ? "${taskTab.tabName} Task" : "General Task")
+                : "${matkul.matkul} Task",
             dueDateC.value!,
             updatedTask.id.hashCode,
             updatedTask.id,

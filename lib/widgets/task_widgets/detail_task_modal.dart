@@ -82,9 +82,9 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
 
     void deleteTask(String id) {
       try {
-        Get.back();
+        Get.back(closeOverlays: true);
         taskC.deleteTask(id);
-        Get.back();
+        Get.back(closeOverlays: true);
 
         showAppSnackbar(title: "Success!", message: "Berhasil menghapus task");
       } catch (e) {
@@ -276,7 +276,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             showDescField = true;
                           });
                         },
-                        icon: const Icon(LucideIcons.alignLeft),
+                        icon: const Icon(LucideIcons.textAlignStart),
                       ),
                       IconButton(
                         onPressed: () async {
@@ -337,7 +337,10 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                       ? null // tombol disable
                       : () {
                           try {
-                            taskC.updateTask(widget.taskId);
+                            print(
+                              "task id dari detail task: ${selectedTask.id}",
+                            );
+                            taskC.updateTask(selectedTask.id);
                             Get.back();
                             showAppSnackbar(
                               title: "Sucess!",
