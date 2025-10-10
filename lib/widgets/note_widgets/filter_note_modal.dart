@@ -16,7 +16,7 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
   final noteC = Get.find<NoteControllers>();
 
   // State variables for filter selections
-  String _selectedDeviceType = 'all';
+  Set<String> _selectedMatkuls = {};
 
   List<Matkul> get deviceTypesList {
     return [...matkulC.allMatkul];
@@ -24,10 +24,49 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _selectedDeviceType = noteC.filterMatkulId.value;
-    print("filtered device id: $_selectedDeviceType");
+    final current = noteC.filterMatkulId.value;
+    if (current.isEmpty || current == 'all') {
+      _selectedMatkuls = {'all'};
+    } else {
+      _selectedMatkuls = current
+          .split(',')
+          .map((e) => e.trim())
+          .where((element) => element.isNotEmpty)
+          .toSet();
+      if (_selectedMatkuls.isEmpty) _selectedMatkuls = {'all'};
+    }
+    print("filtered matkul id: $_selectedMatkuls");
+  }
+
+  bool _isSelected(String id) => _selectedMatkuls.contains(id);
+
+  void _toggleSelect(String id, bool selected) {
+    setState(() {
+      if (selected) {
+        // selecting any specific matkul: remove 'all'
+        _selectedMatkuls.remove('all');
+        _selectedMatkuls.add(id);
+      } else {
+        _selectedMatkuls.remove(id);
+        // if nothing remains selected, fallback to 'all'
+        if (_selectedMatkuls.isEmpty) _selectedMatkuls.add('all');
+      }
+    });
+  }
+
+  void _selectAll(bool selected) {
+    setState(() {
+      if (selected) {
+        _selectedMatkuls
+          ..clear()
+          ..add('all');
+      } else {
+        // unselecting 'all' -> default to empty (then you may want to pick one)
+        _selectedMatkuls.remove('all');
+        if (_selectedMatkuls.isEmpty) _selectedMatkuls.add('all');
+      }
+    });
   }
 
   @override
@@ -60,12 +99,10 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
               spacing: 8,
               children: [
                 FilterChip(
-                  label: Text("All"),
-                  selected: _selectedDeviceType == "all",
+                  label: const Text("All"),
+                  selected: _isSelected('all'),
                   onSelected: (selected) {
-                    setState(() {
-                      _selectedDeviceType = 'all';
-                    });
+                    _selectAll(selected);
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -74,24 +111,20 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                 ...deviceTypesList.map((type) {
                   return FilterChip(
                     label: Text(type.abbreviation),
-                    selected: _selectedDeviceType == type.id,
+                    selected: _isSelected(type.id!),
                     onSelected: (selected) {
-                      setState(() {
-                        _selectedDeviceType = selected ? type.id! : 'all';
-                      });
+                      _toggleSelect(type.id!, selected);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   );
-                }).toList(),
+                }),
                 FilterChip(
-                  label: Text("Umum"),
-                  selected: _selectedDeviceType == "umum",
+                  label: const Text("Umum"),
+                  selected: _isSelected('umum'),
                   onSelected: (selected) {
-                    setState(() {
-                      _selectedDeviceType = 'umum';
-                    });
+                    _toggleSelect('umum', selected);
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -110,21 +143,20 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
                   child: OutlinedButton(
                     onPressed: () {
                       setState(() {
-                        _selectedDeviceType = 'all';
+                        _selectedMatkuls = {'all'};
                       });
                     },
-                    child: Text('Reset'),
+                    child: const Text('Reset'),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: FilledButton(
                     onPressed: () {
-                      // Return the filter selections to the calling screen
-                      // Navigator.of(
-                      //   context,
-                      // ).pop({'deviceType': _selectedDeviceType});
-                      noteC.filterMatkulId.value = _selectedDeviceType;
+                      final value = _selectedMatkuls.contains("all")
+                          ? 'all'
+                          : _selectedMatkuls.join(',');
+                      noteC.filterMatkulId.value = value;
                       noteC.filterByMatkul();
                       Get.back();
                     },

@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:get/get.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 
 import '../../../models/jadwal.dart';
 import '../../../controllers/jadwal_controllers/jadwal_kuliah_c.dart';
@@ -53,19 +56,15 @@ class MatkulCard extends StatelessWidget {
 
                     Get.back();
 
-                    Get.snackbar(
-                      "Success",
-                      "Berhasil menghapus ${matkul.matkul}",
-                      backgroundColor: Colors.green.shade400,
-                      colorText: Colors.white,
+                    showAppSnackbar(
+                      title: "Success",
+                      message: "Berhasil menghapus ${matkul.matkul}",
                     );
                   } catch (error) {
-                    Get.snackbar(
-                      'Error',
-                      'Gagal menghapus ${matkul.matkul}: $error',
-                      snackPosition: SnackPosition.TOP,
-                      backgroundColor: theme.colorScheme.error,
-                      colorText: theme.colorScheme.onError,
+                    showAppSnackbar(
+                      title: "Error!",
+                      message: "Gagal menghapus: $e",
+                      isSuccess: false,
                     );
                   }
                 },

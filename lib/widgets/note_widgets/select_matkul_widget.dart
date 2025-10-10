@@ -41,8 +41,8 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: !isMatkulSelected
-              ? EdgeInsets.symmetric(horizontal: 12, vertical: 8)
-              : EdgeInsets.only(left: 12, right: 4),
+              ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
+              : const EdgeInsets.only(left: 12, right: 4),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

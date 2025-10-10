@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/models/task_tab.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 
 class EditGroupModal extends StatefulWidget {
   const EditGroupModal({super.key, required this.groupId});
@@ -40,8 +41,13 @@ class _EditGroupModalState extends State<EditGroupModal> {
       try {
         tabC.editTaskTab(widget.groupId);
         Get.back();
+        showAppSnackbar(
+          title: "Success!",
+          message: "Berhasil megubah nama tab",
+        );
       } catch (error) {
         print("error add tab: $error");
+        showAppSnackbar(title: "Error", message: "Error: $error");
       }
     }
 
@@ -63,7 +69,7 @@ class _EditGroupModalState extends State<EditGroupModal> {
                 Text("Edit group", style: theme.textTheme.bodyLarge),
                 TextButton(
                   onPressed: textC.text.trim().isEmpty ? null : editTab,
-                  child: Text("save"),
+                  child: const Text("save"),
                 ),
               ],
             ),
@@ -71,7 +77,7 @@ class _EditGroupModalState extends State<EditGroupModal> {
             TextField(
               controller: textC,
               decoration: InputDecoration(
-                hint: Text("Nama group"),
+                hint: const Text("Nama group"),
                 helper: Text(
                   "group tidak termasuk ke dalam matkul",
                   style: theme.textTheme.labelLarge,

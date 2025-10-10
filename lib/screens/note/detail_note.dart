@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/note_controllers/note_controllers.dart';
 import 'package:jaku/models/note.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:jaku/widgets/note_widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -60,6 +61,23 @@ class _DetailNoteState extends State<DetailNote> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    void deleteNote() {
+      try {
+        noteC.deleteNote(noteId);
+
+        Get.back(); // Tutup dialog konfirmasi
+        Get.back(canPop: true);
+
+        showAppSnackbar(title: "Success", message: "Berhasil menghapus note");
+      } catch (e) {
+        showAppSnackbar(
+          title: "Error!",
+          message: "Error ketika menghapus note: $e",
+          isSuccess: false,
+        );
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -71,10 +89,27 @@ class _DetailNoteState extends State<DetailNote> {
           ),
           IconButton(
             onPressed: () {
-              noteC.deleteNote(noteId);
-              Get.back();
+              Get.defaultDialog(
+                title: "Hapus note?",
+                titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+                content: const Text(
+                  "Yakin ingin menghapus note ini?",
+                  textAlign: TextAlign.center,
+                ),
+                cancel: FilledButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: const Text("Tidak"),
+                ),
+                confirm: OutlinedButton(
+                  onPressed: deleteNote,
+                  child: const Text("Ya"),
+                ),
+              );
             },
-            icon: Icon(LucideIcons.trash2),
+            icon: const Icon(LucideIcons.trash2),
           ),
         ],
       ),
@@ -94,7 +129,7 @@ class _DetailNoteState extends State<DetailNote> {
                   hintStyle: theme.textTheme.titleLarge,
                   border: InputBorder.none,
                   filled: false,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
               Expanded(

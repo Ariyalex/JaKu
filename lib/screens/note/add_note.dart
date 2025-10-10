@@ -72,10 +72,10 @@ class _AddNoteState extends State<AddNote> {
       appBar: AppBar(
         actions: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: matkulC.allMatkul.isNotEmpty
                 ? (selectedMatkul == null
-                      ? SelectMatkulWidget()
+                      ? const SelectMatkulWidget()
                       : SelectMatkulWidget(matkulId: selectedMatkul!.id))
                 : null,
           ),
@@ -97,7 +97,7 @@ class _AddNoteState extends State<AddNote> {
                   hintStyle: theme.textTheme.titleLarge,
                   border: InputBorder.none,
                   filled: false,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
               Expanded(

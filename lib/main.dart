@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget {
             controller: tabC.mainTabController,
             tabs: [
               PersistentTabConfig(
-                screen: ScheduleDashboard(),
+                screen: const ScheduleDashboard(),
 
                 item: ItemConfig(
                   activeForegroundColor: themeC.isLight.value
@@ -103,12 +103,12 @@ class MyApp extends StatelessWidget {
                   activeColorSecondary: themeC.isLight.value
                       ? themeLight.colorScheme.primary
                       : themeDark.colorScheme.primary,
-                  icon: Icon(LucideIcons.calendarRange),
+                  icon: const Icon(LucideIcons.calendarRange),
                   title: "Schedule",
                 ),
               ),
               PersistentTabConfig(
-                screen: NoteDashboard(),
+                screen: const NoteDashboard(),
                 item: ItemConfig(
                   activeForegroundColor: themeC.isLight.value
                       ? themeLight.colorScheme.onPrimary
@@ -116,12 +116,12 @@ class MyApp extends StatelessWidget {
                   activeColorSecondary: themeC.isLight.value
                       ? themeLight.colorScheme.primary
                       : themeDark.colorScheme.primary,
-                  icon: Icon(LucideIcons.notebook),
+                  icon: const Icon(LucideIcons.notebook),
                   title: "Note",
                 ),
               ),
               PersistentTabConfig(
-                screen: TaskDashboard(),
+                screen: const TaskDashboard(),
                 item: ItemConfig(
                   activeForegroundColor: themeC.isLight.value
                       ? themeLight.colorScheme.onPrimary
@@ -129,22 +129,29 @@ class MyApp extends StatelessWidget {
                   activeColorSecondary: themeC.isLight.value
                       ? themeLight.colorScheme.primary
                       : themeDark.colorScheme.primary,
-                  icon: Icon(LucideIcons.listTodo),
+                  icon: const Icon(LucideIcons.listTodo),
                   title: "Task",
                 ),
               ),
             ],
-            navBarBuilder: (navBarConfig) => Obx(
-              () => Style8BottomNavBar(
-                navBarConfig: navBarConfig,
-                navBarDecoration: NavBarDecoration(
-                  color: themeC.isLight.value
-                      ? themeLight.colorScheme.surface
-                      : themeDark.colorScheme.surface,
+            navBarBuilder: (navBarConfig) => Obx(() {
+              final bgColor = themeC.isLight.value
+                  ? themeLight.colorScheme.surface
+                  : themeDark.colorScheme.surface;
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.ease,
+                color: bgColor,
+                child: Style8BottomNavBar(
+                  navBarConfig: navBarConfig,
+                  navBarDecoration: const NavBarDecoration(
+                    color: Colors.transparent,
+                  ),
+                  height: 60,
                 ),
-                height: 60,
-              ),
-            ),
+              );
+            }),
           ),
         ),
         getPages: AppPage.pages,

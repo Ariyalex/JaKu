@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/notification_controller.dart';
 import 'package:jaku/models/matkul.dart';
@@ -9,14 +10,18 @@ import 'package:uuid/uuid.dart';
 
 var uuid = const Uuid();
 
-class TaskController extends GetxController {
-  final titleC = TextEditingController();
-  final descC = TextEditingController();
+class TaskController extends GetxController with GetTickerProviderStateMixin {
+  late TextEditingController titleC;
+  late TextEditingController descC;
   RxnString matkulIdC = RxnString(); //ini berisi matkul id
   Rxn<DateTime> dueDateC = Rxn<DateTime>();
   RxBool isStaredC = false.obs;
 
   RxBool isLoading = false.obs;
+
+  //tab controller
+  late TabController tabController;
+  RxInt tabLength = 0.obs;
 
   final RxList<Task> allTask = <Task>[].obs;
 
@@ -74,14 +79,16 @@ class TaskController extends GetxController {
       }
 
       if (dueDateC.value != null) {
-        final notifC = Get.find<NotificationController>();
-        notifC.scheduleNotification(
-          matkul != null ? "${matkul.matkul} Task" : "General Task",
-          titleC.text,
-          dueDateC.value!,
-          newTask.id.hashCode,
-          newTask.id,
-        );
+        if (dueDateC.value!.isAfter(DateTime.now())) {
+          final notifC = Get.find<NotificationController>();
+          notifC.scheduleNotification(
+            matkul != null ? "${matkul.matkul} Task" : "General Task",
+            titleC.text,
+            dueDateC.value!,
+            newTask.id.hashCode,
+            newTask.id,
+          );
+        }
       }
 
       print("starred: ${newTask.isStared}");
@@ -118,14 +125,16 @@ class TaskController extends GetxController {
       }
 
       if (dueDateC.value != null) {
-        final notifC = Get.find<NotificationController>();
-        notifC.scheduleNotification(
-          matkul != null ? "${matkul.matkul} Task" : "General Task",
-          titleC.text,
-          dueDateC.value!,
-          updatedTask.id.hashCode,
-          updatedTask.id,
-        );
+        if (dueDateC.value!.isAfter(DateTime.now())) {
+          final notifC = Get.find<NotificationController>();
+          notifC.scheduleNotification(
+            matkul != null ? "${matkul.matkul} Task" : "General Task",
+            titleC.text,
+            dueDateC.value!,
+            updatedTask.id.hashCode,
+            updatedTask.id,
+          );
+        }
       }
     } catch (error) {
       print("error update task: $error");
@@ -211,10 +220,49 @@ class TaskController extends GetxController {
     }
   }
 
+  int getTabLength() {
+    //get all controllers
+    try {
+      final matkulC = Get.find<MatkulController>();
+      final tabC = Get.find<MainTabController>();
+
+      final matkulList = matkulC.allMatkul;
+      return 2 + tabC.taskTabs.length + matkulList.length;
+    } catch (error) {
+      print("error get tab length: $error");
+      rethrow;
+    }
+  }
+
+  void updateTabLength() {
+    tabLength.value = getTabLength();
+    print("tab length after delete: ${tabLength.value}");
+    tabController = TabController(length: tabLength.value, vsync: this);
+  }
+
   @override
   void onInit() {
     // TODO: implement onInit
     super.onInit();
+    //init tab controller
+    tabLength.value = getTabLength();
+    tabController = TabController(
+      length: tabLength.value,
+      vsync: this,
+      initialIndex: 1,
+    );
+
+    //init text editing controller
+    titleC = TextEditingController();
+    descC = TextEditingController();
     loadAllTasks();
+  }
+
+  @override
+  void onClose() {
+    titleC.dispose();
+    descC.dispose();
+    tabController.dispose();
+    super.onClose();
   }
 }

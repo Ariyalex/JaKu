@@ -5,8 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 class NotificationController extends GetxController {
   RxString payload = "".obs;
 
-  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   Future<void> scheduleNotification(
     String title,
@@ -47,6 +46,7 @@ class NotificationController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     //init the plugin
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
     final androidPermission = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -62,7 +62,7 @@ class NotificationController extends GetxController {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('notif_icon');
 
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
     flutterLocalNotificationsPlugin.initialize(initializationSettings);

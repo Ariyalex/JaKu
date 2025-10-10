@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:jaku/routes/route_named.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:get/get.dart';
@@ -70,12 +71,7 @@ class _AddMatkulState extends State<EditJadwal> {
         dayKuliahController.getUniqueDays(allMatkulProvider);
 
         // Show success message
-        Get.snackbar(
-          "Success",
-          "Jadwal berhasil diedit",
-          backgroundColor: Colors.green.shade400,
-          colorText: Colors.white,
-        );
+        showAppSnackbar(title: "Success", message: "Jadwal berhasil diedit");
 
         // Clear form fields
         allMatkulProvider.matkulNameC.clear();
@@ -93,12 +89,10 @@ class _AddMatkulState extends State<EditJadwal> {
         // Close loading dialog
         Get.back();
 
-        // Show error message
-        Get.snackbar(
-          "Error",
-          "Gagal mengedit jadwal: ${e.toString()}",
-          backgroundColor: theme.colorScheme.error,
-          colorText: theme.colorScheme.onError,
+        showAppSnackbar(
+          title: "Error!",
+          message: "Gagal mengedit jadwal: $e",
+          isSuccess: false,
         );
       }
     }
@@ -114,7 +108,7 @@ class _AddMatkulState extends State<EditJadwal> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(vertical: 20),
+            padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 30,
@@ -123,7 +117,7 @@ class _AddMatkulState extends State<EditJadwal> {
                   spacing: 12,
                   children: [
                     TextField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: "Ex: Basis Data",
                         labelText: "Matkul*",
                         alignLabelWithHint: true,
@@ -170,7 +164,7 @@ class _AddMatkulState extends State<EditJadwal> {
                     Obx(
                       () => DropdownSearch<String>(
                         selectedItem: allMatkulProvider.hari.value,
-                        decoratorProps: DropDownDecoratorProps(
+                        decoratorProps: const DropDownDecoratorProps(
                           decoration: InputDecoration(hintText: "Pilih hari*"),
                         ),
                         popupProps: PopupProps.menu(
@@ -178,8 +172,8 @@ class _AddMatkulState extends State<EditJadwal> {
                           menuProps: MenuProps(
                             align: MenuAlign.bottomStart,
                             backgroundColor: theme.colorScheme.surfaceContainer,
-                            margin: EdgeInsets.only(top: 12),
-                            shape: RoundedRectangleBorder(
+                            margin: const EdgeInsets.only(top: 12),
+                            shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(
                                 Radius.circular(12),
                               ),
@@ -200,7 +194,7 @@ class _AddMatkulState extends State<EditJadwal> {
                     Obx(
                       () => DropdownSearch<String>(
                         selectedItem: allMatkulProvider.kelas.value,
-                        decoratorProps: DropDownDecoratorProps(
+                        decoratorProps: const DropDownDecoratorProps(
                           decoration: InputDecoration(hintText: "Pilih kelas"),
                         ),
                         popupProps: PopupProps.menu(
@@ -208,8 +202,8 @@ class _AddMatkulState extends State<EditJadwal> {
                           menuProps: MenuProps(
                             align: MenuAlign.topStart,
                             backgroundColor: theme.colorScheme.surfaceContainer,
-                            margin: EdgeInsets.only(top: 12),
-                            shape: RoundedRectangleBorder(
+                            margin: const EdgeInsets.only(top: 12),
+                            shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(
                                 Radius.circular(12),
                               ),
@@ -317,8 +311,8 @@ class _AddMatkulState extends State<EditJadwal> {
                             editJadwal();
                           } else {
                             Get.defaultDialog(
-                              contentPadding: EdgeInsets.all(10),
-                              titlePadding: EdgeInsets.only(top: 20),
+                              contentPadding: const EdgeInsets.all(10),
+                              titlePadding: const EdgeInsets.only(top: 20),
                               title: "Form tidak lengkap",
                               content: const Text(
                                 "Harap Isi Matkul, Hari, dan Jam",

@@ -7,6 +7,7 @@ import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/notification_controller.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:jaku/widgets/task_widgets/add_group_modal.dart';
 import 'package:jaku/widgets/task_widgets/add_task_modal.dart';
 import 'package:jaku/widgets/task_widgets/build_task_widget.dart';
@@ -23,38 +24,25 @@ class TaskDashboard extends StatefulWidget {
   State<TaskDashboard> createState() => _TaskDashboardState();
 }
 
-class _TaskDashboardState extends State<TaskDashboard>
-    with TickerProviderStateMixin {
+class _TaskDashboardState extends State<TaskDashboard> {
   //fabKey untuk controller floating action button
   final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
   final matkulC = Get.find<MatkulController>();
   final notifC = Get.find<NotificationController>();
   final tabC = Get.find<MainTabController>();
 
-  late TabController tabController;
-  int _tabLength = 0;
   late TaskController taskC;
-  late String? selectedMatkul;
 
   @override
   void initState() {
     super.initState();
     taskC = Get.put(TaskController());
-    //init
-    _tabLength = getTabLength();
-    tabController = TabController(length: _tabLength, vsync: this);
   }
 
   @override
   void dispose() {
-    tabController.dispose();
     Get.delete<TaskController>();
     super.dispose();
-  }
-
-  int getTabLength() {
-    final matkulList = matkulC.allMatkul;
-    return 2 + tabC.taskTabs.length + matkulList.length;
   }
 
   @override
@@ -77,7 +65,7 @@ class _TaskDashboardState extends State<TaskDashboard>
           print("harusnya routing ke: ${1 + (matkulIndex + 1)}");
 
           //routing to designated tab
-          tabController.animateTo(1 + (matkulIndex + 1));
+          taskC.tabController.animateTo(1 + (matkulIndex + 1));
           notifC.payload.value = ""; // reset agar tidak pindah tab terus
         });
       }
@@ -89,30 +77,45 @@ class _TaskDashboardState extends State<TaskDashboard>
         try {
           tabC.deleteTaskTab(groupId);
 
-          final newLength = getTabLength();
-          print("tab length after delete: ${newLength}");
-          tabController = TabController(length: newLength, vsync: this);
-          tabController.index = 1 + tabC.taskTabs.length; //move to tabs before
+          taskC.updateTabLength();
+
+          taskC.tabController.index =
+              1 + tabC.taskTabs.length; //move to tabs before
           print("menjalankan update tabs");
-          setState(() {});
-        } catch (on) {
-          print(on); // TODO: rem
+
+          showAppSnackbar(title: "Success!", message: "Berhasil menghapus tab");
+        } catch (error) {
+          print(error);
+          showAppSnackbar(
+            title: "Error!",
+            message: "Error: $error",
+            isSuccess: false,
+          );
         }
       }
 
       //fungction for adding tab
-      void addTabs() async {
+      void addTabs() {
         try {
-          await tabC.addTaskTab();
+          tabC.addTaskTab();
 
-          final newLength = getTabLength();
-          print("tab length after: ${newLength}");
-          tabController = TabController(length: newLength, vsync: this);
-          tabController.index = 1 + tabC.taskTabs.length;
-          print("menjalankan update tabs");
-          setState(() {});
-        } catch (on) {
-          print(on); // TODO: rem
+          taskC.updateTabLength();
+
+          taskC.tabController.index = 1 + tabC.taskTabs.length;
+
+          Get.back();
+
+          showAppSnackbar(
+            title: "Success!",
+            message: "Berhasil menambahkan tab baru",
+          );
+        } catch (error) {
+          print(error);
+          showAppSnackbar(
+            title: "Error!",
+            message: "Error: $error",
+            isSuccess: false,
+          );
         }
       }
 
@@ -147,11 +150,11 @@ class _TaskDashboardState extends State<TaskDashboard>
         appBar: AppBar(
           title: const Text("Task"),
           bottom: TabBar(
-            controller: tabController,
+            controller: taskC.tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             splashFactory: InkSparkle.splashFactory,
-            splashBorderRadius: BorderRadius.only(
+            splashBorderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
@@ -159,7 +162,10 @@ class _TaskDashboardState extends State<TaskDashboard>
           ),
         ),
         body: SafeArea(
-          child: TabBarView(controller: tabController, children: tabViews),
+          child: TabBarView(
+            controller: taskC.tabController,
+            children: tabViews,
+          ),
         ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton: ExpandableFab(
@@ -179,7 +185,7 @@ class _TaskDashboardState extends State<TaskDashboard>
             shape: const CircleBorder(),
           ),
           type: ExpandableFabType.up,
-          duration: Duration(milliseconds: 340),
+          duration: const Duration(milliseconds: 340),
           childrenAnimation: ExpandableFabAnimation.none,
           distance: 70,
           overlayStyle: ExpandableFabOverlayStyle(
@@ -189,7 +195,7 @@ class _TaskDashboardState extends State<TaskDashboard>
             Row(
               children: [
                 Text('Add Group', style: theme.textTheme.bodyLarge),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () {
@@ -204,18 +210,18 @@ class _TaskDashboardState extends State<TaskDashboard>
                           AddGroupModal(onUpdateTabs: addTabs),
                     );
                   },
-                  child: Icon(Icons.playlist_add),
+                  child: const Icon(Icons.playlist_add),
                 ),
               ],
             ),
             Row(
               children: [
                 Text('Add Task', style: theme.textTheme.bodyLarge),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 FloatingActionButton(
                   heroTag: null,
                   onPressed: () async {
-                    final tabIndex = tabController.index;
+                    final tabIndex = taskC.tabController.index;
                     String? selectedMatkul;
                     if (tabIndex >= 2) {
                       if (tabIndex >= (2 + tabC.taskTabs.length)) {
@@ -233,11 +239,13 @@ class _TaskDashboardState extends State<TaskDashboard>
                       useRootNavigator: true,
                       bounce: true,
                       backgroundColor: theme.colorScheme.surfaceContainer,
-                      builder: (context) =>
-                          AddTaskModal(matkulId: selectedMatkul),
+                      builder: (context) => AddTaskModal(
+                        matkulId: selectedMatkul,
+                        starred: tabIndex == 0,
+                      ),
                     );
                   },
-                  child: Icon(Icons.add_task),
+                  child: const Icon(Icons.add_task),
                 ),
               ],
             ),

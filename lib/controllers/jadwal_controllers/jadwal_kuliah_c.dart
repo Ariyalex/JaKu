@@ -7,6 +7,7 @@ import 'package:jaku/services/jadwal_service.dart';
 import 'package:jaku/controllers/jadwal_controllers/hari_kuliah_c.dart';
 import 'package:jaku/services/matkul_service.dart';
 import 'package:jaku/theme/theme.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/jadwal.dart';
@@ -30,10 +31,10 @@ String getInitials(String kalimat) {
 
 class JadwalkuliahC extends GetxController {
   //text controller
-  final matkulNameC = TextEditingController();
-  final dosen1C = TextEditingController();
-  final dosen2C = TextEditingController();
-  final ruanganC = TextEditingController();
+  late TextEditingController matkulNameC;
+  late TextEditingController dosen1C;
+  late TextEditingController dosen2C;
+  late TextEditingController ruanganC;
   RxnString hari = RxnString();
   RxnString kelas = RxnString();
   RxnString jamAwal = RxnString();
@@ -79,12 +80,6 @@ class JadwalkuliahC extends GetxController {
 
   void clearData() {
     allSchedule.clear();
-  }
-
-  @override
-  void onInit() async {
-    super.onInit();
-    loadSchedule();
   }
 
   //fungsi mebandingkan dua matkul saat sorting
@@ -310,25 +305,21 @@ class JadwalkuliahC extends GetxController {
       // Tutup dialog loading
       Get.back();
 
-      // Tampilkan notifikasi sukses
-      Get.snackbar(
-        'Berhasil',
-        'Semua data berhasil dihapus',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green.shade400,
-        colorText: Colors.white,
+      // Tampilkan snackbar sukses
+      showAppSnackbar(
+        title: "Berhasil",
+        message: "Semua data berhasil dihapus",
+        isSuccess: true,
       );
     } catch (e) {
       // Tutup dialog loading jika terjadi error
       Get.back();
 
       // Tampilkan pesan error
-      Get.snackbar(
-        'Gagal',
-        'Terjadi kesalahan saat menghapus data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: color.colorScheme.error,
-        colorText: color.colorScheme.onError,
+      showAppSnackbar(
+        title: "Gagal!",
+        message: "Terjadi kesalahan saat menghapus data: $e",
+        isSuccess: false,
       );
     }
   }
@@ -358,5 +349,28 @@ class JadwalkuliahC extends GetxController {
       print("Error menghapus matkul tidak terpakai: $e");
       rethrow;
     }
+  }
+
+  @override
+  void onInit() async {
+    super.onInit();
+    // init textEditingController
+    matkulNameC = TextEditingController();
+    dosen1C = TextEditingController();
+    dosen2C = TextEditingController();
+    ruanganC = TextEditingController();
+
+    //load all schedule
+    loadSchedule();
+  }
+
+  @override
+  void onClose() {
+    // dispose textEditingController
+    matkulNameC.dispose();
+    dosen1C.dispose();
+    dosen2C.dispose();
+    ruanganC.dispose();
+    super.onClose();
   }
 }

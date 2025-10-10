@@ -49,7 +49,7 @@ class _SortTileState extends State<SortTile> {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: ListTile(
                 onTap: widget.onTap,
-                leading: Icon(LucideIcons.check),
+                leading: const Icon(LucideIcons.check),
                 selected: true,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),

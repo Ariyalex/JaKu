@@ -37,7 +37,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
   void deleteTab() {
     Get.defaultDialog(
       title: "Hapus task?",
-      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
       backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
       content: Text(
         "Yakin ingin menghapus task ${taskC.titleC.text}?",
@@ -129,14 +129,14 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                       Text(widget.group, style: theme.textTheme.bodyLarge),
                       if (widget.groupId!.startsWith("tab"))
                         DropdownButton2(
-                          customButton: Icon(LucideIcons.ellipsisVertical),
+                          customButton: const Icon(LucideIcons.ellipsisVertical),
                           buttonStyleData: ButtonStyleData(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
 
-                          items: [
+                          items: const [
                             DropdownMenuItem<Object>(
                               value: 0,
                               child: Row(
@@ -193,7 +193,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                     ? completedTasks.isEmpty
                           ? Container(
                               width: double.infinity,
-                              padding: EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(12),
                               child: Column(
                                 children: [
                                   Text(
@@ -201,7 +201,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                                     style: theme.textTheme.bodyLarge,
                                   ),
                                   Container(
-                                    margin: EdgeInsets.all(12),
+                                    margin: const EdgeInsets.all(12),
                                     clipBehavior: Clip.hardEdge,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
@@ -213,7 +213,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                             )
                           : Container(
                               width: double.infinity,
-                              padding: EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(12),
                               child: Column(
                                 children: [
                                   Text(
@@ -222,7 +222,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
                                   ),
                                   Container(
                                     height: 230,
-                                    margin: EdgeInsets.all(12),
+                                    margin: const EdgeInsets.all(12),
                                     clipBehavior: Clip.hardEdge,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
@@ -267,7 +267,7 @@ class _BuildTaskWidgetState extends State<BuildTaskWidget> {
 
           // Card untuk completed
           completedTasks.isEmpty
-              ? SizedBox.shrink()
+              ? const SizedBox.shrink()
               : Card(
                   color: theme.colorScheme.surfaceContainer,
                   margin: const EdgeInsets.symmetric(vertical: 8),

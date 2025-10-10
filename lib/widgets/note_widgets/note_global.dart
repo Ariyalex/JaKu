@@ -62,7 +62,7 @@ class NoteGlobal extends StatelessWidget {
                     if (matkulNote != null && matkulNote.isNotEmpty)
                       Chip(
                         label: Text(matkulNote),
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 0,
                           horizontal: 3,
                         ),

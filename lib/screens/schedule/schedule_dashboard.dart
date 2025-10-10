@@ -67,7 +67,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
   static void clearAllData(BuildContext context) {
     Get.defaultDialog(
       title: "Hapus semua data?",
-      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
       backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
       content: const Text(
         "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
@@ -152,8 +152,8 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                       ),
                     ),
               icon: isCardView.value
-                  ? Icon(Icons.view_agenda_outlined)
-                  : Icon(Icons.table_chart),
+                  ? const Icon(Icons.view_agenda_outlined)
+                  : const Icon(Icons.table_chart),
               style: ButtonStyle(
                 backgroundColor: isCardView.value
                     ? null
@@ -170,7 +170,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           const SizedBox(width: 15),
           IconButton(
             onPressed: () => themeC.changeTheme(),
-            icon: Icon(Icons.color_lens),
+            icon: const Icon(Icons.color_lens),
           ),
         ],
       ),
@@ -180,7 +180,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
               ? const CardView()
               : Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: TableView(),
+                  child: const TableView(),
                 ),
         );
       }),
@@ -202,7 +202,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           shape: const CircleBorder(),
         ),
         type: ExpandableFabType.up,
-        duration: Duration(milliseconds: 340),
+        duration: const Duration(milliseconds: 340),
         childrenAnimation: ExpandableFabAnimation.none,
         distance: 70,
         overlayStyle: ExpandableFabOverlayStyle(
@@ -212,7 +212,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           Row(
             children: [
               Text('PDF to Schedule', style: textTheme.bodyLarge),
-              SizedBox(width: 20),
+              const SizedBox(width: 20),
               FloatingActionButton(
                 heroTag: null,
                 onPressed: () {
@@ -220,13 +220,13 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                   Get.defaultDialog(
                     title: "Peringatan!!",
                     backgroundColor: theme.dialogTheme.backgroundColor,
-                    titlePadding: EdgeInsets.only(top: 20),
-                    titleStyle: TextStyle(fontWeight: FontWeight.bold),
+                    titlePadding: const EdgeInsets.only(top: 20),
+                    titleStyle: const TextStyle(fontWeight: FontWeight.bold),
                     content: const Text(
                       "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
                       textAlign: TextAlign.center,
                     ),
-                    contentPadding: EdgeInsets.all(10),
+                    contentPadding: const EdgeInsets.all(10),
                     confirm: FilledButton(
                       onPressed: () {
                         Get.back();
@@ -242,14 +242,14 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                     ),
                   );
                 },
-                child: Icon(LucideIcons.filePlus2),
+                child: const Icon(LucideIcons.filePlus2),
               ),
             ],
           ),
           Row(
             children: [
               Text('Add Schedule', style: textTheme.bodyLarge),
-              SizedBox(width: 20),
+              const SizedBox(width: 20),
               FloatingActionButton(
                 heroTag: null,
                 onPressed: () async {
@@ -263,7 +263,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                     builder: (context) => const AddJadwal(),
                   );
                 },
-                child: Icon(LucideIcons.plus),
+                child: const Icon(LucideIcons.plus),
               ),
             ],
           ),

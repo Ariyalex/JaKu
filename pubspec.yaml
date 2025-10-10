@@ -63,7 +63,9 @@ dependencies:
   date_time_format: ^2.0.1
   flutter_local_notifications: ^19.4.0
   timezone: ^0.10.1
+  timeago: ^3.7.1
 
+  path_provider: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

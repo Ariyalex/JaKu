@@ -1,3 +1,4 @@
+import 'package:date_time_format/date_time_format.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ import 'package:jaku/controllers/matkul_controllers.dart';
 import 'package:jaku/controllers/task_controllers/task_controller.dart';
 import 'package:jaku/models/matkul.dart';
 import 'package:jaku/models/task.dart';
+import 'package:jaku/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DetailTaskModal extends StatefulWidget {
@@ -34,6 +36,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
       selectedTask = taskC.selectById(widget.taskId)!;
     } catch (error) {
       print("error");
+      Get.back();
     }
     matkulList = matkulC.allMatkul;
 
@@ -58,6 +61,41 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    String showGroup() {
+      try {
+        if (taskC.matkulIdC.value == null || taskC.matkulIdC.value == "") {
+          return "Select group";
+        } else {
+          if (taskC.matkulIdC.value!.startsWith("tab")) {
+            return tabC.selectTabById(taskC.matkulIdC.value!)!.tabName;
+          } else {
+            return matkulC
+                .selectMatkulById(taskC.matkulIdC.value!)!
+                .abbreviation;
+          }
+        }
+      } catch (e) {
+        return "Error showing group";
+      }
+    }
+
+    void deleteTask(String id) {
+      try {
+        Get.back();
+        taskC.deleteTask(id);
+        Get.back();
+
+        showAppSnackbar(title: "Success!", message: "Berhasil menghapus task");
+      } catch (e) {
+        showAppSnackbar(
+          title: "Error!",
+          message: "Error ketika menghapus task: $e",
+          isSuccess: false,
+        );
+      }
+    }
+
     return SafeArea(
       child: Container(
         padding: EdgeInsets.only(
@@ -78,7 +116,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                   child: Obx(
                     () => DropdownButton2(
                       customButton: Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 3,
                           horizontal: 6,
                         ),
@@ -87,28 +125,15 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           spacing: 6,
                           children: [
-                            Text(
-                              taskC.matkulIdC.value == null ||
-                                      taskC.matkulIdC.value == ""
-                                  ? "Select group"
-                                  : (taskC.matkulIdC.value!.startsWith("tab"))
-                                  ? tabC
-                                        .selectTabById(taskC.matkulIdC.value!)!
-                                        .tabName
-                                  : matkulC
-                                        .selectMatkulById(
-                                          taskC.matkulIdC.value!,
-                                        )!
-                                        .abbreviation,
-                            ),
+                            Text(showGroup()),
                             taskC.matkulIdC.value == null ||
                                     taskC.matkulIdC.value == ""
-                                ? SizedBox.shrink()
+                                ? const SizedBox.shrink()
                                 : IconButton(
                                     onPressed: () {
                                       taskC.matkulIdC.value = null;
                                     },
-                                    icon: Icon(LucideIcons.x),
+                                    icon: const Icon(LucideIcons.x),
                                   ),
                             const Icon(LucideIcons.chevronDown),
                           ],
@@ -155,7 +180,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                   onPressed: () {
                     Get.defaultDialog(
                       title: "Hapus task?",
-                      titleStyle: TextStyle(fontWeight: FontWeight.bold),
+                      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
                       backgroundColor: Theme.of(
                         context,
                       ).dialogTheme.backgroundColor,
@@ -170,16 +195,12 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                         child: const Text("Tidak"),
                       ),
                       confirm: OutlinedButton(
-                        onPressed: () {
-                          Get.back();
-                          taskC.deleteTask(widget.taskId);
-                          Get.back();
-                        },
+                        onPressed: () => deleteTask(widget.taskId),
                         child: const Text("Ya"),
                       ),
                     );
                   },
-                  icon: Icon(LucideIcons.trash2),
+                  icon: const Icon(LucideIcons.trash2),
                 ),
               ],
             ),
@@ -216,10 +237,21 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                       child: Chip(
                         label: Text(
                           // Tampilkan tanggal dan waktu jika ada
-                          taskC.dueDateC.value!.hour == 0 &&
-                                  taskC.dueDateC.value!.minute == 0
-                              ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
-                              : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
+                          DateTimeFormat.format(
+                            DateTime(
+                              taskC.dueDateC.value!.year,
+                              taskC.dueDateC.value!.month,
+                              taskC.dueDateC.value!.day,
+                              taskC.dueDateC.value?.hour ?? 0,
+                              taskC.dueDateC.value?.minute ?? 0,
+                            ),
+                            format:
+                                taskC.dueDateC.value?.hour == null ||
+                                    (taskC.dueDateC.value?.hour == 0 &&
+                                        taskC.dueDateC.value?.minute == 0)
+                                ? "d F Y"
+                                : "d F Y, H:i",
+                          ),
                           style: theme.textTheme.bodySmall,
                         ),
                         onDeleted: () {
@@ -244,7 +276,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             showDescField = true;
                           });
                         },
-                        icon: Icon(LucideIcons.alignLeft),
+                        icon: const Icon(LucideIcons.alignLeft),
                       ),
                       IconButton(
                         onPressed: () async {
@@ -265,7 +297,7 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                             taskC.dueDateC.value = pickedDate;
                           }
                         },
-                        icon: Icon(LucideIcons.calendar),
+                        icon: const Icon(LucideIcons.calendar),
                       ),
                       if (taskC.dueDateC.value != null)
                         IconButton(
@@ -286,15 +318,15 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                                   );
                             }
                           },
-                          icon: Icon(LucideIcons.clock),
+                          icon: const Icon(LucideIcons.clock),
                         ),
                       IconButton(
                         onPressed: () {
                           taskC.isStaredC.value = !taskC.isStaredC.value;
                         },
                         icon: taskC.isStaredC.value
-                            ? Icon(Icons.star, color: Colors.amberAccent)
-                            : Icon(Icons.star_border),
+                            ? const Icon(Icons.star, color: Colors.amberAccent)
+                            : const Icon(Icons.star_border),
                       ),
                     ],
                   ),
@@ -307,11 +339,21 @@ class _DetailTaskModalState extends State<DetailTaskModal> {
                           try {
                             taskC.updateTask(widget.taskId);
                             Get.back();
+                            showAppSnackbar(
+                              title: "Sucess!",
+                              message:
+                                  "Berhasil mengubah task ${selectedTask.task}",
+                            );
                           } catch (error) {
+                            showAppSnackbar(
+                              title: "Error!",
+                              message: "Error: $error",
+                              isSuccess: false,
+                            );
                             print(error);
                           }
                         },
-                  child: Text("Save"),
+                  child: const Text("Save"),
                 ),
               ],
             ),

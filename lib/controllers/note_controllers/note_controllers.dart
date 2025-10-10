@@ -11,8 +11,8 @@ import 'package:uuid/uuid.dart';
 var uuid = const Uuid();
 
 class NoteControllers extends GetxController {
-  final titleC = TextEditingController();
-  final noteC = TextEditingController();
+  late TextEditingController titleC;
+  late TextEditingController noteC;
   RxnString matkulC = RxnString(); //ini bersi matkul id
 
   //controller for sorting
@@ -34,7 +34,7 @@ class NoteControllers extends GetxController {
 
   Timer? debounce;
 
-  //save note debounce
+  ///save note with debounce
   void onNoteChanged(String id) {
     if (debounce?.isActive ?? false) debounce!.cancel();
     debounce = Timer(const Duration(milliseconds: 300), () {
@@ -46,7 +46,7 @@ class NoteControllers extends GetxController {
     });
   }
 
-  //select note by id
+  ///select note by id
   Note? selectById(String id) {
     if (allNote.isEmpty) {
       debugPrint("data kosong, pastikan sudah memanggil getonce");
@@ -58,7 +58,7 @@ class NoteControllers extends GetxController {
     );
   }
 
-  //load all note and delete empty note
+  ///load all note and delete empty note
   void loadAllNotes() {
     try {
       allNote.clear();
@@ -82,7 +82,7 @@ class NoteControllers extends GetxController {
     }
   }
 
-  //add note with return note id
+  ///add note with return note id
   String addNote() {
     try {
       Note newNote = Note(
@@ -115,7 +115,7 @@ class NoteControllers extends GetxController {
     }
   }
 
-  //update note
+  ///update note by id
   Future<void> updateNote(String id) async {
     try {
       final matkulController = Get.find<MatkulController>();
@@ -162,6 +162,7 @@ class NoteControllers extends GetxController {
     }
   }
 
+  ///delete matkul relation in allnotes
   Future<void> deleteMatkulRelationFromNotes() async {
     try {
       final allMatkul = Get.find<MatkulController>().allMatkul;
@@ -204,10 +205,12 @@ class NoteControllers extends GetxController {
     }
   }
 
-  //delete note by id
+  ///delete note by id
   Future<void> deleteNote(String id) async {
     try {
+      //delete note in allnotes and filteredNotes
       allNote.removeWhere((note) => note.id == id);
+      filteredNotes.removeWhere((note) => note.id == id);
 
       await NoteService.deleteNoteService(id);
     } catch (error) {
@@ -258,20 +261,33 @@ class NoteControllers extends GetxController {
 
   void filterByMatkul() {
     try {
-      if (filterMatkulId.value == "all") {
-        filteredNotes.clear();
-        filteredNotes.addAll(allNote);
-      } else if (filterMatkulId.value == "umum") {
-        filteredNotes.clear();
-        filteredNotes.addAll(
-          allNote.where((note) => note.matkulId == null || note.matkulId == ""),
-        );
-      } else {
-        filteredNotes.clear();
-        filteredNotes.addAll(
-          allNote.where((note) => note.matkulId == filterMatkulId.value),
-        );
+      final raw = filterMatkulId.value;
+      if (raw.trim().isEmpty || raw == 'all') {
+        filteredNotes
+          ..clear()
+          ..addAll(allNote);
+        return;
       }
+
+      final parts = raw
+          .split(',')
+          .map((e) => e.trim())
+          .where((element) => element.isNotEmpty)
+          .toList();
+      final includeUmum = parts.contains('umum');
+      final specificIds = parts.where((element) => element != 'umum').toSet();
+
+      final result = allNote.where((note) {
+        if (includeUmum && (note.matkulId == null || note.matkulId == ""))
+          return true;
+        if (specificIds.isNotEmpty && specificIds.contains(note.matkulId))
+          return true;
+        return false;
+      }).toList();
+
+      filteredNotes
+        ..clear()
+        ..addAll(result);
     } catch (error) {
       print(error);
       rethrow;
@@ -305,9 +321,11 @@ class NoteControllers extends GetxController {
 
   @override
   void onInit() async {
-    // TODO: implement onInit
-
     super.onInit();
+    //init texteditingcontroller
+    titleC = TextEditingController();
+    noteC = TextEditingController();
+
     print("run loading");
     isLoading.value = true;
     loadAllNotes();
@@ -320,8 +338,12 @@ class NoteControllers extends GetxController {
   //dispose debaunce when onclose
   @override
   void onClose() {
-    // TODO: implement onClose
+    //dispose debounce
     debounce?.cancel();
+
+    //dispose textEditingController
+    titleC.dispose();
+    noteC.dispose();
     super.onClose();
   }
 }
