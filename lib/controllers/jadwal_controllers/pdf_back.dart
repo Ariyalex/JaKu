@@ -24,13 +24,21 @@ class PdfBack extends GetxController {
   Future<void> pickPdfFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
+        type: FileType.any,
+        allowMultiple: false,
+        withData: false,
+        withReadStream: false,
+        dialogTitle: 'Pilih File PDF',
       );
 
-      if (result != null) {
-        selectedFile.value = File(result.files.single.path!);
-        responseMessage.value = "File dipilih: ${result.files.single.name}";
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.single;
+        if (file.extension?.toLowerCase() != 'pdf') {
+          responseMessage.value = "File yang dipilih bukan PDF";
+          return;
+        }
+        selectedFile.value = File(file.path!);
+        responseMessage.value = "File dipilih: ${file.name}";
         _allMatkul.clear(); // Reset data when a new file is selected
       }
     } catch (e) {
@@ -47,7 +55,6 @@ class PdfBack extends GetxController {
 
     isLoading.value = true;
     responseMessage.value = "Menghapus data lama...";
-
     try {
       // Clear existing data both in Firebase and locally first
       await JadwalService.deleteAllScheduleService();
