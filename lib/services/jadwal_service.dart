@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/models/jadwal.dart';
+import 'package:jaku/domain/models/matkul_schedule.dart';
 
 class JadwalService {
   static const String scheduleBoxName = "schedule_box";
@@ -12,16 +12,16 @@ class JadwalService {
     }
 
     //open box
-    await Hive.openBox<Jadwal>(scheduleBoxName);
+    await Hive.openBox<MatkulSchedule>(scheduleBoxName);
   }
 
   //mendapatkan reference to the box
-  static Box<Jadwal> getScheduleBox() {
-    return Hive.box<Jadwal>(scheduleBoxName);
+  static Box<MatkulSchedule> getScheduleBox() {
+    return Hive.box<MatkulSchedule>(scheduleBoxName);
   }
 
   // save single matkul
-  static Future<void> saveScheduleService(Jadwal schedule) async {
+  static Future<void> saveScheduleService(MatkulSchedule schedule) async {
     final box = getScheduleBox();
 
     if (schedule.id != null) {
@@ -32,10 +32,12 @@ class JadwalService {
   }
 
   //save multiple matkul
-  static Future<void> saveAllScheduleService(List<Jadwal> schedules) async {
+  static Future<void> saveAllScheduleService(
+    List<MatkulSchedule> schedules,
+  ) async {
     final box = getScheduleBox();
 
-    final Map<dynamic, Jadwal> matkulMap = {};
+    final Map<dynamic, MatkulSchedule> matkulMap = {};
 
     for (var matkul in schedules) {
       if (matkul.id == null) {
@@ -47,7 +49,7 @@ class JadwalService {
   }
 
   //get all saved matkuls
-  static List<Jadwal> getAllScheduleService() {
+  static List<MatkulSchedule> getAllScheduleService() {
     final box = getScheduleBox();
     return box.values.toList();
   }

@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:jaku/models/task_tab.dart';
+import 'package:jaku/domain/models/task_tab.dart';
 
 class TaskTabService {
   static const taskBoxName = "task_tab_box";

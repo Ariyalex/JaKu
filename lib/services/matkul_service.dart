@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/models/matkul.dart';
+import 'package:jaku/domain/models/matkul.dart';
 
 class MatkulService {
   static const String matkulBoxName = "matkul_box";
