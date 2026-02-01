@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 import 'package:jaku/domain/value_objects/day.dart';
+import 'package:uuid/uuid.dart';
 
 part 'matkul_schedule.g.dart';
 
@@ -31,4 +32,20 @@ class MatkulSchedule extends Equatable {
 
   @override
   List<Object?> get props => [id, matkulId, day, startTime, endTime];
+
+  factory MatkulSchedule.create({
+    required String matkulId,
+    required Day day,
+    required DateTime startTime,
+    DateTime? endTime,
+  }) {
+    const uuid = Uuid();
+    return MatkulSchedule(
+      id: uuid.v4(),
+      matkulId: matkulId,
+      day: day,
+      startTime: startTime,
+      endTime: endTime,
+    );
+  }
 }

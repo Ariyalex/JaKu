@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
-import 'package:jaku/services/jadwal_service.dart';
+import 'package:jaku/application/services/matkul_schedule_service.dart';
 import 'package:jaku/domain/models/matkul_schedule.dart';
 import 'package:jaku/presentation/controllers/jadwal_controllers/jadwal_kuliah_c.dart';
 import 'package:path_provider/path_provider.dart';
@@ -57,7 +57,7 @@ class PdfBack extends GetxController {
     responseMessage.value = "Menghapus data lama...";
     try {
       // Clear existing data both in Firebase and locally first
-      await JadwalService.deleteAllScheduleService();
+      await MatkulScheduleService.deleteAllScheduleService();
       jadwalProvider.clearData(); // Clear data in the JadwalKuliah provider
 
       responseMessage.value = "Mengunggah dan memproses file...";

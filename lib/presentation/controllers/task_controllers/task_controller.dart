@@ -6,7 +6,7 @@ import 'package:jaku/presentation/controllers/notification_controller.dart';
 import 'package:jaku/domain/models/matkul.dart';
 import 'package:jaku/domain/models/task.dart';
 import 'package:jaku/domain/models/task_tab.dart';
-import 'package:jaku/services/task_service.dart';
+import 'package:jaku/application/services/task_service.dart';
 import 'package:uuid/uuid.dart';
 
 var uuid = const Uuid();

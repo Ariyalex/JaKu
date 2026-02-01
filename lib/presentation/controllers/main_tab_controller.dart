@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:jaku/domain/models/task_tab.dart';
-import 'package:jaku/services/task_tab_service.dart';
+import 'package:jaku/application/services/task_tab_service.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:uuid/uuid.dart';
 

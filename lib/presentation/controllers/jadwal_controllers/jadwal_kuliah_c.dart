@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/presentation/controllers/matkul_controllers.dart';
 import 'package:jaku/domain/models/matkul.dart';
-import 'package:jaku/services/jadwal_service.dart';
+import 'package:jaku/application/services/matkul_schedule_service.dart';
 import 'package:jaku/presentation/controllers/jadwal_controllers/hari_kuliah_c.dart';
-import 'package:jaku/services/matkul_service.dart';
+import 'package:jaku/application/services/matkul_service.dart';
 import 'package:jaku/core/theme/theme.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:uuid/uuid.dart';
@@ -112,7 +112,7 @@ class JadwalkuliahC extends GetxController {
     errorMsg.value = '';
     try {
       // Load schedule
-      List<MatkulSchedule> localData = JadwalService.getAllScheduleService();
+      List<MatkulSchedule> localData = MatkulScheduleService.getAllSchedule();
 
       if (localData.isNotEmpty) {
         localData.sort((a, b) => _compareMatkul(a, b));
@@ -174,7 +174,7 @@ class JadwalkuliahC extends GetxController {
       allSchedule.add(newSchedule);
 
       //save to hive
-      await JadwalService.saveScheduleService(newSchedule);
+      await MatkulScheduleService.saveScheduleService(newSchedule);
 
       try {
         final dayController = Get.find<HariKuliahC>();
@@ -233,7 +233,7 @@ class JadwalkuliahC extends GetxController {
         allSchedule[index] = updatedSchedule;
 
         //update di local storage
-        await JadwalService.saveScheduleService(updatedSchedule);
+        await MatkulScheduleService.saveScheduleService(updatedSchedule);
 
         // Perbarui daftar hari unik setelah memperbarui matkul
         try {
@@ -261,7 +261,7 @@ class JadwalkuliahC extends GetxController {
       allSchedule.removeWhere((product) => product.id == id);
 
       //hapus dari local storage
-      await JadwalService.deleteScheduleService(id);
+      await MatkulScheduleService.deleteScheduleService(id);
 
       // Perbarui daftar hari unik setelah menghapus matkul
       dayKuliahController.getUniqueDays(this);
@@ -291,7 +291,7 @@ class JadwalkuliahC extends GetxController {
       clearData();
 
       //hapus data dari local storage
-      await JadwalService.deleteAllScheduleService();
+      await MatkulScheduleService.deleteAllScheduleService();
 
       // Perbarui tampilan hari
       hariKuliahProvider.clearAllDays();

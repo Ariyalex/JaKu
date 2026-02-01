@@ -10,14 +10,14 @@ import 'package:jaku/presentation/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/presentation/screens/note/note_dashboard.dart';
 import 'package:jaku/presentation/screens/task/task_dashboard.dart';
-import 'package:jaku/services/jadwal_service.dart';
+import 'package:jaku/application/services/matkul_schedule_service.dart';
 import 'package:jaku/presentation/controllers/version_control.dart';
 import 'package:jaku/core/routes/page_route.dart';
 import 'package:jaku/presentation/screens/schedule/schedule_dashboard.dart';
-import 'package:jaku/services/matkul_service.dart';
-import 'package:jaku/services/note_service.dart';
-import 'package:jaku/services/task_service.dart';
-import 'package:jaku/services/task_tab_service.dart';
+import 'package:jaku/application/services/matkul_service.dart';
+import 'package:jaku/application/services/note_service.dart';
+import 'package:jaku/application/services/task_service.dart';
+import 'package:jaku/application/services/task_tab_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -34,7 +34,7 @@ void main() async {
 
   //inisialisasi hive
   await Hive.initFlutter();
-  await JadwalService.initScheduleService();
+  await MatkulScheduleService.initScheduleService();
   await NoteService.initNoteService();
   await MatkulService.iniMatkulService();
   await TaskService.initTaskService();

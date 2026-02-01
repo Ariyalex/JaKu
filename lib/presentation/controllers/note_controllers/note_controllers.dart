@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:jaku/presentation/controllers/matkul_controllers.dart';
 import 'package:jaku/domain/models/matkul.dart';
 import 'package:jaku/domain/models/note.dart';
-import 'package:jaku/services/note_service.dart';
+import 'package:jaku/application/services/note_service.dart';
 import 'package:uuid/uuid.dart';
 
 var uuid = const Uuid();

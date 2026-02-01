@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:jaku/domain/models/matkul.dart';
-import 'package:jaku/services/matkul_service.dart';
+import 'package:jaku/application/services/matkul_service.dart';
 
 class MatkulController extends GetxController {
   final RxList<Matkul> allMatkul = <Matkul>[].obs;

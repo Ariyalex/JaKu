@@ -1,10 +1,10 @@
 import 'package:jaku/domain/models/matkul_schedule.dart';
 
-abstract class MatkulScheduleLocalDatasource {
+abstract class MatkulScheduleRepository {
   List<MatkulSchedule> getAllSchedule();
-  MatkulSchedule? getScheduleById(String id);
-  Future<void> saveSchedule(MatkulSchedule schedule);
-  Future<void> saveSchedules(List<MatkulSchedule> schedules);
+  MatkulSchedule getScheduleById(String id);
+  Future<void> addSchedule(MatkulSchedule schedule);
+  Future<void> addSchedules(List<MatkulSchedule> schedules);
   Future<void> updateSchedule(MatkulSchedule schedule);
   Future<void> deleteSchedule(String id);
   Future<void> deleteAllSchedule();
