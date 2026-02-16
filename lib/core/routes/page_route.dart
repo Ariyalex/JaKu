@@ -1,15 +1,15 @@
 import 'package:get/get.dart';
-import 'package:jaku/presentation/bindings/detail_jadwal_binding.dart';
+import 'package:jaku/modules/schedule/binding/detail_jadwal_binding.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/presentation/screens/note/add_note.dart';
-import 'package:jaku/presentation/screens/note/detail_note.dart';
-import 'package:jaku/presentation/screens/note/note_dashboard.dart';
-import 'package:jaku/presentation/screens/schedule/detail_matkul.dart';
-import 'package:jaku/presentation/screens/guide/guide_schedule.dart';
-import 'package:jaku/presentation/screens/guide/guide_pdf.dart';
-import 'package:jaku/presentation/screens/schedule/schedule_dashboard.dart';
-import 'package:jaku/presentation/screens/schedule/pdf_parsing.dart';
-import 'package:jaku/presentation/screens/task/task_dashboard.dart';
+import 'package:jaku/modules/note/view/add_note.dart';
+import 'package:jaku/modules/note/view/detail_note.dart';
+import 'package:jaku/modules/note/view/note_dashboard.dart';
+import 'package:jaku/modules/schedule/view/detail_matkul.dart';
+import 'package:jaku/modules/guides/view/guide_schedule.dart';
+import 'package:jaku/modules/guides/view/guide_pdf.dart';
+import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
+import 'package:jaku/modules/schedule/view/pdf_parsing.dart';
+import 'package:jaku/modules/task/view/task_dashboard.dart';
 
 class AppPage {
   static final pages = [

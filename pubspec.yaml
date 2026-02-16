@@ -67,6 +67,7 @@ dependencies:
 
   path_provider: any
   equatable: ^2.0.8
+  flutter_screenutil: ^5.9.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -3,21 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/presentation/controllers/main_tab_controller.dart';
-import 'package:jaku/presentation/controllers/matkul_controllers.dart';
-import 'package:jaku/presentation/controllers/notification_controller.dart';
-import 'package:jaku/presentation/controllers/theme_c.dart';
+import 'package:jaku/core/di/dependency_injection.dart';
+import 'package:jaku/controllers/main_tab_controller.dart';
+import 'package:jaku/controllers/matkul_controller.dart';
+import 'package:jaku/controllers/notification_controller.dart';
+import 'package:jaku/controllers/theme_c.dart';
 import 'package:jaku/firebase_options.dart';
-import 'package:jaku/presentation/screens/note/note_dashboard.dart';
-import 'package:jaku/presentation/screens/task/task_dashboard.dart';
-import 'package:jaku/application/services/matkul_schedule_service.dart';
-import 'package:jaku/presentation/controllers/version_control.dart';
+import 'package:jaku/modules/note/view/note_dashboard.dart';
+import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
+import 'package:jaku/modules/task/view/task_dashboard.dart';
+import 'package:jaku/services/matkul_schedule_service.dart';
+import 'package:jaku/controllers/version_control.dart';
 import 'package:jaku/core/routes/page_route.dart';
-import 'package:jaku/presentation/screens/schedule/schedule_dashboard.dart';
-import 'package:jaku/application/services/matkul_service.dart';
-import 'package:jaku/application/services/note_service.dart';
-import 'package:jaku/application/services/task_service.dart';
-import 'package:jaku/application/services/task_tab_service.dart';
+import 'package:jaku/services/matkul_service.dart';
+import 'package:jaku/services/note_service.dart';
+import 'package:jaku/services/task_service.dart';
+import 'package:jaku/services/task_tab_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -32,16 +33,9 @@ void main() async {
   //inisialisasi firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  //inisialisasi hive
-  await Hive.initFlutter();
-  await MatkulScheduleService.initScheduleService();
-  await NoteService.initNoteService();
-  await MatkulService.iniMatkulService();
-  await TaskService.initTaskService();
-  await TaskTabService.initTaskTabService();
+  await DependencyInjection.init();
 
   // Inisialisasi controller tanpa menyimpan ke variabel lokal
-  Get.put(MatkulController(), permanent: true);
   Get.put(VersionControl(), permanent: true);
   final notifC = Get.put(NotificationController(), permanent: true);
   Get.put(MainTabController(), permanent: true);

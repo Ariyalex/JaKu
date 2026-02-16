@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jaku/modules/task/controller/task_controller.dart';
+import 'package:jaku/data/models/task.dart';
+import 'package:jaku/modules/task/widgets/add_task_modal.dart';
+import 'package:jaku/modules/task/widgets/task_tile.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+class TaskMatkul extends StatelessWidget {
+  const TaskMatkul({
+    super.key,
+    required this.theme,
+    required this.matkulId,
+    this.matkul,
+  });
+
+  final ThemeData theme;
+  final String? matkul;
+  final String matkulId;
+
+  @override
+  Widget build(BuildContext context) {
+    final taskC = Get.find<TaskController>();
+
+    return Obx(() {
+      late List<Task> tasks;
+      tasks = taskC.allTask.where((t) => t.groupId == matkulId).toList();
+      //order tasks according to matkulOrder
+      tasks = tasks.reversed.toList();
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Tugas",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(LucideIcons.plus),
+                tooltip: "Tambah Tugas",
+                onPressed: () {
+                  // TODO: Tambah task
+                  showBarModalBottomSheet<Map<String, dynamic>>(
+                    barrierColor: Colors.black.withValues(alpha: 0.4),
+                    context: context,
+                    useRootNavigator: true,
+                    bounce: true,
+                    backgroundColor: theme.colorScheme.surfaceContainer,
+                    builder: (context) => AddTaskModal(matkulId: matkulId),
+                  );
+                },
+              ),
+            ],
+          ),
+          tasks.isEmpty
+              ? Text("Belum ada tugas.", style: theme.textTheme.bodyMedium)
+              : Column(
+                  children: tasks
+                      .map(
+                        (task) => Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.dividerColor,
+                              width: 1.2,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: TaskTile(taskId: task.id, star: false),
+                        ),
+                      )
+                      .toList(),
+                ),
+        ],
+      );
+    });
+  }
+}
