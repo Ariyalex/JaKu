@@ -1,14 +1,19 @@
+import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 
 part 'task_tab.g.dart';
 
 @HiveType(typeId: 4)
-class TaskTab extends HiveObject {
+class TaskTab extends Equatable {
   @HiveField(0)
-  String id;
+  final String id;
 
   @HiveField(1)
-  String tabName;
+  final String tabName;
 
-  TaskTab({required this.id, required this.tabName});
+  const TaskTab({required this.id, required this.tabName});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [id, tabName];
 }

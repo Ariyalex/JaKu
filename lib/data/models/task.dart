@@ -1,9 +1,49 @@
+import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 
 part 'task.g.dart';
 
 @HiveType(typeId: 3)
-class Task extends HiveObject {
+class Task extends Equatable {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String task;
+
+  @HiveField(2)
+  final String? desc;
+
+  @HiveField(3)
+  final bool status;
+
+  @HiveField(4)
+  final DateTime? taskDueDate;
+
+  @HiveField(5)
+  final String? groupId;
+
+  @HiveField(6)
+  final bool isStared;
+
+  @HiveField(7)
+  final int? matkulOrder;
+
+  @HiveField(8)
+  final int? starredOrder;
+
+  const Task({
+    required this.id,
+    required this.task,
+    required this.status,
+    this.desc,
+    this.taskDueDate,
+    this.groupId,
+    required this.isStared,
+    this.matkulOrder,
+    this.starredOrder,
+  });
+
   Task copyWith({
     String? id,
     String? task,
@@ -32,42 +72,17 @@ class Task extends HiveObject {
     );
   }
 
-  @HiveField(0)
-  String id;
-
-  @HiveField(1)
-  String task;
-
-  @HiveField(2)
-  String? desc;
-
-  @HiveField(3)
-  bool status;
-
-  @HiveField(4)
-  DateTime? taskDueDate;
-
-  @HiveField(5)
-  String? groupId;
-
-  @HiveField(6)
-  bool isStared;
-
-  @HiveField(7)
-  int? matkulOrder;
-
-  @HiveField(8)
-  int? starredOrder;
-
-  Task({
-    required this.id,
-    required this.task,
-    required this.status,
-    this.desc,
-    this.taskDueDate,
-    this.groupId,
-    required this.isStared,
-    this.matkulOrder,
-    this.starredOrder,
-  });
+  @override
+  // TODO: implement props
+  List<Object?> get props => [
+    id,
+    task,
+    desc,
+    status,
+    taskDueDate,
+    groupId,
+    isStared,
+    matkulOrder,
+    starredOrder,
+  ];
 }

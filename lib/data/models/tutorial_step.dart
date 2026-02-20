@@ -5,9 +5,5 @@ class TutorialStep {
   final String description;
   final IconData? icon;
 
-  TutorialStep({
-    required this.title,
-    required this.description,
-    this.icon,
-  });
+  TutorialStep({required this.title, required this.description, this.icon});
 }
