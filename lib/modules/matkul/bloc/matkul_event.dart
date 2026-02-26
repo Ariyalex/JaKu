@@ -8,7 +8,15 @@ abstract class MatkulEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadMatkul extends MatkulEvent {}
+class LoadListMatkul extends MatkulEvent {}
+
+class LoadMatkul extends MatkulEvent {
+  final String id;
+  const LoadMatkul(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}
 
 class AddMatkul extends MatkulEvent {
   final Matkul matkul;

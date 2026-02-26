@@ -7,6 +7,8 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   final MatkulRepository _repository;
 
   MatkulBloc(this._repository) : super(MatkulInitial()) {
+    on<LoadListMatkul>(_onLoadListMatkul);
+
     // Menangani event LoadMatkul
     on<LoadMatkul>(_onLoadMatkul);
 
@@ -23,14 +25,27 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     on<DeleteAllMatkul>(_onDeleteAllMatkul);
   }
 
+  Future<void> _onLoadListMatkul(
+    LoadListMatkul event,
+    Emitter<MatkulState> emit,
+  ) async {
+    emit(MatkulListLoading());
+    try {
+      final matkuls = _repository.getAllMatkul();
+      emit(MatkulListLoaded(matkuls));
+    } catch (e) {
+      emit(MatkulError(e.toString()));
+    }
+  }
+
   Future<void> _onLoadMatkul(
     LoadMatkul event,
     Emitter<MatkulState> emit,
   ) async {
-    emit(MatkulLoading());
+    emit(MatkulListLoading());
     try {
-      final matkuls = _repository.getAllMatkul();
-      emit(MatkulLoaded(matkuls));
+      final matkul = _repository.getMatkulById(event.id);
+      emit(MatkulLoaded(matkul));
     } catch (e) {
       emit(MatkulError(e.toString()));
     }
@@ -40,7 +55,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     try {
       await _repository.addMatkul(event.matkul);
       // Setelah tambah, kita refresh data
-      add(LoadMatkul());
+      add(LoadListMatkul());
     } catch (e) {
       emit(MatkulError(e.toString()));
     }
@@ -52,7 +67,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   ) async {
     try {
       await _repository.updateMatkul(event.matkul);
-      add(LoadMatkul());
+      add(LoadListMatkul());
     } catch (e) {
       emit(MatkulError(e.toString()));
     }
@@ -64,7 +79,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   ) async {
     try {
       await _repository.deleteMatkul(event.id);
-      add(LoadMatkul());
+      add(LoadListMatkul());
     } catch (e) {
       emit(MatkulError(e.toString()));
     }
@@ -76,7 +91,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   ) async {
     try {
       await _repository.deleteAllMatkul();
-      add(LoadMatkul());
+      add(LoadListMatkul());
     } catch (e) {
       emit(MatkulError(e.toString()));
     }

@@ -13,8 +13,18 @@ class MatkulInitial extends MatkulState {}
 class MatkulLoading extends MatkulState {}
 
 class MatkulLoaded extends MatkulState {
+  final Matkul matkul;
+  const MatkulLoaded(this.matkul);
+
+  @override
+  List<Object?> get props => [matkul];
+}
+
+class MatkulListLoading extends MatkulState {}
+
+class MatkulListLoaded extends MatkulState {
   final List<Matkul> matkuls;
-  const MatkulLoaded(this.matkuls);
+  const MatkulListLoaded(this.matkuls);
 
   @override
   List<Object?> get props => [matkuls];
