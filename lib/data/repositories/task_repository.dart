@@ -14,6 +14,15 @@ class TaskRepository {
     }
   }
 
+  List<Task> getTasksByMatkul(String matkulId) {
+    try {
+      return _localProvider.getTasksByMatkul(matkulId);
+    } catch (e) {
+      print("error get all task(repo): $e");
+      rethrow;
+    }
+  }
+
   Task getTaskById(String id) {
     try {
       final result = _localProvider.getTaskById(id);

@@ -14,9 +14,19 @@ class NoteListLoading extends NoteState {}
 
 class NoteLoading extends NoteState {}
 
+class NoteListByMatkulLoading extends NoteState {}
+
 class NoteListLoaded extends NoteState {
   final List<Note> notes;
   const NoteListLoaded(this.notes);
+
+  @override
+  List<Object?> get props => [notes];
+}
+
+class NoteListByMatkulLoaded extends NoteState {
+  final List<Note> notes;
+  const NoteListByMatkulLoaded(this.notes);
 
   @override
   List<Object?> get props => [notes];

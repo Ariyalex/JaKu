@@ -12,6 +12,15 @@ class LocalNoteProvider {
     }
   }
 
+  List<Note> getNotesByMatkul(String matkulId) {
+    try {
+      final notes = _noteBox.values.toList();
+      return notes.where((note) => note.matkulId == matkulId).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> saveNote(Note note) async {
     try {
       await _noteBox.put(note.id, note);

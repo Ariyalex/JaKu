@@ -10,6 +10,14 @@ abstract class NoteEvent extends Equatable {
 
 class LoadListNote extends NoteEvent {}
 
+class LoadListNoteByMatkul extends NoteEvent {
+  final String matkulId;
+  const LoadListNoteByMatkul(this.matkulId);
+
+  @override
+  List<Object?> get props => [matkulId];
+}
+
 class LoadNote extends NoteEvent {
   final String id;
   const LoadNote(this.id);

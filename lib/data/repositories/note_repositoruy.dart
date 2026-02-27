@@ -14,6 +14,15 @@ class NoteRepository {
     }
   }
 
+  List<Note> getNotesByMatkul(String matkulId) {
+    try {
+      return _localProvider.getNotesByMatkul(matkulId);
+    } catch (e) {
+      print("error get all note(repo): $e");
+      rethrow;
+    }
+  }
+
   Note getNoteById(String id) {
     try {
       final result = _localProvider.getNoteById(id);

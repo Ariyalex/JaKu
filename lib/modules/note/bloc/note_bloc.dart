@@ -8,6 +8,8 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   NoteBloc(this._repository) : super(NoteInitial()) {
     on<LoadListNote>(_onLoadListNote);
 
+    on<LoadListNoteByMatkul>(_onLoadListNoteByMatkul);
+
     on<LoadNote>(_onLoadNote);
 
     on<AddNote>(_onAddNote);
@@ -27,6 +29,19 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     try {
       final notes = _repository.getAllNote();
       emit(NoteListLoaded(notes));
+    } catch (e) {
+      emit(NoteError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadListNoteByMatkul(
+    LoadListNoteByMatkul event,
+    Emitter<NoteState> emit,
+  ) async {
+    emit(NoteListByMatkulLoading());
+    try {
+      final notes = _repository.getNotesByMatkul(event.matkulId);
+      emit(NoteListByMatkulLoaded(notes));
     } catch (e) {
       emit(NoteError(e.toString()));
     }

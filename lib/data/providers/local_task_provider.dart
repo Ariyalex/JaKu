@@ -12,6 +12,15 @@ class LocalTaskProvider {
     }
   }
 
+  List<Task> getTasksByMatkul(String matkulId) {
+    try {
+      final tasks = _taskBox.values.toList();
+      return tasks.where((task) => task.groupId == matkulId).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> saveTask(Task task) async {
     try {
       await _taskBox.put(task.id, task);
