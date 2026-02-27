@@ -6,7 +6,7 @@ import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class VersionControl extends GetxController {
+class VersionService {
   Future<void> checkForUpdate() async {
     final remoteConfig = FirebaseRemoteConfig.instance;
     try {
@@ -73,11 +73,5 @@ class VersionControl extends GetxController {
         child: const Text("Update Sekarang"),
       ),
     );
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    checkForUpdate();
   }
 }

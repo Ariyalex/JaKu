@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:hive/hive.dart';
 import 'package:jaku/modules/schedule/controller/pdf_back.dart';
-import 'package:jaku/controllers/theme_c.dart';
+import 'package:jaku/core/theme/theme_cubit.dart';
 import 'package:jaku/modules/schedule/widgets/add_jadwal.dart';
 import 'package:jaku/modules/schedule/widgets/card_view/card_view.dart';
 import 'package:get/get.dart';
@@ -97,7 +97,7 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
     final textTheme = Theme.of(context).textTheme;
     final theme = Theme.of(context);
 
-    final themeC = Get.find<ThemeC>();
+    final themeC = Get.find<ThemeCubit>();
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
