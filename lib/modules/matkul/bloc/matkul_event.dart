@@ -26,6 +26,14 @@ class AddMatkul extends MatkulEvent {
   List<Object?> get props => [matkul];
 }
 
+class AddListMatkul extends MatkulEvent {
+  final List<Matkul> matkuls;
+  const AddListMatkul(this.matkuls);
+
+  @override
+  List<Object?> get props => [matkuls];
+}
+
 class UpdateMatkul extends MatkulEvent {
   final Matkul matkul;
   const UpdateMatkul(this.matkul);

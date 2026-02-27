@@ -15,6 +15,8 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     // Menangani event AddMatkul
     on<AddMatkul>(_onAddMatkul);
 
+    on<AddListMatkul>(_onAddListMatkul);
+
     // Menangani event UpdateMatkul
     on<UpdateMatkul>(_onUpdateMatkul);
 
@@ -55,6 +57,18 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     try {
       await _repository.addMatkul(event.matkul);
       // Setelah tambah, kita refresh data
+      add(LoadListMatkul());
+    } catch (e) {
+      emit(MatkulError(e.toString()));
+    }
+  }
+
+  Future<void> _onAddListMatkul(
+    AddListMatkul event,
+    Emitter<MatkulState> emit,
+  ) async {
+    try {
+      await _repository.addMatkuls(event.matkuls);
       add(LoadListMatkul());
     } catch (e) {
       emit(MatkulError(e.toString()));
