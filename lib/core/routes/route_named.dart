@@ -5,7 +5,7 @@ abstract class RouteNamed {
   static const pdfParsing = '/pdf_parsing';
   static const guidePdf = '/guide_pdf';
   static const guideGeneral = '/guide_general';
-  static const detailMatkul = '/detail_matkul';
+  static const detailMatkul = '/detail_matkul/:id';
   static const addNote = '/add_note';
-  static const detailNote = '/detail_note';
+  static const detailNote = '/detail_note/:id';
 }

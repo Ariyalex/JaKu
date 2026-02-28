@@ -1,112 +1,86 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:hive/hive.dart';
-import 'package:jaku/modules/schedule/controller/pdf_back.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:get/get.dart';
 import 'package:jaku/core/theme/theme_cubit.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
+import 'package:jaku/modules/schedule/controller/pdf_back.dart';
 import 'package:jaku/modules/schedule/widgets/add_jadwal.dart';
 import 'package:jaku/modules/schedule/widgets/card_view/card_view.dart';
-import 'package:get/get.dart';
 import 'package:jaku/modules/schedule/widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../controller/matkul_schedule_controller.dart';
 import '../../../core/routes/route_named.dart';
 
-import 'dart:math' as math;
-
-class ScheduleDashboard extends StatefulWidget {
+class ScheduleDashboard extends HookWidget {
   const ScheduleDashboard({super.key});
-  static const routeName = "/home";
-
-  @override
-  State<ScheduleDashboard> createState() => _ScheduleDashboardState();
-}
-
-class _ScheduleDashboardState extends State<ScheduleDashboard> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  // late selectedDay jadwalKuliahC;
-  // late HariKuliahC hariKuliahC;
-
-  final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
-
-  RxBool isCardView = true.obs;
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    Get.delete<PdfBack>();
-    // Get.delete<selectedDay>();
-    // Get.delete<HariKuliahC>();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // hariKuliahC = Get.put(HariKuliahC());
-    // jadwalKuliahC = Get.put(selectedDay());
-    Get.put(PdfBack());
-    loadViewValue();
-    // hariKuliahC.getOrderedDays();
-  }
-
-  Future<void> loadViewValue() async {
-    // Pakai Hive untuk menyimpan setting
-    final box = await Hive.openBox('settings');
-    final hasil = box.get('cardView') as bool?;
-    isCardView.value = hasil ?? true;
-  }
-
-  Future<void> saveViewValue(bool value) async {
-    final box = await Hive.openBox('settings');
-    await box.put('cardView', value);
-  }
 
   static void clearAllData(BuildContext context) {
-    Get.defaultDialog(
-      title: "Hapus semua data?",
-      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-      content: const Text(
-        "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
-        textAlign: TextAlign.center,
-      ),
-      cancel: FilledButton(
-        onPressed: () {
-          Get.back();
-        },
-        child: const Text("Tidak"),
-      ),
-      confirm: OutlinedButton(
-        onPressed: null,
-        // () async {
-        //   Get.back(); // Tutup dialog konfirmasi
-        //   final allMatkulProvider = Get.find<selectedDay>();
-
-        //   allMatkulProvider.clearAllSchedule();
-        // },
-        child: const Text("Ya"),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          "Hapus semua data?",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+        content: const Text(
+          "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              Navigator.pop(context); // Tutup dialog konfirmasi
+            },
+            child: const Text("Tidak"),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context); // Tutup dialog konfirmasi
+              context.read<ScheduleBloc>().add(DeleteAllSchedule());
+            },
+            child: const Text("Ya"),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>());
+    final fabKey = useMemoized(() => GlobalKey<ExpandableFabState>());
+
+    useEffect(() {
+      Get.put(PdfBack());
+
+      return () {
+        Get.delete<PdfBack>();
+      };
+    }, const []);
+
     final colorTheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final theme = Theme.of(context);
 
-    final themeC = Get.find<ThemeCubit>();
+    final themeC = context.read<ThemeCubit>();
+    final isCardView = context.watch<ScheduleViewCubit>().state;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      key: _scaffoldKey,
+      key: scaffoldKey,
       appBar: AppBar(
         title: const Text("Jaku"),
         leading: Builder(
           builder: (context) => PopupMenuButton<String>(
-            icon: const Icon(Icons.menu), // Burger Icon
+            icon: const Icon(Icons.menu),
             onSelected: (value) {
               if (value == "info") {
                 Get.toNamed(RouteNamed.guideGeneral);
@@ -114,7 +88,6 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                 clearAllData(context);
               }
             },
-
             position: PopupMenuPosition.under,
             itemBuilder: (BuildContext context) => [
               const PopupMenuItem<String>(
@@ -132,58 +105,51 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
           ),
         ),
         actions: [
-          Obx(
-            () => TextButton.icon(
-              onPressed: () {
-                isCardView.value = !isCardView.value;
-                saveViewValue(isCardView.value);
-              },
-              label: isCardView.value
-                  ? Text(
-                      "Card view",
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: colorTheme.primary,
-                      ),
-                    )
-                  : Text(
-                      "Table view",
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: colorTheme.onPrimary,
-                      ),
+          TextButton.icon(
+            onPressed: () => context.read<ScheduleViewCubit>().toggleView(),
+            label: isCardView
+                ? Text(
+                    "Card view",
+                    style: textTheme.bodyMedium!.copyWith(
+                      color: colorTheme.primary,
                     ),
-              icon: isCardView.value
-                  ? const Icon(Icons.view_agenda_outlined)
-                  : const Icon(Icons.table_chart),
-              style: ButtonStyle(
-                backgroundColor: isCardView.value
-                    ? null
-                    : WidgetStatePropertyAll(colorTheme.primary),
-                iconColor: isCardView.value
-                    ? null
-                    : WidgetStatePropertyAll(colorTheme.onPrimary),
-                side: WidgetStatePropertyAll(
-                  BorderSide(width: 1, color: colorTheme.primary),
-                ),
+                  )
+                : Text(
+                    "Table view",
+                    style: textTheme.bodyMedium!.copyWith(
+                      color: colorTheme.onPrimary,
+                    ),
+                  ),
+            icon: isCardView
+                ? const Icon(Icons.view_agenda_outlined)
+                : const Icon(Icons.table_chart),
+            style: ButtonStyle(
+              backgroundColor: isCardView
+                  ? null
+                  : WidgetStatePropertyAll(colorTheme.primary),
+              iconColor: isCardView
+                  ? null
+                  : WidgetStatePropertyAll(colorTheme.onPrimary),
+              side: WidgetStatePropertyAll(
+                BorderSide(width: 1, color: colorTheme.primary),
               ),
             ),
           ),
           const SizedBox(width: 15),
           IconButton(
-            onPressed: () => themeC.changeTheme(),
+            onPressed: () => themeC.toggleTheme(),
             icon: const Icon(Icons.color_lens),
           ),
         ],
       ),
-      body: Obx(() {
-        return SafeArea(
-          child: isCardView.value
-              ? const CardView()
-              : Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: const TableView(),
-                ),
-        );
-      }),
+      body: SafeArea(
+        child: isCardView
+            ? const CardView()
+            : Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: const TableView(),
+              ),
+      ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         key: fabKey,
@@ -217,28 +183,33 @@ class _ScheduleDashboardState extends State<ScheduleDashboard> {
                 heroTag: null,
                 onPressed: () {
                   fabKey.currentState?.close();
-                  Get.defaultDialog(
-                    title: "Peringatan!!",
-                    backgroundColor: theme.dialogTheme.backgroundColor,
-                    titlePadding: const EdgeInsets.only(top: 20),
-                    titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    content: const Text(
-                      "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
-                      textAlign: TextAlign.center,
-                    ),
-                    contentPadding: const EdgeInsets.all(10),
-                    confirm: FilledButton(
-                      onPressed: () {
-                        Get.back();
-                        Get.toNamed(RouteNamed.pdfParsing);
-                      },
-                      child: const Text("Ok Bang"),
-                    ),
-                    cancel: OutlinedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      child: const Text("Ga jadi"),
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text(
+                        "Peringatan!!",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      backgroundColor: theme.dialogTheme.backgroundColor,
+                      content: const Text(
+                        "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                        textAlign: TextAlign.center,
+                      ),
+                      actions: [
+                        OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Ga jadi"),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Get.toNamed(RouteNamed.pdfParsing);
+                          },
+                          child: const Text("Ok Bang"),
+                        ),
+                      ],
                     ),
                   );
                 },

@@ -5,7 +5,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jaku/core/di/app_providers.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
+import 'package:jaku/core/routes/app_router.dart';
 import 'package:jaku/core/theme/theme_cubit.dart';
+import 'package:jaku/modules/main_tab/view/main_screen.dart';
 import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
 import 'package:jaku/modules/notification/bloc/notification_event.dart';
 import 'package:jaku/modules/notification/bloc/notification_state.dart';
@@ -14,6 +16,7 @@ import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
 import 'package:jaku/firebase_options.dart';
 import 'package:jaku/modules/note/view/note_dashboard.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
 import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
 import 'package:jaku/modules/task/view/task_dashboard.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -60,6 +63,8 @@ void main() async {
         BlocProvider(
           create: (context) => MainTabBloc()..add(LoadAllTaskTabs()),
         ),
+
+        BlocProvider(create: (context) => ScheduleViewCubit()..initView()),
       ],
       child: const MyApp(),
     ),
@@ -84,92 +89,24 @@ class MyApp extends StatelessWidget {
               context.read<MainTabBloc>().add(const ChangeTab(2));
             }
           },
-          child: MaterialApp(
+          child: MaterialApp.router(
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
-            home: MultiRepositoryProvider(
-              providers: [
-                ...AppProviders.matkulRepositoryProviders,
-                ...AppProviders.scheduleRepositoryProviders,
-                ...AppProviders.noteRepositoryProviders,
-                ...AppProviders.taskRepositoryProviders,
-              ],
-              child: const MainScreen(),
-            ),
+            routerConfig: AppRouter.router,
+            builder: (context, child) {
+              return MultiRepositoryProvider(
+                providers: [
+                  ...AppProviders.matkulRepositoryProviders,
+                  ...AppProviders.scheduleRepositoryProviders,
+                  ...AppProviders.noteRepositoryProviders,
+                  ...AppProviders.taskRepositoryProviders,
+                ],
+                child: const MainScreen(),
+              );
+            },
           ),
-        );
-      },
-    );
-  }
-}
-
-class MainScreen extends StatelessWidget {
-  const MainScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeDark = AppTheme.dark;
-    final themeLight = AppTheme.light;
-
-    return BlocBuilder<ThemeCubit, ThemeMode>(
-      builder: (context, themeMode) {
-        final isLight = themeMode == ThemeMode.light;
-        final theme = isLight ? themeLight : themeDark;
-
-        return BlocBuilder<MainTabBloc, MainTabState>(
-          builder: (context, state) {
-            return PersistentTabView(
-              stateManagement: false,
-              controller: context.read<MainTabBloc>().mainTabController,
-              tabs: [
-                PersistentTabConfig(
-                  screen: const ScheduleDashboard(),
-                  item: ItemConfig(
-                    activeForegroundColor: theme.colorScheme.onPrimary,
-                    activeColorSecondary: theme.colorScheme.primary,
-                    icon: const Icon(LucideIcons.calendarRange),
-                    title: "Schedule",
-                  ),
-                ),
-                PersistentTabConfig(
-                  screen: const NoteDashboard(),
-                  item: ItemConfig(
-                    activeForegroundColor: theme.colorScheme.onPrimary,
-                    activeColorSecondary: theme.colorScheme.primary,
-                    icon: const Icon(LucideIcons.notebook),
-                    title: "Note",
-                  ),
-                ),
-                PersistentTabConfig(
-                  screen: const TaskDashboard(),
-                  item: ItemConfig(
-                    activeForegroundColor: theme.colorScheme.onPrimary,
-                    activeColorSecondary: theme.colorScheme.primary,
-                    icon: const Icon(LucideIcons.listTodo),
-                    title: "Task",
-                  ),
-                ),
-              ],
-              navBarBuilder: (navBarConfig) {
-                final bgColor = theme.colorScheme.surface;
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.ease,
-                  color: bgColor,
-                  child: Style8BottomNavBar(
-                    navBarConfig: navBarConfig,
-                    navBarDecoration: const NavBarDecoration(
-                      color: Colors.transparent,
-                    ),
-                    height: 60,
-                  ),
-                );
-              },
-            );
-          },
         );
       },
     );

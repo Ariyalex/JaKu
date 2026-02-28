@@ -8,16 +8,16 @@ import 'package:get/get.dart';
 
 import '../controller/matkul_schedule_controller.dart';
 
-class EditJadwal extends StatefulWidget {
-  const EditJadwal({super.key, required this.jadwalId});
+class EditScheduleWidget extends StatefulWidget {
+  const EditScheduleWidget({super.key, required this.scheduleId});
 
-  final String jadwalId;
+  final String scheduleId;
 
   @override
-  State<EditJadwal> createState() => _AddMatkulState();
+  State<EditScheduleWidget> createState() => _AddMatkulState();
 }
 
-class _AddMatkulState extends State<EditJadwal> {
+class _AddMatkulState extends State<EditScheduleWidget> {
   // final allMatkulProvider = Get.find<selectedDay>();
   // final dayKuliahController = Get.find<HariKuliahC>();
 

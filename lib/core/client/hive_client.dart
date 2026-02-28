@@ -15,5 +15,7 @@ class HiveClient {
 
     await Hive.openBox<Matkul>("matkulBox");
     await Hive.openBox<MatkulSchedule>("scheduleBox");
+    await Hive.openBox<Note>("noteBox");
+    await Hive.openBox<Task>("taskBox");
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/modules/schedule/controller/matkul_schedule_controller.dart';
 import 'package:jaku/modules/schedule/controller/pdf_back.dart';
 import 'package:get/get.dart';
 import 'package:jaku/core/theme/theme.dart';
