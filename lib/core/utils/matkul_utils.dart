@@ -8,10 +8,12 @@ class MatkulUtils {
       ..sort((a, b) => a.index.compareTo(b.index));
 
     Day today = Day.currentDay();
-    sorted = [
+    
+    final List<Day> result = [
       ...sorted.where((d) => d.index >= today.index),
-      ...sorted.where((d) => d.index > today.index),
+      ...sorted.where((d) => d.index < today.index),
     ];
-    return sorted;
+    
+    return result;
   }
 }

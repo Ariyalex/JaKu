@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:jaku/core/utils/matkul_utils.dart';
 import 'package:jaku/data/value_objects/day.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
@@ -17,14 +18,16 @@ class CardView extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final scheduleBloc = context.read<ScheduleBloc>();
     useEffect(() {
-      context.read<ScheduleBloc>().add(LoadListSchedule());
-      return;
+      scheduleBloc.add(LoadListSchedule());
+      context.read<MatkulBloc>().add(LoadListMatkul());
+      return null;
     }, []);
 
     return Obx(() {
       return BlocBuilder<ScheduleBloc, ScheduleState>(
+        bloc: scheduleBloc,
         builder: (context, state) {
           if (state is ScheduleListLoading) {
             return const Center(child: CircularProgressIndicator());

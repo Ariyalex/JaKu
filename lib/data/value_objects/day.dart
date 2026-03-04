@@ -31,6 +31,18 @@ enum Day {
     int todayIndex = DateTime.now().weekday - 1;
     return Day.values[todayIndex];
   }
+
+  static List<Day> getAllDay() {
+    return [
+      Day.monday,
+      Day.tuesday,
+      Day.wednesday,
+      Day.thursday,
+      Day.friday,
+      Day.saturday,
+      Day.sunday,
+    ];
+  }
 }
 
 extension DayExtension on Day {

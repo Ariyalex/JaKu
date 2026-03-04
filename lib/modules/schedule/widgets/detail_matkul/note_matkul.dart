@@ -19,13 +19,15 @@ class NoteMatkul extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteBloc = context.read<NoteBloc>();
 
     useEffect(() {
-      context.read<NoteBloc>().add(LoadListNoteByMatkul(matkulId));
+      noteBloc.add(LoadListNoteByMatkul(matkulId));
       return;
     }, [matkulId]);
 
     return BlocBuilder<NoteBloc, NoteState>(
+      bloc: noteBloc,
       builder: (context, state) {
         if (state is NoteListByMatkulLoading) {
           return const Center(child: CircularProgressIndicator());

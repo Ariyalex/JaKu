@@ -15,9 +15,10 @@ class InformasiMatkul extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final matkulBloc = context.read<MatkulBloc>();
 
     useEffect(() {
-      context.read<MatkulBloc>().add(LoadMatkul(matkulId));
+      matkulBloc.add(LoadMatkul(matkulId));
       return;
     }, [matkulId]);
 
@@ -29,6 +30,7 @@ class InformasiMatkul extends HookWidget {
         border: Border.all(color: theme.dividerColor),
       ),
       child: BlocBuilder<MatkulBloc, MatkulState>(
+        bloc: matkulBloc,
         builder: (context, state) {
           if (state is MatkulLoading) {
             return const Center(child: CircularProgressIndicator());

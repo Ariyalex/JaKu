@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:jaku/data/value_objects/day.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
-import '../controller/matkul_schedule_controller.dart';
-
-class AddJadwal extends StatefulWidget {
+class AddJadwal extends HookWidget {
   const AddJadwal({super.key});
-
-  @override
-  State<AddJadwal> createState() => _AddJadwalState();
-}
-
-class _AddJadwalState extends State<AddJadwal> {
-  // final allMatkulProvider = Get.find<selectedDay>();
 
   String divider(String formattedJamAkhir) {
     if (formattedJamAkhir.isEmpty) {
@@ -25,23 +17,24 @@ class _AddJadwalState extends State<AddJadwal> {
     }
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   allMatkulProvider.matkulNameC.clear();
-  //   allMatkulProvider.dosen1C.clear();
-  //   allMatkulProvider.dosen2C.clear();
-  //   allMatkulProvider.ruanganC.clear();
-  //   allMatkulProvider.kelas.value = null;
-  //   allMatkulProvider.jamAkhir.value = null;
-  //   allMatkulProvider.jamAwal.value = null;
-  //   allMatkulProvider.hari.value = null;
-  // }
-
   @override
   Widget build(BuildContext context) {
     final mediaQueryWidth = Get.width;
     final theme = Theme.of(context);
+
+    //   allMatkulProvider.matkulNameC.clear();
+    //   allMatkulProvider.dosen1C.clear();
+    //   allMatkulProvider.dosen2C.clear();
+    //   allMatkulProvider.ruanganC.clear();
+    //   allMatkulProvider.kelas.value = null;
+    //   allMatkulProvider.jamAkhir.value = null;
+    //   allMatkulProvider.jamAwal.value = null;
+    //   allMatkulProvider.hari.value = null;
+
+    final scheduleRoomTextC = useTextEditingController();
+    final selectedDay = useState<Day?>(null);
+    final selectedStartTime = useState<TimeOfDay?>(null);
+    final selectedEndTime = useState<TimeOfDay?>(null);
 
     // void addJadwal() async {
     //   Get.dialog(
@@ -103,38 +96,6 @@ class _AddJadwalState extends State<AddJadwal> {
                 children: [
                   TextField(
                     decoration: const InputDecoration(
-                      hintText: "Ex: Basis Data",
-                      labelText: "Matkul*",
-                      alignLabelWithHint: true,
-                    ),
-                    autocorrect: false,
-                    style: const TextStyle(fontWeight: FontWeight.normal),
-                    textInputAction: TextInputAction.next,
-                    // controller: allMatkulProvider.matkulNameC,
-                  ),
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: "Dosen1",
-                      hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
-                    ),
-                    autocorrect: false,
-                    style: const TextStyle(fontWeight: FontWeight.normal),
-                    textInputAction: TextInputAction.next,
-                    // controller: allMatkulProvider.dosen1C,
-                  ),
-                  TextField(
-                    decoration: const InputDecoration(
-                      hintText: "Ex: Muhammad Didik Rohmad Wahyudi, S.T., MT. ",
-                      labelText: "Dosen2",
-                      alignLabelWithHint: true,
-                    ),
-                    autocorrect: false,
-                    style: const TextStyle(fontWeight: FontWeight.normal),
-                    textInputAction: TextInputAction.next,
-                    // controller: allMatkulProvider.dosen2C,
-                  ),
-                  TextField(
-                    decoration: const InputDecoration(
                       hintText: "Ex: fst-404",
                       labelText: "Ruang kelas",
                       alignLabelWithHint: true,
@@ -142,65 +103,32 @@ class _AddJadwalState extends State<AddJadwal> {
                     autocorrect: false,
                     style: const TextStyle(fontWeight: FontWeight.normal),
                     textInputAction: TextInputAction.next,
-                    // controller: allMatkulProvider.ruanganC,
+                    controller: scheduleRoomTextC,
                   ),
-                  Obx(
-                    () => DropdownSearch<String>(
-                      // selectedItem: allMatkulProvider.hari.value,
-                      decoratorProps: const DropDownDecoratorProps(
-                        decoration: InputDecoration(hintText: "Pilih hari*"),
-                      ),
-                      popupProps: PopupProps.menu(
-                        constraints: const BoxConstraints(maxHeight: 200),
-                        menuProps: MenuProps(
-                          align: MenuAlign.bottomStart,
-                          backgroundColor: theme.colorScheme.surfaceContainer,
-                          margin: const EdgeInsets.only(top: 12),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
-                          ),
+                  DropdownSearch<Day>(
+                    selectedItem: selectedDay.value,
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(hintText: "Pilih hari*"),
+                    ),
+                    popupProps: PopupProps.menu(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      menuProps: MenuProps(
+                        align: MenuAlign.bottomStart,
+                        backgroundColor: theme.colorScheme.surfaceContainer,
+                        margin: const EdgeInsets.only(top: 12),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                       ),
-                      items: (filter, loadProps) =>
-                          // allMatkulProvider.hariList.toList(),
-                          ["senin", "Selasa"],
-                      // onChanged: (value) {
-                      //   if (value != null) {
-                      //     allMatkulProvider.hari.value = value;
-                      //   } else {
-                      //     allMatkulProvider.hari.value = "";
-                      //   }
-                      // },
                     ),
-                  ),
-                  Obx(
-                    () => DropdownSearch<String>(
-                      // selectedItem: allMatkulProvider.kelas.value,
-                      decoratorProps: const DropDownDecoratorProps(
-                        decoration: InputDecoration(hintText: "Pilih kelas"),
-                      ),
-                      popupProps: PopupProps.menu(
-                        constraints: const BoxConstraints(maxHeight: 225),
-                        menuProps: MenuProps(
-                          align: MenuAlign.topStart,
-                          backgroundColor: theme.colorScheme.surfaceContainer,
-                          margin: const EdgeInsets.only(top: 12),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
-                          ),
-                        ),
-                      ),
-                      items: (filter, loadProps) =>
-                          // allMatkulProvider.kelasList.toList
-                          ['a'],
-                      onChanged: (value) {
-                        // if (value != null) {
-                        //   allMatkulProvider.kelas.value = value;
-                        // } else if (value == null || value == "") {
-                        //   allMatkulProvider.kelas.value = null;
-                        // }
-                      },
-                    ),
+                    items: (filter, loadProps) => Day.getAllDay(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        selectedDay.value = value;
+                      } else {
+                        selectedDay.value = null;
+                      }
+                    },
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -244,19 +172,8 @@ class _AddJadwalState extends State<AddJadwal> {
                             unSelectedEmpty: true,
                             context: context,
                             onSubmitted: (TimeRangeValue value) {
-                              // if (value.endTime != null) {
-                              //   allMatkulProvider.jamAwal.value =
-                              //       "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              //   allMatkulProvider.jamAkhir.value =
-                              //       "${value.endTime?.hour}:${value.endTime?.minute.toString().padLeft(2, '0')}";
-                              // } else if (value.startTime == null) {
-                              //   allMatkulProvider.jamAwal.value = null;
-                              //   allMatkulProvider.jamAkhir.value = null;
-                              // } else {
-                              //   allMatkulProvider.jamAwal.value =
-                              //       "${value.startTime?.hour}:${value.startTime?.minute.toString().padLeft(2, '0')}";
-                              //   allMatkulProvider.jamAkhir.value = "";
-                              // }
+                              selectedStartTime.value = value.startTime;
+                              selectedEndTime.value = value.endTime;
                             },
                           );
                         },

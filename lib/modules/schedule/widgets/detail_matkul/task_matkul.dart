@@ -17,13 +17,15 @@ class TaskMatkul extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final taskBloc = context.read<TaskBloc>();
 
     useEffect(() {
-      context.read<TaskBloc>().add(LoadListTaskByMatkul(matkulId));
+      taskBloc.add(LoadListTaskByMatkul(matkulId));
       return;
     }, [matkulId]);
 
     return BlocBuilder<TaskBloc, TaskState>(
+      bloc: taskBloc,
       builder: (context, state) {
         if (state is TaskListByMatkulLoading) {
           return const Center(child: CircularProgressIndicator());

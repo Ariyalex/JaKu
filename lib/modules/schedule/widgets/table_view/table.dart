@@ -1,348 +1,233 @@
-import 'dart:async';
-
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:jaku/modules/schedule/controller/matkul_schedule_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
+import 'package:jaku/core/utils/matkul_utils.dart';
+import 'package:jaku/core/utils/time_parser_helper.dart';
+import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/value_objects/day.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 
-class Table extends StatefulWidget {
-  const Table({super.key});
+class Table extends HookWidget {
+  final List<MatkulSchedule> schedules;
+  final List<Matkul> matkuls;
 
-  @override
-  State<Table> createState() => _TableState();
-}
-
-class _TableState extends State<Table> {
-  final ScrollController _horizontalScrollController = ScrollController();
-  // final jadwalKuliahC = Get.find<selectedDay>();
-  // final hariKuliahC = Get.find<HariKuliahC>();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      //panggil fungsi tunggu data lalu scroll
-      // _waitForDataAndScrollToToday();
-    });
-  }
-
-  @override
-  void dispose() {
-    //dispose scroll controller
-    _horizontalScrollController.dispose();
-    super.dispose();
-  }
-
-  // Method untuk scroll ke kolom hari ini (dimodifikasi untuk testing)
-  // void scrollToTodayColumn() {
-  //   debugPrint("==== _scrollToTodayColumn dipanggil ====");
-
-  //   final jadwalKuliahDayProvider = Get.find<HariKuliahC>();
-
-  //   final dayNow = jadwalKuliahDayProvider.getCurrentDay();
-  //   // final dayNow = "Kamis";
-
-  //   debugPrint("Target hari: $dayNow");
-
-  //   final hariList = jadwalKuliahDayProvider.jadwalHariTerurut;
-  //   debugPrint("Daftar hari: $hariList");
-
-  //   if (hariList.isEmpty) {
-  //     debugPrint("PERINGATAN: Daftar hari masih kosong!");
-  //     return;
-  //   }
-
-  //   // Cari indeks hari dengan nama "Kamis"
-  //   int targetIndex = -1;
-  //   for (int i = 0; i < hariList.length; i++) {
-  //     final namaHari =
-  //         hariList[i].day; // atau hariList[i].namaHari atau properti lainnya
-  //     debugPrint("Hari ke-$i: $namaHari");
-
-  //     if (namaHari == dayNow) {
-  //       targetIndex = i;
-  //       debugPrint("Ketemu! $dayNow ada di indeks $i");
-  //       break;
-  //     }
-  //   }
-
-  //   if (targetIndex == -1) {
-  //     debugPrint(
-  //       "'$dayNow' tidak ditemukan dalam daftar hari, menggunakan indeks 0 sebagai fallback",
-  //     );
-  //     targetIndex = 0; // Fallback ke indeks pertama jika tidak ditemukan
-  //   }
-
-  //   // Lebar setiap kolom
-  //   const double columnWidth = 225.0;
-  //   final double scrollPosition = targetIndex * columnWidth;
-
-  //   debugPrint("Posisi scroll target: $scrollPosition");
-
-  //   if (!mounted) return;
-
-  //   Future.delayed(const Duration(milliseconds: 800), () {
-  //     if (!mounted) return;
-
-  //     if (_horizontalScrollController.hasClients) {
-  //       debugPrint(
-  //         "Controller memiliki clients, melakukan scroll ke $scrollPosition",
-  //       );
-  //       _horizontalScrollController.animateTo(
-  //         scrollPosition,
-  //         duration: const Duration(milliseconds: 500),
-  //         curve: Curves.easeInOut,
-  //       );
-  //     } else {
-  //       debugPrint("Controller TIDAK memiliki clients");
-  //     }
-  //   });
-  // }
-
-  // //tunggu data lalu scroll
-  // Future<void> _waitForDataAndScrollToToday() async {
-  //   final dayController = Get.find<HariKuliahC>();
-
-  //   // Check if data is already available
-  //   if (dayController.jadwalHariTerurut.isNotEmpty) {
-  //     debugPrint("Data hari tersedia segera");
-  //     scrollToTodayColumn();
-  //     return;
-  //   }
-
-  //   // Wait for data to become available
-  //   int attempts = 0;
-  //   while (attempts < 10) {
-  //     debugPrint("Menunggu data hari tersedia... (${attempts + 1}/10)");
-
-  //     // Wait a short time
-  //     await Future.delayed(const Duration(milliseconds: 400));
-
-  //     // Check again after waiting
-  //     if (dayController.jadwalHariTerurut.isNotEmpty) {
-  //       debugPrint("Data hari tersedia setelah ${attempts + 1} kali coba");
-  //       scrollToTodayColumn();
-  //       return;
-  //     }
-  //     attempts++;
-  //   }
-
-  //   debugPrint("Data hari tidak tersedia setelah menunggu 5 detik");
-  // }
+  const Table({super.key, required this.schedules, required this.matkuls});
 
   @override
   Widget build(BuildContext context) {
-    //get hari saat ini untuk highlight
-    // final String todayDay = hariKuliahC.getCurrentDay();
+    final ScrollController horizontalScrollController = useScrollController();
+    final Day todayDay = Day.currentDay();
 
     final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+    final textTheme = theme.textTheme;
 
-    //color
-    final primaryColor = Theme.of(context).primaryColor;
-    final colorTheme = Theme.of(context).colorScheme;
+    // 1. Compute Days and Time Pairs
+    final List<Day> days = useMemoized(
+      () => MatkulUtils.getListDayOfSchedule(schedules),
+      [schedules],
+    );
 
-    //text theme
-    final textTheme = Theme.of(context).textTheme;
-
-    return Obx(() {
-      // final allJadwal = jadwalKuliahC.allSchedule;
-      // final hari = hariKuliahC.jadwalHariTerurut;
-
-      //fungsi mendapatkanJam
-      // List<Map<String, String>> getJam() {
-      //   final jamPairSet = <String>{};
-
-      //   //membuat set dari string unik berdasarkan kombinasi jam awal dan akhir
-      //   for (var jadwal in allJadwal) {
-      //     jamPairSet.add("${jadwal.startTime}#${jadwal.endTime}");
-      //   }
-
-      //   //membuat list dari pasangan jam dalam bentuk map
-      //   final jamPairList = jamPairSet.map((pair) {
-      //     final parts = pair.split('#');
-      //     return {'jamAwal': parts[0], 'jamAkhir': parts[1]};
-      //   }).toList();
-
-      //   //mengurutkan berdasarkan jam awal
-      //   jamPairList.sort((a, b) {
-      //     int timeToMinutes(String timeStr) {
-      //       final parts = timeStr.split(":");
-      //       if (parts.length != 2) return 0;
-
-      //       try {
-      //         final hours = int.parse(parts[0]);
-      //         final minutes = int.parse(parts[1]);
-      //         return hours * 60 + minutes;
-      //       } catch (e) {
-      //         return 0;
-      //       }
-      //     }
-
-      //     final aMinutes = timeToMinutes(a['jamAwal']!);
-      //     final bMinutes = timeToMinutes(b['jamAwal']!);
-      //     return aMinutes.compareTo(bMinutes);
-      //   });
-
-      //   return jamPairList;
-      // }
-
-      // final jam = getJam();
-
-      //datacell matkul
-      DataCell getMatkulCell(String hari, Map<String, String> jamPair) {
-        //filter jadwal sesuai dengan hari dan jam
-        // final matchingMatkul = allJadwal.where(
-        //   (jadwal) =>
-        //       jadwal.day == hari &&
-        //       jadwal.startTime == jamPair['jamAwal'] &&
-        //       jadwal.endTime == jamPair['jamAkhir'],
-        // );
-
-        final isToday = true;
-
-        // if (matchingMatkul.isEmpty) {
-        //   // Sel kosong jika tidak ada mata kuliah
-        //   return const DataCell(Text(""));
-        // } // Membuat konten DataCell dengan mata kuliah
-        return DataCell(
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: isToday ? primaryColor.withValues(alpha: 0.35) : null,
-            ),
-            alignment: AlignmentDirectional.center,
-            child: Text(
-              // matchingMatkul.first.matkul,
-              "testing",
-              style: isToday ? textTheme.bodyLarge : textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
-            ),
-          ),
-          onTap: () {
-            Get.toNamed(
-              RouteNamed.detailMatkul,
-              // arguments: matchingMatkul.first.id,
-            );
-          },
-          onLongPress: () {
-            Get.defaultDialog(
-              backgroundColor: theme.dialogTheme.backgroundColor,
-              title: "Hapus Item",
-              content: const Text("Yakin hapus matkul ini?"),
-              cancel: TextButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text("No"),
-              ),
-              confirm: FilledButton(
-                onPressed: null,
-                //  () async {
-                //   try {
-                //     await jadwalKuliahC.deleteSchedule(
-                //       matchingMatkul.first.id!,
-                //       hariKuliahC,
-                //     );
-
-                //     Get.back();
-
-                //     showAppSnackbar(
-                //       title: "Success",
-                //       message: "Jadwal berhasil ditambahkan",
-                //     );
-                //   } catch (error) {
-                //     showAppSnackbar(
-                //       title: "Error!",
-                //       message: "Gagal menghapus jadwal: $error",
-                //       isSuccess: false,
-                //     );
-                //   }
-
-                //   Get.back();
-                // },
-                child: const Text("Yes"),
-              ),
-            );
-          },
-          // Opsi DataCell tambahan
+    final List<Map<String, String>> timePairs = useMemoized(() {
+      final Set<String> jamPairSet = <String>{};
+      for (var schedule in schedules) {
+        jamPairSet.add(
+          "${TimeParserHelper.formatDateTimeToString(schedule.startTime)}#${schedule.endTime != null ? TimeParserHelper.formatDateTimeToString(schedule.endTime!) : ""}",
         );
       }
 
-      //main code
-      return DataTable2(
-        horizontalMargin: 0,
-        columnSpacing: 0,
-        bottomMargin: 70,
-        dataRowHeight: 100,
-        fixedLeftColumns: 1,
-        headingRowColor: WidgetStateProperty.resolveWith<Color>((
-          Set<WidgetState> states,
-        ) {
-          return primaryColor.withValues(alpha: 0.4);
-        }),
-        isHorizontalScrollBarVisible: false,
-        isVerticalScrollBarVisible: false,
-        horizontalScrollController: _horizontalScrollController,
-        border: TableBorder.all(width: 1, color: theme.primaryColorDark),
-        minWidth: 1800,
-        columns: [
-          DataColumn2(
-            headingRowAlignment: MainAxisAlignment.center,
-            fixedWidth: 75,
-            label: Text("Jam", style: textTheme.bodyLarge),
-            size: ColumnSize.S,
+      final jamPairList = jamPairSet.map((pair) {
+        final parts = pair.split('#');
+        return {'jamAwal': parts[0], 'jamAkhir': parts[1]};
+      }).toList();
+
+      jamPairList.sort((a, b) {
+        int timeToMinutes(String timeStr) {
+          final parts = timeStr.split(":");
+          if (parts.length != 2) return 0;
+          try {
+            return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+          } catch (e) {
+            return 0;
+          }
+        }
+
+        return timeToMinutes(
+          a['jamAwal']!,
+        ).compareTo(timeToMinutes(b['jamAwal']!));
+      });
+      return jamPairList;
+    }, [schedules]);
+
+    // 2. Scroll Logic
+    void scrollToTodayColumn() {
+      if (days.isEmpty) return;
+
+      int targetIndex = days.indexWhere((day) => day == todayDay);
+      if (targetIndex == -1) targetIndex = 0;
+
+      const double columnWidth = 225.0;
+      final double scrollPosition = targetIndex * columnWidth;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (horizontalScrollController.hasClients) {
+          horizontalScrollController.animateTo(
+            scrollPosition,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
+
+    useEffect(() {
+      scrollToTodayColumn();
+      return null;
+    }, [days]);
+
+    // 3. Cell Builder
+    DataCell getMatkulCell(Day day, Map<String, String> jamPair) {
+      final matchingSchedules = schedules.where((jadwal) {
+        final sameDay = jadwal.day == day;
+        final sameStartTime =
+            TimeParserHelper.formatDateTimeToString(jadwal.startTime) ==
+            jamPair['jamAwal'];
+        final sameEndTime =
+            (jadwal.endTime != null
+                ? TimeParserHelper.formatDateTimeToString(jadwal.endTime!)
+                : "") ==
+            jamPair['jamAkhir'];
+        return sameDay && sameStartTime && sameEndTime;
+      }).toList();
+
+      final isToday = day == todayDay;
+
+      if (matchingSchedules.isEmpty) {
+        return const DataCell(Text(""));
+      }
+
+      final schedule = matchingSchedules.first;
+      final matkul = matkuls.firstWhere(
+        (m) => m.id == schedule.matkulId,
+        orElse: () =>
+            const Matkul(id: "", name: "Unknown", nameAbbreviation: "???"),
+      );
+
+      return DataCell(
+        Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: isToday ? primaryColor.withValues(alpha: 0.15) : null,
           ),
-          ...List<DataColumn2>.generate(
-            // hari.length,
-            2,
-            (index) => DataColumn2(
-              fixedWidth: 225.0,
-              headingRowAlignment: MainAxisAlignment.center,
-              // label: Text(hari[index].day, style: textTheme.bodyLarge),
-              label: Text("data"),
-            ),
+          alignment: Alignment.center,
+          child: Text(
+            matkul.nameAbbreviation.isNotEmpty
+                ? matkul.nameAbbreviation
+                : matkul.name,
+            style: isToday
+                ? textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)
+                : textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
-        ],
-        rows: [
-          ...List<DataRow2>.generate(
-            // jam.length,
-            2,
-            (index) => DataRow2(
-              cells: [
-                DataCell(
-                  Container(
-                    decoration: BoxDecoration(
-                      color: colorTheme.primary.withValues(alpha: 0.4),
-                    ),
-                    alignment: AlignmentDirectional.center,
-                    child: Text(
-                      // jam[index]['jamAkhir']!.isNotEmpty
-                      //     ? '${jam[index]['jamAwal']}\n - \n${jam[index]['jamAkhir']}'
-                      //     : '${jam[index]['jamAwal']}',
-                      "testing",
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyLarge,
-                    ),
-                  ),
+        ),
+        onTap: () {
+          context.goNamed(
+            RouteNamed.detailMatkul,
+            pathParameters: {"id": matkul.id},
+          );
+        },
+        onLongPress: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Hapus Item"),
+              content: Text("Yakin hapus jadwal ${matkul.name}?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Tidak"),
                 ),
-                ...List<DataCell>.generate(
-                  // hari.length,
-                  2,
-                  (hariIndex) => getMatkulCell(
-                    // hari[hariIndex].day,
-                    // jam[index],
-                    "senin",
-                    Map<String, String>(),
-                  ), // DataCell langsung dari getMatkulCell
+                FilledButton(
+                  onPressed: () {
+                    context.read<ScheduleBloc>().add(
+                      DeleteSchedule(schedule.id),
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Ya, Hapus"),
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        },
       );
-    });
+    }
+
+    // 4. Render Table
+    return DataTable2(
+      horizontalMargin: 0,
+      columnSpacing: 0,
+      bottomMargin: 70,
+      dataRowHeight: 100,
+      fixedLeftColumns: 1,
+      headingRowColor: WidgetStateProperty.all(
+        primaryColor.withValues(alpha: 0.1),
+      ),
+      isHorizontalScrollBarVisible: true,
+      horizontalScrollController: horizontalScrollController,
+      border: TableBorder.all(width: 0.5, color: theme.dividerColor),
+      minWidth: 150 + (days.length * 225.0),
+      columns: [
+        DataColumn2(
+          fixedWidth: 80,
+          label: Center(child: Text("Jam", style: textTheme.labelLarge)),
+        ),
+        ...days.map(
+          (day) => DataColumn2(
+            fixedWidth: 225.0,
+            label: Center(
+              child: Text(
+                day.display,
+                style: textTheme.labelLarge?.copyWith(
+                  color: day == todayDay ? primaryColor : null,
+                  fontWeight: day == todayDay
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+      rows: timePairs.map((jamPair) {
+        return DataRow2(
+          cells: [
+            DataCell(
+              Container(
+                width: double.infinity,
+                alignment: Alignment.center,
+                child: Text(
+                  jamPair['jamAkhir']!.isNotEmpty
+                      ? '${jamPair['jamAwal']}\n-\n${jamPair['jamAkhir']}'
+                      : '${jamPair['jamAwal']}',
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodySmall,
+                ),
+              ),
+            ),
+            ...days.map((day) => getMatkulCell(day, jamPair)),
+          ],
+        );
+      }).toList(),
+    );
   }
 }
