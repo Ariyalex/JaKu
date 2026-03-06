@@ -21,4 +21,15 @@ class ScheduleModel extends MatkulSchedule {
       room: json["room"],
     );
   }
+
+  MatkulSchedule toEntity() {
+    return MatkulSchedule(
+      id: id,
+      matkulId: matkulId,
+      day: day,
+      startTime: startTime,
+      endTime: endTime,
+      room: room,
+    );
+  }
 }

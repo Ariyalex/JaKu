@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jaku/core/client/hive_client.dart';
 import 'package:jaku/core/di/app_providers.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/routes/app_router.dart';
@@ -33,6 +35,8 @@ void main() async {
   // initialise the time zone database
   tz.initializeTimeZones();
 
+  await dotenv.load(fileName: ".env");
+
   // inisialisasi firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -41,6 +45,7 @@ void main() async {
   // init hive
   await Hive.initFlutter();
   await Hive.openBox('settings');
+  await HiveClient().init();
 
   final notificationBloc = NotificationBloc();
   notificationBloc.add(NotificationInitialize());
