@@ -43,6 +43,13 @@ enum Day {
       Day.sunday,
     ];
   }
+
+  static Day stringToDay(String value) {
+    return Day.values.firstWhere(
+      (day) => day.label == value || day.jsonValue == value,
+      orElse: () => throw Exception('Invalid day value: $value'),
+    );
+  }
 }
 
 extension DayExtension on Day {

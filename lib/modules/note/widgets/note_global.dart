@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/note.dart';
 import 'package:jaku/core/routes/route_named.dart';
 
 class NoteGlobal extends StatelessWidget {

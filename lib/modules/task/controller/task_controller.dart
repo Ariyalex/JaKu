@@ -3,13 +3,10 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
 import 'package:jaku/controllers/notification_controller.dart';
-import 'package:jaku/data/models/matkul.dart';
-import 'package:jaku/data/models/task.dart';
-import 'package:jaku/data/models/task_tab.dart';
+import 'package:jaku/data/entities/matkul.dart';
+import 'package:jaku/data/entities/task.dart';
+import 'package:jaku/data/entities/task_tab.dart';
 import 'package:jaku/services/task_service.dart';
-import 'package:uuid/uuid.dart';
-
-var uuid = const Uuid();
 
 class TaskController extends GetxController with GetTickerProviderStateMixin {
   late TextEditingController titleC;

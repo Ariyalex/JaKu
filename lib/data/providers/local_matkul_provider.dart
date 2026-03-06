@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 
 class LocalMatkulProvider {
   Box<Matkul> get _matkulBox => Hive.box<Matkul>("matkulBox");

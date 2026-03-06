@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/note.dart';
 
 abstract class NoteEvent extends Equatable {
   const NoteEvent();

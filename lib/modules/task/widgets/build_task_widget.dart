@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:jaku/controllers/main_tab_controller.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
 import 'package:jaku/modules/task/controller/task_controller.dart';
-import 'package:jaku/data/models/task.dart';
+import 'package:jaku/data/entities/task.dart';
 import 'package:jaku/modules/task/widgets/edit_group_modal.dart';
 import 'package:jaku/modules/task/widgets/task_tile.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

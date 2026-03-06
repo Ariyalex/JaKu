@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 
 class LocalMatkulScheduleProvider {
   Box<MatkulSchedule> get _box => Hive.box<MatkulSchedule>("scheduleBox");

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
 import 'package:jaku/modules/note/controller/note_controllers.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 
 class FilterNoteModal extends StatefulWidget {
   const FilterNoteModal({super.key});

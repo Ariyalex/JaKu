@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/repositories/matkul_repository.dart';
 
 class MatkulService extends GetxService {

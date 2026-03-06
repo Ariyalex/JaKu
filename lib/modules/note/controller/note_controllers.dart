@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
-import 'package:jaku/data/models/matkul.dart';
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/matkul.dart';
+import 'package:jaku/data/entities/note.dart';
 import 'package:jaku/services/note_service.dart';
 import 'package:uuid/uuid.dart';
-
-var uuid = const Uuid();
 
 class NoteControllers extends GetxController {
   late TextEditingController titleC;

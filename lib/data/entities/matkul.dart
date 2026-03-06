@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
-import 'package:uuid/uuid.dart';
+import 'package:jaku/main.dart';
 
 part 'matkul.g.dart';
 
@@ -21,43 +21,53 @@ class Matkul extends Equatable {
   @HiveField(4)
   final String? lecturer2;
 
-  @HiveField(5)
-  final String? className;
-
   const Matkul({
     required this.id,
     required this.name,
     required this.nameAbbreviation,
     this.lecturer1,
     this.lecturer2,
-    this.className,
   });
 
   @override
-  List<Object?> get props => [
-    id,
-    name,
-    nameAbbreviation,
-    lecturer1,
-    lecturer2,
-    className,
-  ];
+  List<Object?> get props => [id, name, nameAbbreviation, lecturer1, lecturer2];
 
   factory Matkul.create({
     required String name,
     required String nameAbbreviation,
     String? lecturer1,
     String? lecturer2,
-    String? className,
   }) {
-    const uuid = Uuid();
     return Matkul(
       id: uuid.v4(),
       name: name,
-      nameAbbreviation: nameAbbreviation,
+      nameAbbreviation: matkulAbbreviation(name),
       lecturer1: lecturer1,
       lecturer2: lecturer2,
-      className: className,
     );
+  }
+
+  static String matkulAbbreviation(String name) {
+    final List<String> conjunctions = [
+      'dan',
+      'atau',
+      'dsb',
+      'yang',
+      'di',
+      'ke',
+      'dari',
+      'untuk',
+    ];
+    final words = name
+        .toLowerCase()
+        .split(' ')
+        .where((word) => word.isNotEmpty && !conjunctions.contains(word))
+        .toList();
+
+    if (words.length <= 2) {
+      return name;
+    }
+
+    return words.map((word) => word[0].toUpperCase()).join();
   }
 }

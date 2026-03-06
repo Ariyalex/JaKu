@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/utils/time_parser_helper.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 
-import '../../../../data/models/matkul_schedule.dart';
+import '../../../../data/entities/matkul_schedule.dart';
 import '../../../../core/routes/route_named.dart';
 
 class MatkulCard extends StatelessWidget {

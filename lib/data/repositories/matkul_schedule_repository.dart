@@ -1,5 +1,5 @@
 import 'package:jaku/data/providers/local_matkul_schedule_provider.dart';
-import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 
 class MatkulScheduleRepository {
   final LocalMatkulScheduleProvider localProvider;

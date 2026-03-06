@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 
 abstract class MatkulState extends Equatable {
   const MatkulState();

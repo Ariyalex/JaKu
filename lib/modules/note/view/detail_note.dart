@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
 import 'package:jaku/modules/note/controller/note_controllers.dart';
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/note.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/core/widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

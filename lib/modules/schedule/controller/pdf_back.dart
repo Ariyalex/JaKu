@@ -5,7 +5,7 @@ import 'package:dio/dio.dart' as dio_package;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:jaku/services/matkul_schedule_service.dart';
-import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/modules/schedule/controller/matkul_schedule_controller.dart';
 import 'package:path_provider/path_provider.dart';
 

@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/note.dart';
 
 class LocalNoteProvider {
   Box<Note> get _noteBox => Hive.box<Note>("noteBox");

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/matkul_controller.dart';
 import 'package:jaku/modules/note/controller/note_controllers.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SelectMatkulWidget extends StatefulWidget {

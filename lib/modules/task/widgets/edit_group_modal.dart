@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaku/controllers/main_tab_controller.dart';
-import 'package:jaku/data/models/task_tab.dart';
+import 'package:jaku/data/entities/task_tab.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 
 class EditGroupModal extends StatefulWidget {

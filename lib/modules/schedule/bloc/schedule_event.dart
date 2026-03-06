@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 
 abstract class ScheduleEvent extends Equatable {
   const ScheduleEvent();

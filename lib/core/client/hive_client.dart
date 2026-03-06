@@ -1,8 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/data/models/matkul.dart';
-import 'package:jaku/data/models/matkul_schedule.dart';
-import 'package:jaku/data/models/note.dart';
-import 'package:jaku/data/models/task.dart';
+import 'package:jaku/data/entities/matkul.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
+import 'package:jaku/data/entities/note.dart';
+import 'package:jaku/data/entities/task.dart';
 
 class HiveClient {
   Future<void> init() async {

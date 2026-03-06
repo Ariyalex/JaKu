@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 import 'package:jaku/data/value_objects/day.dart';
-import 'package:uuid/uuid.dart';
+import 'package:jaku/main.dart';
 
 part 'matkul_schedule.g.dart';
 
@@ -44,7 +44,6 @@ class MatkulSchedule extends Equatable {
     DateTime? endTime,
     String? room,
   }) {
-    const uuid = Uuid();
     return MatkulSchedule(
       id: uuid.v4(),
       matkulId: matkulId,

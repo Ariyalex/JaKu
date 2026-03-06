@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/note.dart';
 
 class NoteService {
   static const noteBoxName = "note_box";

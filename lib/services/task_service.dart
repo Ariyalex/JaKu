@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:jaku/data/models/task.dart';
+import 'package:jaku/data/entities/task.dart';
 
 class TaskService {
   static const taskBoxName = "task_box";

@@ -1,15 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaku/main.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
-import 'package:uuid/uuid.dart';
-import 'package:jaku/data/models/task_tab.dart';
+import 'package:jaku/data/entities/task_tab.dart';
 import 'package:jaku/services/task_tab_service.dart';
 import 'main_tab_event.dart';
 import 'main_tab_state.dart';
 
 class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
-  final PersistentTabController mainTabController =
-      PersistentTabController(initialIndex: 0);
-  final Uuid uuid = const Uuid();
+  final PersistentTabController mainTabController = PersistentTabController(
+    initialIndex: 0,
+  );
 
   MainTabBloc() : super(const MainTabState()) {
     on<LoadAllTaskTabs>(_onLoadAllTaskTabs);
@@ -34,12 +34,12 @@ class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
     }
   }
 
-  Future<void> _onAddTaskTab(AddTaskTab event, Emitter<MainTabState> emit) async {
+  Future<void> _onAddTaskTab(
+    AddTaskTab event,
+    Emitter<MainTabState> emit,
+  ) async {
     try {
-      TaskTab newTab = TaskTab(
-        id: "tab-${uuid.v4()}",
-        tabName: event.tabName,
-      );
+      TaskTab newTab = TaskTab(id: "tab-${uuid.v4()}", tabName: event.tabName);
       final updatedTabs = List<TaskTab>.from(state.taskTabs)..add(newTab);
       await TaskTabService.saveTaskTabService(newTab);
       emit(state.copyWith(taskTabs: updatedTabs));
@@ -72,8 +72,9 @@ class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
     Emitter<MainTabState> emit,
   ) async {
     try {
-      final updatedTabs =
-          state.taskTabs.where((tab) => tab.id != event.id).toList();
+      final updatedTabs = state.taskTabs
+          .where((tab) => tab.id != event.id)
+          .toList();
       await TaskTabService.deleteTaskTabService(event.id);
       emit(state.copyWith(taskTabs: updatedTabs));
     } catch (error) {

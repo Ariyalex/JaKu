@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:jaku/data/models/task.dart';
+import 'package:jaku/data/entities/task.dart';
 
 abstract class TaskState extends Equatable {
   const TaskState();

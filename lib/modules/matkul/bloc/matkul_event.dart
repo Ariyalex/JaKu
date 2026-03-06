@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 
 abstract class MatkulEvent extends Equatable {
   const MatkulEvent();

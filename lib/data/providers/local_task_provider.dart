@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/data/models/task.dart';
+import 'package:jaku/data/entities/task.dart';
 
 class LocalTaskProvider {
   Box<Task> get _taskBox => Hive.box<Task>("taskBox");

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jaku/data/models/tutorial_step.dart';
+import 'package:jaku/data/entities/tutorial_step.dart';
 import 'package:jaku/modules/guides/widgets/info_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 

@@ -1,5 +1,5 @@
 import 'package:jaku/data/providers/local_matkul_provider.dart';
-import 'package:jaku/data/models/matkul.dart';
+import 'package:jaku/data/entities/matkul.dart';
 
 class MatkulRepository {
   final LocalMatkulProvider _localProvider;

@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/repositories/matkul_schedule_repository.dart';
 
 class MatkulScheduleService extends GetxService {

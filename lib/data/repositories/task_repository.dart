@@ -1,4 +1,4 @@
-import 'package:jaku/data/models/task.dart';
+import 'package:jaku/data/entities/task.dart';
 import 'package:jaku/data/providers/local_task_provider.dart';
 
 class TaskRepository {

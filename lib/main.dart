@@ -22,7 +22,10 @@ import 'package:jaku/modules/task/view/task_dashboard.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:uuid/uuid.dart';
 import 'core/theme/theme.dart';
+
+const uuid = Uuid();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

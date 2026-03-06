@@ -1,4 +1,4 @@
-import 'package:jaku/data/models/note.dart';
+import 'package:jaku/data/entities/note.dart';
 import 'package:jaku/data/providers/local_note_provider.dart';
 
 class NoteRepository {

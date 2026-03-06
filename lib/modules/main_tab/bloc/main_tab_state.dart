@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:jaku/data/models/task_tab.dart';
+import 'package:jaku/data/entities/task_tab.dart';
 
 class MainTabState extends Equatable {
   final List<TaskTab> taskTabs;

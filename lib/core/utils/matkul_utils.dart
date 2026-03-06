@@ -1,4 +1,4 @@
-import 'package:jaku/data/models/matkul_schedule.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/value_objects/day.dart';
 
 class MatkulUtils {
