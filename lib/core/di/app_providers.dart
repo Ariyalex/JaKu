@@ -15,7 +15,8 @@ import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
 
 class AppProviders {
-  static List<RepositoryProvider> get matkulRepositoryProviders => [
+  // --- Repository Providers ---
+  static List<RepositoryProvider> get repositoryProviders => [
     RepositoryProvider<LocalMatkulProvider>(
       create: (context) => LocalMatkulProvider(),
     ),
@@ -23,12 +24,6 @@ class AppProviders {
       create:
           (context) => MatkulRepository(context.read<LocalMatkulProvider>()),
     ),
-    RepositoryProvider<MatkulBloc>(
-      create: (context) => MatkulBloc(context.read<MatkulRepository>()),
-    ),
-  ];
-
-  static List<RepositoryProvider> get scheduleRepositoryProviders => [
     RepositoryProvider<LocalMatkulScheduleProvider>(
       create: (context) => LocalMatkulScheduleProvider(),
     ),
@@ -39,33 +34,17 @@ class AppProviders {
                 context.read<LocalMatkulScheduleProvider>(),
               ),
     ),
-    RepositoryProvider<ScheduleBloc>(
-      create:
-          (context) => ScheduleBloc(context.read<MatkulScheduleRepository>()),
-    ),
-  ];
-
-  static List<RepositoryProvider> get noteRepositoryProviders => [
     RepositoryProvider<LocalNoteProvider>(
       create: (context) => LocalNoteProvider(),
     ),
     RepositoryProvider<NoteRepository>(
       create: (context) => NoteRepository(context.read<LocalNoteProvider>()),
     ),
-    RepositoryProvider<NoteBloc>(
-      create: (context) => NoteBloc(context.read<NoteRepository>()),
-    ),
-  ];
-
-  static List<RepositoryProvider> get taskRepositoryProviders => [
     RepositoryProvider<LocalTaskProvider>(
       create: (context) => LocalTaskProvider(),
     ),
     RepositoryProvider<TaskRepository>(
       create: (context) => TaskRepository(context.read<LocalTaskProvider>()),
-    ),
-    RepositoryProvider<TaskBloc>(
-      create: (context) => TaskBloc(context.read<TaskRepository>()),
     ),
     RepositoryProvider<LocalTaskTabProvider>(
       create: (context) => LocalTaskTabProvider(),
@@ -74,6 +53,23 @@ class AppProviders {
       create:
           (context) =>
               TaskTabRepository(context.read<LocalTaskTabProvider>()),
+    ),
+  ];
+
+  // --- Bloc Providers ---
+  static List<BlocProvider> get blocProviders => [
+    BlocProvider<MatkulBloc>(
+      create: (context) => MatkulBloc(context.read<MatkulRepository>()),
+    ),
+    BlocProvider<ScheduleBloc>(
+      create:
+          (context) => ScheduleBloc(context.read<MatkulScheduleRepository>()),
+    ),
+    BlocProvider<NoteBloc>(
+      create: (context) => NoteBloc(context.read<NoteRepository>()),
+    ),
+    BlocProvider<TaskBloc>(
+      create: (context) => TaskBloc(context.read<TaskRepository>()),
     ),
   ];
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
@@ -9,38 +10,27 @@ import 'package:jaku/core/widgets/note_global.dart';
 import 'package:jaku/modules/note/widgets/search_textfield.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class NoteDashboard extends StatefulWidget {
+class NoteDashboard extends HookWidget {
   const NoteDashboard({super.key});
-
-  @override
-  State<NoteDashboard> createState() => _NoteDashboardState();
-}
-
-class _NoteDashboardState extends State<NoteDashboard> {
-  @override
-  void initState() {
-    super.initState();
-    // Dispatch LoadListNote if it hasn't been loaded
-    final noteBloc = context.read<NoteBloc>();
-    if (noteBloc.state.status == NoteStatus.initial) {
-      noteBloc.add(LoadListNote());
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteBloc = context.read<NoteBloc>();
+
+    // Tambahkan [] agar hanya berjalan satu kali saat init, bukan setiap rebuild
+    useEffect(() {
+      noteBloc.add(LoadListNote());
+      return null;
+    }, []);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: BlocBuilder<NoteBloc, NoteState>(
         builder: (context, state) {
-          if (state.status == NoteStatus.initial || state.status == NoteStatus.loading) {
+          if (state.status == NoteStatus.initial ||
+              state.status == NoteStatus.loading) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state.status == NoteStatus.error) {
-            return Center(child: Text("Error: ${state.message}"));
           }
 
           final notes = state.filteredNotes;
@@ -89,6 +79,9 @@ class _NoteDashboardState extends State<NoteDashboard> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // LANGKAH TERBAIK: Langsung buka layar AddNote.
+          // Layar tersebut sudah memiliki logika Note.create() sendiri
+          // dan auto-save yang aman dari race condition.
           context.pushNamed(RouteNamed.addNote);
         },
         shape: const CircleBorder(),

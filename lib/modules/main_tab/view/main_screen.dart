@@ -25,6 +25,7 @@ class MainScreen extends StatelessWidget {
         builder: (context, state) {
           return PersistentTabView(
             controller: mainTabBloc.mainTabController,
+
             tabs: [
               PersistentTabConfig(
                 screen: const ScheduleDashboard(),
@@ -54,6 +55,7 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
             ],
+
             navBarBuilder: (navBarConfig) {
               return Style8BottomNavBar(
                 navBarConfig: navBarConfig,
@@ -62,7 +64,6 @@ class MainScreen extends StatelessWidget {
                   border: Border(
                     top: BorderSide(
                       color: theme.dividerColor.withValues(alpha: 0.1),
-                      width: 1,
                     ),
                   ),
                 ),

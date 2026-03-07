@@ -21,8 +21,8 @@ class NoteAdapter extends TypeAdapter<Note> {
       matkulId: fields[1] as String?,
       title: fields[2] as String?,
       desc: fields[3] as String?,
-      createdOn: fields[5] as DateTime,
-      editedOn: fields[6] as DateTime,
+      createdOn: fields[4] as DateTime,
+      editedOn: fields[5] as DateTime,
     );
   }
 
@@ -38,9 +38,9 @@ class NoteAdapter extends TypeAdapter<Note> {
       ..write(obj.title)
       ..writeByte(3)
       ..write(obj.desc)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.createdOn)
-      ..writeByte(6)
+      ..writeByte(5)
       ..write(obj.editedOn);
   }
 

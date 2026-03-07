@@ -9,8 +9,8 @@ import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/core/widgets/select_matkul_widget.dart';
 
-class AddNote extends HookWidget {
-  const AddNote({super.key});
+class AddNoteScreen extends HookWidget {
+  const AddNoteScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +31,23 @@ class AddNote extends HookWidget {
     final selectedMatkulId = useState<String?>(initialNote.matkulId);
     final titleController = useTextEditingController();
     final noteController = useTextEditingController();
-    
-    // Track if the note has been saved at least once
-    final isSaved = useRef<bool>(false);
+
+    // Track if the note has been added to the database at least once
+    final isAddedToDb = useRef<bool>(false);
 
     useEffect(() {
       Timer? debounceTimer;
 
       void saveNote() {
-        // Only save if there is some content
-        if (titleController.text.isEmpty && noteController.text.isEmpty) return;
+        // If content is empty
+        if (titleController.text.isEmpty && noteController.text.isEmpty) {
+          // If it was previously saved, delete it from DB
+          if (isAddedToDb.value) {
+            noteBloc.add(DeleteNote(initialNote.id));
+            isAddedToDb.value = false;
+          }
+          return;
+        }
 
         final updatedNote = initialNote.copyWith(
           title: titleController.text,
@@ -49,8 +56,14 @@ class AddNote extends HookWidget {
           matkulId: selectedMatkulId.value,
         );
 
-        noteBloc.add(UpdateNote(updatedNote));
-        isSaved.value = true;
+        if (!isAddedToDb.value) {
+          // First time saving: use AddNote event
+          noteBloc.add(AddNote(updatedNote));
+          isAddedToDb.value = true;
+        } else {
+          // Subsequent saves: use UpdateNote event
+          noteBloc.add(UpdateNote(updatedNote));
+        }
       }
 
       void onTextChanged() {
@@ -66,8 +79,10 @@ class AddNote extends HookWidget {
         noteController.removeListener(onTextChanged);
         if (debounceTimer?.isActive ?? false) debounceTimer!.cancel();
 
-        // If the screen is disposed and content is empty, but we had saved it before, delete it.
-        if (isSaved.value && titleController.text.isEmpty && noteController.text.isEmpty) {
+        // Final check on dispose: if empty and was in DB, ensure it's deleted.
+        if (isAddedToDb.value &&
+            titleController.text.isEmpty &&
+            noteController.text.isEmpty) {
           noteBloc.add(DeleteNote(initialNote.id));
         }
       };

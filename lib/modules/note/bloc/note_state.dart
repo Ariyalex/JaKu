@@ -7,9 +7,10 @@ class NoteState extends Equatable {
   final List<Note> allNotes;
   final List<Note> filteredNotes;
   final Note? selectedNote;
+  final String? lastLoadedId;
   final NoteStatus status;
   final String? message;
-  
+
   // UI States
   final String searchQuery;
   final String filterMatkulId;
@@ -22,6 +23,7 @@ class NoteState extends Equatable {
     this.allNotes = const [],
     this.filteredNotes = const [],
     this.selectedNote,
+    this.lastLoadedId,
     this.status = NoteStatus.initial,
     this.message,
     this.searchQuery = '',
@@ -36,6 +38,7 @@ class NoteState extends Equatable {
     List<Note>? allNotes,
     List<Note>? filteredNotes,
     Note? selectedNote,
+    String? lastLoadedId,
     NoteStatus? status,
     String? message,
     String? searchQuery,
@@ -50,6 +53,7 @@ class NoteState extends Equatable {
       allNotes: allNotes ?? this.allNotes,
       filteredNotes: filteredNotes ?? this.filteredNotes,
       selectedNote: clearSelected ? null : (selectedNote ?? this.selectedNote),
+      lastLoadedId: lastLoadedId ?? this.lastLoadedId,
       status: status ?? this.status,
       message: message ?? this.message,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -63,16 +67,17 @@ class NoteState extends Equatable {
 
   @override
   List<Object?> get props => [
-        allNotes,
-        filteredNotes,
-        selectedNote,
-        status,
-        message,
-        searchQuery,
-        filterMatkulId,
-        sortActiveIndex,
-        isAsce,
-        isSorting,
-        isSortByCreatedDate,
-      ];
+    allNotes,
+    filteredNotes,
+    selectedNote,
+    lastLoadedId,
+    status,
+    message,
+    searchQuery,
+    filterMatkulId,
+    sortActiveIndex,
+    isAsce,
+    isSorting,
+    isSortByCreatedDate,
+  ];
 }

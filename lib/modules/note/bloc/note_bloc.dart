@@ -6,7 +6,7 @@ import 'package:jaku/modules/note/bloc/note_state.dart';
 
 class NoteBloc extends Bloc<NoteEvent, NoteState> {
   final NoteRepository _repository;
-  
+
   NoteBloc(this._repository) : super(const NoteState()) {
     on<LoadListNote>(_onLoadListNote);
     on<LoadListNoteByMatkul>(_onLoadListNoteByMatkul);
@@ -15,7 +15,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     on<UpdateNote>(_onUpdateNote);
     on<DeleteNote>(_onDeleteNote);
     on<DeleteAllNote>(_onDeleteAllNote);
-    
+
     // New events for UI state
     on<SearchNotes>(_onSearchNotes);
     on<FilterNotesByMatkul>(_onFilterNotesByMatkul);
@@ -36,7 +36,8 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     }
 
     // 2. Filter by Matkul
-    if (currentState.filterMatkulId != 'all' && currentState.filterMatkulId.isNotEmpty) {
+    if (currentState.filterMatkulId != 'all' &&
+        currentState.filterMatkulId.isNotEmpty) {
       final parts = currentState.filterMatkulId
           .split(',')
           .map((e) => e.trim())
@@ -46,8 +47,14 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
       final specificIds = parts.where((element) => element != 'umum').toSet();
 
       result = result.where((note) {
-        if (includeUmum && (note.matkulId == null || note.matkulId!.isEmpty)) return true;
-        if (specificIds.isNotEmpty && note.matkulId != null && specificIds.contains(note.matkulId)) return true;
+        if (includeUmum && (note.matkulId == null || note.matkulId!.isEmpty)) {
+          return true;
+        }
+        if (specificIds.isNotEmpty &&
+            note.matkulId != null &&
+            specificIds.contains(note.matkulId)) {
+          return true;
+        }
         return false;
       }).toList();
     }
@@ -76,22 +83,26 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     LoadListNote event,
     Emitter<NoteState> emit,
   ) async {
-    emit(state.copyWith(status: NoteStatus.loading));
+    emit(state.copyWith(status: NoteStatus.loading, lastLoadedId: null));
     try {
       final notes = _repository.getAllNote();
-      
+
       // Filter out empty notes
       final validNotes = <Note>[];
       for (var note in notes) {
         if ((note.title == null || note.title!.isEmpty) &&
             (note.desc == null || note.desc!.isEmpty)) {
-          await _repository.deleteNote(note.id!);
+          await _repository.deleteNote(note.id);
         } else {
           validNotes.add(note);
         }
       }
 
-      emit(_applyFilters(state.copyWith(status: NoteStatus.success, allNotes: validNotes)));
+      emit(
+        _applyFilters(
+          state.copyWith(status: NoteStatus.success, allNotes: validNotes),
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -111,17 +122,36 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   }
 
   Future<void> _onLoadNote(LoadNote event, Emitter<NoteState> emit) async {
-    // If we have it in list, set it
-    final existing = state.allNotes.where((n) => n.id == event.id).firstOrNull;
-    if (existing != null) {
-      emit(state.copyWith(selectedNote: existing));
+    // If we already have it selected, just ensure success
+    if (state.selectedNote?.id == event.id) {
+      emit(state.copyWith(status: NoteStatus.success, lastLoadedId: event.id));
       return;
     }
 
-    emit(state.copyWith(status: NoteStatus.loading));
+    // Optimization: If we have it in list, set it immediately
+    final existing = state.allNotes.where((n) => n.id == event.id).firstOrNull;
+    if (existing != null) {
+      emit(state.copyWith(
+        selectedNote: existing,
+        status: NoteStatus.success,
+        lastLoadedId: event.id,
+      ));
+      return;
+    }
+
+    // Otherwise, clear and load from repository
+    emit(state.copyWith(
+      status: NoteStatus.loading,
+      clearSelected: true,
+      lastLoadedId: event.id,
+    ));
     try {
       final note = _repository.getNoteById(event.id);
-      emit(state.copyWith(status: NoteStatus.success, selectedNote: note));
+      emit(state.copyWith(
+        status: NoteStatus.success,
+        selectedNote: note,
+        lastLoadedId: event.id,
+      ));
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -139,7 +169,16 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   Future<void> _onUpdateNote(UpdateNote event, Emitter<NoteState> emit) async {
     try {
       await _repository.updateNote(event.note);
-      add(LoadListNote());
+      final notes = _repository.getAllNote();
+
+      final updatedAllNotes = notes.map((n) => n.id == event.note.id ? event.note : n).toList();
+
+      final newState = state.copyWith(
+        allNotes: updatedAllNotes,
+        selectedNote: event.note,
+        status: NoteStatus.success,
+      );
+      emit(_applyFilters(newState));
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -170,16 +209,23 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     emit(_applyFilters(state.copyWith(searchQuery: event.query)));
   }
 
-  void _onFilterNotesByMatkul(FilterNotesByMatkul event, Emitter<NoteState> emit) {
+  void _onFilterNotesByMatkul(
+    FilterNotesByMatkul event,
+    Emitter<NoteState> emit,
+  ) {
     emit(_applyFilters(state.copyWith(filterMatkulId: event.matkulId)));
   }
 
   void _onSortNotes(SortNotes event, Emitter<NoteState> emit) {
-    emit(_applyFilters(state.copyWith(
-      sortActiveIndex: event.activeIndex,
-      isAsce: event.isAsce,
-      isSorting: event.isSorting,
-      isSortByCreatedDate: event.isSortByCreatedDate,
-    )));
+    emit(
+      _applyFilters(
+        state.copyWith(
+          sortActiveIndex: event.activeIndex,
+          isAsce: event.isAsce,
+          isSorting: event.isSorting,
+          isSortByCreatedDate: event.isSortByCreatedDate,
+        ),
+      ),
+    );
   }
 }

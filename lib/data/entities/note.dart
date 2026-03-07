@@ -18,10 +18,10 @@ class Note extends Equatable {
   @HiveField(3)
   final String? desc;
 
-  @HiveField(5)
+  @HiveField(4)
   final DateTime createdOn;
 
-  @HiveField(6)
+  @HiveField(5)
   final DateTime editedOn;
 
   const Note({
@@ -40,7 +40,6 @@ class Note extends Equatable {
     DateTime? createdOn,
     DateTime? editedOn,
     String? matkulId,
-    String? matkul,
   }) {
     return Note(
       id: this.id,

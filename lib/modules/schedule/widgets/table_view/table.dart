@@ -139,8 +139,8 @@ class Table extends HookWidget {
         ),
         onTap: () {
           context.pushNamed(
-            RouteNamed.detailMatkul,
-            pathParameters: {"id": matkul.id},
+            RouteNamed.detailSchedule,
+            pathParameters: {"id": schedule.id},
           );
         },
         onLongPress: () {

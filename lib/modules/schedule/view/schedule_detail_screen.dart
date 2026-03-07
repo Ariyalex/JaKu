@@ -59,24 +59,24 @@ class ScheduleDetailScreen extends HookWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        appBar: AppBar(
-          leadingWidth: 50,
-          actions: [
-            IconButton(
-              onPressed: () async {
-                context.pushNamed(
-                  RouteNamed.editSchedule,
-                  pathParameters: {"id": id},
-                );
-              },
-              icon: const Icon(LucideIcons.squarePen),
-            ),
-          ],
-        ),
-        body: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: AppBar(
+        leadingWidth: 50,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              context.pushNamed(
+                RouteNamed.editSchedule,
+                pathParameters: {"id": id},
+              );
+            },
+            icon: const Icon(LucideIcons.squarePen),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(

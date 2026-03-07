@@ -7,8 +7,8 @@ import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/data/providers/remote_pdf_provider.dart';
 import 'package:jaku/data/repositories/pdf_repository.dart';
 import 'package:jaku/modules/main_tab/view/main_screen.dart';
-import 'package:jaku/modules/note/view/add_note.dart';
-import 'package:jaku/modules/note/view/detail_note.dart';
+import 'package:jaku/modules/note/view/add_note_screen.dart';
+import 'package:jaku/modules/note/view/detail_note_screen.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_bloc.dart';
 import 'package:jaku/modules/schedule/view/add_schedule_screen.dart';
 import 'package:jaku/modules/schedule/view/edit_schedule_screen.dart';
@@ -50,8 +50,8 @@ class AppRouter {
         builder: (context, state) => const GuideGeneral(),
       ),
       GoRoute(
-        name: RouteNamed.detailMatkul,
-        path: RouteNamed.detailMatkul,
+        name: RouteNamed.detailSchedule,
+        path: RouteNamed.detailSchedule,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ScheduleDetailScreen(id: id);
@@ -60,7 +60,7 @@ class AppRouter {
       GoRoute(
         name: RouteNamed.addSchedule,
         path: RouteNamed.addSchedule,
-        builder: (context, state) => AddScheduleScreen(),
+        builder: (context, state) => const AddScheduleScreen(),
       ),
       GoRoute(
         name: RouteNamed.editSchedule,
@@ -73,12 +73,15 @@ class AppRouter {
       GoRoute(
         name: RouteNamed.addNote,
         path: RouteNamed.addNote,
-        builder: (context, state) => const AddNote(),
+        builder: (context, state) => const AddNoteScreen(),
       ),
       GoRoute(
         name: RouteNamed.detailNote,
         path: RouteNamed.detailNote,
-        builder: (context, state) => const DetailNote(),
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return DetailNoteScreen(id: id);
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

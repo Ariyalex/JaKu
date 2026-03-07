@@ -26,7 +26,7 @@ class MatkulCard extends StatelessWidget {
         child: ListTile(
           onTap: () {
             context.pushNamed(
-              RouteNamed.detailMatkul,
+              RouteNamed.detailSchedule,
               pathParameters: {"id": schedule.id},
             );
           },

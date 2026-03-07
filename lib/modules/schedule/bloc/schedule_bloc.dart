@@ -23,7 +23,9 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     emit(state.copyWith(status: ScheduleStatus.loading));
     try {
       final schedules = _repository.getAllSchedule();
-      emit(state.copyWith(status: ScheduleStatus.success, schedules: schedules));
+      emit(
+        state.copyWith(status: ScheduleStatus.success, schedules: schedules),
+      );
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
@@ -43,7 +45,12 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     emit(state.copyWith(status: ScheduleStatus.loading));
     try {
       final schedule = _repository.getScheduleById(event.id);
-      emit(state.copyWith(status: ScheduleStatus.success, selectedSchedule: schedule));
+      emit(
+        state.copyWith(
+          status: ScheduleStatus.success,
+          selectedSchedule: schedule,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }

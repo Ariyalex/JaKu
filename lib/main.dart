@@ -61,14 +61,10 @@ void main() async {
 
   runApp(
     MultiRepositoryProvider(
-      providers: [
-        ...AppProviders.matkulRepositoryProviders,
-        ...AppProviders.scheduleRepositoryProviders,
-        ...AppProviders.noteRepositoryProviders,
-        ...AppProviders.taskRepositoryProviders,
-      ],
+      providers: AppProviders.repositoryProviders,
       child: MultiBlocProvider(
         providers: [
+          ...AppProviders.blocProviders,
           BlocProvider(create: (context) => ThemeCubit()..initTheme()),
           BlocProvider(create: (context) => notificationBloc),
           BlocProvider(
@@ -77,7 +73,6 @@ void main() async {
                     MainTabBloc(context.read<TaskTabRepository>())
                       ..add(LoadAllTaskTabs()),
           ),
-
           BlocProvider(create: (context) => ScheduleViewCubit()..initView()),
         ],
         child: const MyApp(),
