@@ -3,10 +3,12 @@ import 'package:jaku/data/providers/local_matkul_provider.dart';
 import 'package:jaku/data/providers/local_matkul_schedule_provider.dart';
 import 'package:jaku/data/providers/local_note_provider.dart';
 import 'package:jaku/data/providers/local_task_provider.dart';
+import 'package:jaku/data/providers/local_task_tab_provider.dart';
 import 'package:jaku/data/repositories/matkul_repository.dart';
 import 'package:jaku/data/repositories/matkul_schedule_repository.dart';
 import 'package:jaku/data/repositories/note_repositoruy.dart';
 import 'package:jaku/data/repositories/task_repository.dart';
+import 'package:jaku/data/repositories/task_tab_repository.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
@@ -17,12 +19,10 @@ class AppProviders {
     RepositoryProvider<LocalMatkulProvider>(
       create: (context) => LocalMatkulProvider(),
     ),
-
     RepositoryProvider<MatkulRepository>(
-      create: (context) =>
-          MatkulRepository(context.read<LocalMatkulProvider>()),
+      create:
+          (context) => MatkulRepository(context.read<LocalMatkulProvider>()),
     ),
-
     RepositoryProvider<MatkulBloc>(
       create: (context) => MatkulBloc(context.read<MatkulRepository>()),
     ),
@@ -32,15 +32,16 @@ class AppProviders {
     RepositoryProvider<LocalMatkulScheduleProvider>(
       create: (context) => LocalMatkulScheduleProvider(),
     ),
-
     RepositoryProvider<MatkulScheduleRepository>(
-      create: (context) =>
-          MatkulScheduleRepository(context.read<LocalMatkulScheduleProvider>()),
+      create:
+          (context) =>
+              MatkulScheduleRepository(
+                context.read<LocalMatkulScheduleProvider>(),
+              ),
     ),
-
     RepositoryProvider<ScheduleBloc>(
-      create: (context) =>
-          ScheduleBloc(context.read<MatkulScheduleRepository>()),
+      create:
+          (context) => ScheduleBloc(context.read<MatkulScheduleRepository>()),
     ),
   ];
 
@@ -48,11 +49,9 @@ class AppProviders {
     RepositoryProvider<LocalNoteProvider>(
       create: (context) => LocalNoteProvider(),
     ),
-
     RepositoryProvider<NoteRepository>(
       create: (context) => NoteRepository(context.read<LocalNoteProvider>()),
     ),
-
     RepositoryProvider<NoteBloc>(
       create: (context) => NoteBloc(context.read<NoteRepository>()),
     ),
@@ -62,13 +61,19 @@ class AppProviders {
     RepositoryProvider<LocalTaskProvider>(
       create: (context) => LocalTaskProvider(),
     ),
-
     RepositoryProvider<TaskRepository>(
       create: (context) => TaskRepository(context.read<LocalTaskProvider>()),
     ),
-
     RepositoryProvider<TaskBloc>(
       create: (context) => TaskBloc(context.read<TaskRepository>()),
+    ),
+    RepositoryProvider<LocalTaskTabProvider>(
+      create: (context) => LocalTaskTabProvider(),
+    ),
+    RepositoryProvider<TaskTabRepository>(
+      create:
+          (context) =>
+              TaskTabRepository(context.read<LocalTaskTabProvider>()),
     ),
   ];
 }

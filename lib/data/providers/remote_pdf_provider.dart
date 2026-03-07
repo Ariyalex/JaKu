@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:jaku/core/utils/time_parser_helper.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/models/matkul_model.dart';
 import 'package:jaku/data/models/schedule_model.dart';
@@ -21,25 +22,26 @@ class RemotePdfProvider {
         'file': await MultipartFile.fromFile(file.path, filename: fileName),
       });
 
-      final response =
-          await dio.post(
-                '$baseUrl/usukaparse',
-                data: formData,
-                options: Options(
-                  contentType: 'multipart/form-data',
-                  followRedirects: false,
-                ),
-              )
-              as Map<String, dynamic>;
+      final response = await dio.post(
+        '$baseUrl/usukaparse',
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+          followRedirects: false,
+        ),
+      );
+
+      // Ambil data dari response.data sebelum melakukan cast ke Map
+      final data = response.data as Map<String, dynamic>;
 
       List<MatkulModel> matkulList = [];
       List<ScheduleModel> scheduleList = [];
 
       for (Map<String, dynamic> matkul
-          in response['matkuls'] as List<Map<String, dynamic>>) {
+          in data['matkuls'] as List<dynamic>) {
         List<dynamic> lecturerList = matkul['lecturers'] ?? [];
-        String? lecturer1 = lecturerList[0]['name'];
-        String? lecturer2 = lecturerList[1]['name'];
+        String? lecturer1 = lecturerList.isNotEmpty ? lecturerList[0]['name'] : null;
+        String? lecturer2 = lecturerList.length > 1 ? lecturerList[1]['name'] : null;
 
         matkulList.add(
           MatkulModel(
@@ -58,8 +60,10 @@ class RemotePdfProvider {
               id: schedule['id'],
               matkulId: matkul['id'],
               day: Day.stringToDay(schedule['day']),
-              startTime: DateTime.parse(schedule['start_time']),
-              endTime: DateTime.parse(schedule['end_time']),
+              startTime: TimeParserHelper.parseTimeOfDay(
+                schedule['start_time'],
+              ),
+              endTime: TimeParserHelper.parseTimeOfDay(schedule['end_time']),
               room: schedule['room'],
             ),
           );

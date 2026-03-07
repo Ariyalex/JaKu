@@ -1,4 +1,5 @@
 abstract class RouteNamed {
+  static const home = '/';
   static const scheduleDashboard = '/schedule_dashboard';
   static const noteDashboard = '/note_dashboard';
   static const taskDashboard = '/task_dashboard';
@@ -8,4 +9,6 @@ abstract class RouteNamed {
   static const detailMatkul = '/detail_matkul/:id';
   static const addNote = '/add_note';
   static const detailNote = '/detail_note/:id';
+  static const addSchedule = '/add_schedule';
+  static const editSchedule = '/edit_schedule/:id';
 }

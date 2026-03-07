@@ -1,39 +1,36 @@
 import 'package:equatable/equatable.dart';
 import 'package:jaku/data/entities/matkul.dart';
 
-abstract class MatkulState extends Equatable {
-  const MatkulState();
+enum MatkulStatus { initial, loading, success, error }
 
-  @override
-  List<Object?> get props => [];
-}
-
-class MatkulInitial extends MatkulState {}
-
-class MatkulLoading extends MatkulState {}
-
-class MatkulLoaded extends MatkulState {
-  final Matkul matkul;
-  const MatkulLoaded(this.matkul);
-
-  @override
-  List<Object?> get props => [matkul];
-}
-
-class MatkulListLoading extends MatkulState {}
-
-class MatkulListLoaded extends MatkulState {
+class MatkulState extends Equatable {
   final List<Matkul> matkuls;
-  const MatkulListLoaded(this.matkuls);
+  final Matkul? selectedMatkul;
+  final MatkulStatus status;
+  final String? message;
+
+  const MatkulState({
+    this.matkuls = const [],
+    this.selectedMatkul,
+    this.status = MatkulStatus.initial,
+    this.message,
+  });
+
+  MatkulState copyWith({
+    List<Matkul>? matkuls,
+    Matkul? selectedMatkul,
+    MatkulStatus? status,
+    String? message,
+    bool clearSelected = false,
+  }) {
+    return MatkulState(
+      matkuls: matkuls ?? this.matkuls,
+      selectedMatkul: clearSelected ? null : (selectedMatkul ?? this.selectedMatkul),
+      status: status ?? this.status,
+      message: message ?? this.message,
+    );
+  }
 
   @override
-  List<Object?> get props => [matkuls];
-}
-
-class MatkulError extends MatkulState {
-  final String message;
-  const MatkulError(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [matkuls, selectedMatkul, status, message];
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:jaku/modules/note/controller/note_controllers.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_event.dart';
+import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/widgets/sort_tile.dart';
 
 class SortNoteModal extends StatelessWidget {
@@ -8,8 +10,6 @@ class SortNoteModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final noteC = Get.find<NoteControllers>();
-
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -23,56 +23,63 @@ class SortNoteModal extends StatelessWidget {
               ),
             ),
             const Divider(),
-            Obx(() {
-              final activeIndex = noteC.activeIndex;
-              final isAsce = noteC.isAsce;
-              final isSorting = noteC.isSorting;
-              final isSortByCreated = noteC.isSortByCreatedDate;
+            BlocBuilder<NoteBloc, NoteState>(
+              builder: (context, state) {
+                int activeIndex = state.sortActiveIndex;
+                bool isAsce = state.isAsce;
+                bool isSortByCreated = state.isSortByCreatedDate;
 
-              return Column(
-                children: [
-                  SortTile(
-                    isActive: activeIndex.value == 0,
-                    title: 'None',
-                    isSortable: false,
-                    onTap: () {
-                      activeIndex.value = 0;
-                      isSorting.value = false;
-                    },
-                  ),
-                  SortTile(
-                    isActive: activeIndex.value == 1,
-                    title: "Sort by Created Date",
-                    onTap: () {
-                      if (activeIndex.value != 1) {
-                        isAsce.value = true;
-                      } else {
-                        isAsce.value = !isAsce.value;
-                      }
-                      activeIndex.value = 1;
-                      isSorting.value = true;
-                      isSortByCreated.value = true;
-                    },
-                    isAsce: isAsce.value,
-                  ),
-                  SortTile(
-                    isActive: activeIndex.value == 2,
-                    title: "Sort by Modified Date",
-                    onTap: () {
-                      if (activeIndex.value != 2) {
-                        isAsce.value = true;
-                      } else {
-                        isAsce.value = !isAsce.value;
-                      }
-                      activeIndex.value = 2;
-                      isSorting.value = true;
-                      isSortByCreated.value = false;
-                    },
-                    isAsce: isAsce.value,
-                  ),
-                ],
-              );
-            }),
+                void updateSort(int newActiveIndex, bool newIsAsce, bool newIsSorting, bool newIsSortByCreated) {
+                  context.read<NoteBloc>().add(SortNotes(
+                    activeIndex: newActiveIndex,
+                    isAsce: newIsAsce,
+                    isSorting: newIsSorting,
+                    isSortByCreatedDate: newIsSortByCreated,
+                  ));
+                }
+
+                return Column(
+                  children: [
+                    SortTile(
+                      isActive: activeIndex == 0,
+                      title: 'None',
+                      isSortable: false,
+                      onTap: () {
+                        updateSort(0, isAsce, false, isSortByCreated);
+                      },
+                    ),
+                    SortTile(
+                      isActive: activeIndex == 1,
+                      title: "Sort by Created Date",
+                      onTap: () {
+                        bool newIsAsce = isAsce;
+                        if (activeIndex != 1) {
+                          newIsAsce = true;
+                        } else {
+                          newIsAsce = !isAsce;
+                        }
+                        updateSort(1, newIsAsce, true, true);
+                      },
+                      isAsce: isAsce,
+                    ),
+                    SortTile(
+                      isActive: activeIndex == 2,
+                      title: "Sort by Modified Date",
+                      onTap: () {
+                        bool newIsAsce = isAsce;
+                        if (activeIndex != 2) {
+                          newIsAsce = true;
+                        } else {
+                          newIsAsce = !isAsce;
+                        }
+                        updateSort(2, newIsAsce, true, false);
+                      },
+                      isAsce: isAsce,
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/utils/time_parser_helper.dart';
 import 'package:jaku/data/entities/matkul.dart';
@@ -26,28 +25,35 @@ class MatkulCard extends StatelessWidget {
         color: theme.highlightColor,
         child: ListTile(
           onTap: () {
-            context.goNamed(
+            context.pushNamed(
               RouteNamed.detailMatkul,
               pathParameters: {"id": schedule.id},
             );
           },
           onLongPress: () {
-            Get.defaultDialog(
-              backgroundColor: theme.dialogTheme.backgroundColor,
-              title: "Hapus Item",
-              content: const Text("Yakin hapus?"),
-              cancel: OutlinedButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text("No"),
-              ),
-              confirm: FilledButton(
-                onPressed: () => context.read<ScheduleBloc>().add(
-                  DeleteSchedule(schedule.id),
-                ),
-
-                child: const Text("Yes"),
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                backgroundColor: theme.dialogTheme.backgroundColor,
+                title: const Text("Hapus Item"),
+                content: const Text("Yakin hapus?"),
+                actions: [
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("No"),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      context.read<ScheduleBloc>().add(
+                        DeleteSchedule(schedule.id),
+                      );
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Yes"),
+                  ),
+                ],
               ),
             );
           },
@@ -62,10 +68,8 @@ class MatkulCard extends StatelessWidget {
                 children: [
                   Text(
                     (schedule.endTime != null
-                        ? "${TimeParserHelper.formatDateTimeToString(schedule.startTime)} - ${TimeParserHelper.formatDateTimeToString(schedule.endTime!)}"
-                        : TimeParserHelper.formatDateTimeToString(
-                            schedule.endTime!,
-                          )),
+                        ? "${TimeParserHelper.formatTimeOfDay(schedule.startTime)} - ${TimeParserHelper.formatTimeOfDay(schedule.endTime!)}"
+                        : TimeParserHelper.formatTimeOfDay(schedule.startTime)),
                   ),
                   Text(
                     "${schedule.room}",
@@ -80,12 +84,12 @@ class MatkulCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (matkul.lecturer1 == "null" || matkul.lecturer1!.isEmpty)
+                    (matkul.lecturer1 == null)
                         ? "dosen belum ditambahkan"
                         : "${matkul.lecturer1}",
                     overflow: TextOverflow.ellipsis,
                   ),
-                  matkul.lecturer2 == "null" || matkul.lecturer2!.isEmpty
+                  matkul.lecturer2 == null
                       ? const SizedBox.shrink()
                       : Text(
                           "${matkul.lecturer2}",

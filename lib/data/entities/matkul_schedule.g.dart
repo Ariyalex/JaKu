@@ -20,8 +20,8 @@ class MatkulScheduleAdapter extends TypeAdapter<MatkulSchedule> {
       id: fields[0] as String,
       matkulId: fields[1] as String,
       day: fields[2] as Day,
-      startTime: fields[3] as DateTime,
-      endTime: fields[4] as DateTime?,
+      startTime: fields[3] as TimeOfDay,
+      endTime: fields[4] as TimeOfDay?,
       room: fields[5] as String?,
     );
   }

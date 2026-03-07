@@ -1,256 +1,225 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:get/get.dart';
-import 'package:jaku/controllers/main_tab_controller.dart';
-import 'package:jaku/controllers/matkul_controller.dart';
-import 'package:jaku/controllers/notification_controller.dart';
-import 'package:jaku/modules/task/controller/task_controller.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
+import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
+import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
+import 'package:jaku/modules/notification/bloc/notification_state.dart';
+import 'package:jaku/modules/task/bloc/task_bloc.dart';
+import 'package:jaku/modules/task/bloc/task_event.dart';
+import 'package:jaku/modules/task/bloc/task_state.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/modules/task/widgets/add_group_modal.dart';
 import 'package:jaku/modules/task/widgets/add_task_modal.dart';
 import 'package:jaku/modules/task/widgets/build_task_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:uuid/uuid.dart';
 
-class TaskDashboard extends StatefulWidget {
+class TaskDashboard extends HookWidget {
   const TaskDashboard({super.key});
-
-  @override
-  State<TaskDashboard> createState() => _TaskDashboardState();
-}
-
-class _TaskDashboardState extends State<TaskDashboard> {
-  //fabKey untuk controller floating action button
-  final GlobalKey<ExpandableFabState> fabKey = GlobalKey<ExpandableFabState>();
-  // final matkulC = Get.find<MatkulController>();
-  // final notifC = Get.find<NotificationController>();
-  // final tabC = Get.find<MainTabController>();
-
-  late TaskController taskC;
-
-  @override
-  void initState() {
-    super.initState();
-    taskC = Get.put(TaskController());
-  }
-
-  @override
-  void dispose() {
-    Get.delete<TaskController>();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // final matkulList = matkulC.allMatkul;
+    final fabKey = useMemoized(() => GlobalKey<ExpandableFabState>());
+    
+    final taskBloc = context.read<TaskBloc>();
+    final mainTabBloc = context.read<MainTabBloc>();
+    final matkulBloc = context.read<MatkulBloc>();
 
-    //function for routing when click notification
-    // if (notifC.payload.value.isNotEmpty) {
-    //   print("note id: ${notifC.payload.value}");
-    //   final matkulId = taskC.selectById(notifC.payload.value)!.groupId;
-    //   print("matkul id: $matkulId");
-    //   final matkulIndex = matkulList.indexWhere(
-    //     (matkul) => matkul.id == matkulId,
-    //   );
+    useEffect(() {
+      taskBloc.add(LoadListTask());
+      if (mainTabBloc.state.taskTabs.isEmpty) {
+        mainTabBloc.add(LoadAllTaskTabs());
+      }
+      if (matkulBloc.state.status == MatkulStatus.initial) {
+        matkulBloc.add(LoadListMatkul());
+      }
+      return null;
+    }, []);
 
-    //   print("matkul index: $matkulIndex");
-    //   if (matkulIndex != -1) {
-    //     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //       print("harusnya routing ke: ${1 + (matkulIndex + 1)}");
+    final mainTabState = context.watch<MainTabBloc>().state;
+    final matkulState = context.watch<MatkulBloc>().state;
+    
+    List<dynamic> matkulList = matkulState.matkuls;
 
-    //       //routing to designated tab
-    //       taskC.tabController.animateTo(1 + (matkulIndex + 1));
-    //       notifC.payload.value = ""; // reset agar tidak pindah tab terus
-    //     });
-    //   }
-    // }
+    final taskTabs = mainTabState.taskTabs;
+    final tabLength = 2 + taskTabs.length + matkulList.length;
 
-    return Obx(() {
-      //fungction for deleting tab
-      void deleteTabs(String groupId) async {
-        try {
-          // tabC.deleteTaskTab(groupId);
+    final tabController = useTabController(
+      initialLength: tabLength,
+      initialIndex: 1,
+      keys: [tabLength], // Re-create if length changes
+    );
 
-          taskC.updateTabLength();
-
-          taskC.tabController.index =
-              // 1 + tabC.taskTabs.length;
-              0;
-          print("menjalankan update tabs");
-
-          showAppSnackbar(title: "Success!", message: "Berhasil menghapus tab");
-        } catch (error) {
-          print(error);
-          showAppSnackbar(
-            title: "Error!",
-            message: "Error: $error",
-            isSuccess: false,
-          );
+    // Notification routing logic
+    final notificationState = context.watch<NotificationBloc>().state;
+    if (notificationState is NotificationLoaded && notificationState.payload.isNotEmpty) {
+      final payload = notificationState.payload;
+      final taskState = taskBloc.state;
+      if (taskState.status == TaskStatus.success) {
+        final task = taskState.tasks.where((t) => t.id == payload).firstOrNull;
+        if (task != null) {
+          final matkulId = task.groupId;
+          final matkulIndex = matkulList.indexWhere((m) => m.id == matkulId);
+          if (matkulIndex != -1) {
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               tabController.animateTo(2 + taskTabs.length + matkulIndex);
+             });
+          }
         }
       }
+    }
 
-      //fungction for adding tab
-      // void addTabs() {
-      //   try {
-      //     tabC.addTaskTab();
+    void deleteTabs(String groupId) async {
+      try {
+        mainTabBloc.add(DeleteTaskTab(groupId));
+        showAppSnackbar(title: "Success!", message: "Berhasil menghapus tab");
+      } catch (error) {
+        showAppSnackbar(title: "Error!", message: "Error: $error", isSuccess: false);
+      }
+    }
 
-      //     taskC.updateTabLength();
+    void addTabs(String tabName) {
+      try {
+        mainTabBloc.add(AddTaskTab(tabName));
+        showAppSnackbar(title: "Success!", message: "Berhasil menambahkan tab baru");
+      } catch (error) {
+        showAppSnackbar(title: "Error!", message: "Error: $error", isSuccess: false);
+      }
+    }
 
-      //     taskC.tabController.index = 1 + tabC.taskTabs.length;
+    final List<Widget> tabs = [
+      const Tab(icon: Icon(Icons.star)),
+      const Tab(text: "Umum"),
+      ...taskTabs.map((tab) => Tab(text: tab.tabName)),
+      ...matkulList.map((m) => Tab(text: m.nameAbbreviation)),
+    ];
 
-      //     Get.back();
-
-      //     showAppSnackbar(
-      //       title: "Success!",
-      //       message: "Berhasil menambahkan tab baru",
-      //     );
-      //   } catch (error) {
-      //     print(error);
-      //     showAppSnackbar(
-      //       title: "Error!",
-      //       message: "Error: $error",
-      //       isSuccess: false,
-      //     );
-      //   }
-      // }
-
-      //list of tabs
-      final List<Widget> tabs = [
-        const Tab(icon: Icon(Icons.star)),
-        const Tab(text: "Umum"),
-        // ...tabC.taskTabs.map((tab) => Tab(text: tab.tabName)),
-        // ...matkulList.map((m) => Tab(text: m.nameAbbreviation)),
-      ];
-
-      //list of tabs content
-      final List<Widget> tabViews = [
-        const BuildTaskWidget(group: 'Starred', groupId: "0"),
-        const BuildTaskWidget(group: 'Umum', groupId: "1"),
-        // ...tabC.taskTabs.map(
-        //   (tab) => BuildTaskWidget(
-        //     group: tab.tabName,
-        //     groupId: tab.id,
-        //     deleteTabFunction: (groupId) {
-        //       deleteTabs(groupId);
-        //     },
-        //   ),
-        // ),
-        // ...matkulList.map(
-        //   (m) => BuildTaskWidget(group: m.nameAbbreviation, groupId: m.id),
-        // ),
-      ];
-
-      return Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        appBar: AppBar(
-          title: const Text("Task"),
-          bottom: TabBar(
-            controller: taskC.tabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            splashFactory: InkSparkle.splashFactory,
-            splashBorderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
-            ),
-            tabs: tabs,
-          ),
+    final List<Widget> tabViews = [
+      const BuildTaskWidget(group: 'Starred', groupId: "0"),
+      const BuildTaskWidget(group: 'Umum', groupId: "1"),
+      ...taskTabs.map(
+        (tab) => BuildTaskWidget(
+          group: tab.tabName,
+          groupId: tab.id,
+          deleteTabFunction: (groupId) => deleteTabs(groupId),
         ),
-        body: SafeArea(
-          child: TabBarView(
-            controller: taskC.tabController,
-            children: tabViews,
+      ),
+      ...matkulList.map(
+        (m) => BuildTaskWidget(group: m.nameAbbreviation, groupId: m.id),
+      ),
+    ];
+
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: AppBar(
+        title: const Text("Task"),
+        bottom: TabBar(
+          controller: tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          splashFactory: InkSparkle.splashFactory,
+          splashBorderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
           ),
+          tabs: tabs,
         ),
-        floatingActionButtonLocation: ExpandableFab.location,
-        floatingActionButton: ExpandableFab(
-          key: fabKey,
-          openButtonBuilder: RotateFloatingActionButtonBuilder(
-            child: const Icon(LucideIcons.plus),
-            fabSize: ExpandableFabSize.regular,
-            shape: const CircleBorder(),
+      ),
+      body: SafeArea(
+        child: TabBarView(
+          controller: tabController,
+          children: tabViews,
+        ),
+      ),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        key: fabKey,
+        openButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(LucideIcons.plus),
+          fabSize: ExpandableFabSize.regular,
+          shape: const CircleBorder(),
+          angle: math.pi / 4,
+        ),
+        closeButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: Transform.rotate(
             angle: math.pi / 4,
+            child: const Icon(LucideIcons.plus),
           ),
-          closeButtonBuilder: RotateFloatingActionButtonBuilder(
-            child: Transform.rotate(
-              angle: math.pi / 4,
-              child: const Icon(LucideIcons.plus),
-            ),
-            fabSize: ExpandableFabSize.regular,
-            shape: const CircleBorder(),
-          ),
-          type: ExpandableFabType.up,
-          duration: const Duration(milliseconds: 340),
-          childrenAnimation: ExpandableFabAnimation.none,
-          distance: 70,
-          overlayStyle: ExpandableFabOverlayStyle(
-            color: theme.colorScheme.surface.withValues(alpha: 0.7),
-          ),
-          children: [
-            Row(
-              children: [
-                Text('Add Group', style: theme.textTheme.bodyLarge),
-                const SizedBox(width: 20),
-                FloatingActionButton(
-                  heroTag: null,
-                  onPressed: () {
-                    // fabKey.currentState?.close();
-                    // showBarModalBottomSheet<Map<String, dynamic>>(
-                    //   barrierColor: Colors.black.withValues(alpha: 0.4),
-                    //   context: context,
-                    //   useRootNavigator: true,
-                    //   bounce: true,
-                    //   backgroundColor: theme.colorScheme.surfaceContainer,
-                    //   builder: (context) =>
-                    //       AddGroupModal(onUpdateTabs: addTabs),
-                    // );
-                  },
-                  child: const Icon(Icons.playlist_add),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Text('Add Task', style: theme.textTheme.bodyLarge),
-                const SizedBox(width: 20),
-                FloatingActionButton(
-                  heroTag: null,
-                  onPressed: () async {
-                    // final tabIndex = taskC.tabController.index;
-                    // String? selectedMatkul;
-                    // if (tabIndex >= 2) {
-                    //   if (tabIndex >= (2 + tabC.taskTabs.length)) {
-                    //     selectedMatkul =
-                    //         matkulList[tabIndex - (2 + tabC.taskTabs.length)]
-                    //             .id;
-                    //   } else {
-                    //     selectedMatkul = tabC.taskTabs[tabIndex - 2].id;
-                    //   }
-                    // }
-                    // fabKey.currentState?.close();
-                    // showBarModalBottomSheet<Map<String, dynamic>>(
-                    //   barrierColor: Colors.black.withValues(alpha: 0.4),
-                    //   context: context,
-                    //   useRootNavigator: true,
-                    //   bounce: true,
-                    //   backgroundColor: theme.colorScheme.surfaceContainer,
-                    //   builder: (context) => AddTaskModal(
-                    //     matkulId: selectedMatkul,
-                    //     starred: tabIndex == 0,
-                    //   ),
-                    // );
-                  },
-                  child: const Icon(Icons.add_task),
-                ),
-              ],
-            ),
-          ],
+          fabSize: ExpandableFabSize.regular,
+          shape: const CircleBorder(),
         ),
-      );
-    });
+        type: ExpandableFabType.up,
+        duration: const Duration(milliseconds: 340),
+        childrenAnimation: ExpandableFabAnimation.none,
+        distance: 70,
+        overlayStyle: ExpandableFabOverlayStyle(
+          color: theme.colorScheme.surface.withValues(alpha: 0.7),
+        ),
+        children: [
+          Row(
+            children: [
+              Text('Add Group', style: theme.textTheme.bodyLarge),
+              const SizedBox(width: 20),
+              FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  fabKey.currentState?.close();
+                  showBarModalBottomSheet<void>(
+                    barrierColor: Colors.black.withValues(alpha: 0.4),
+                    context: context,
+                    useRootNavigator: true,
+                    bounce: true,
+                    backgroundColor: theme.colorScheme.surfaceContainer,
+                    builder: (context) => AddGroupModal(onUpdateTabs: addTabs),
+                  );
+                },
+                child: const Icon(Icons.playlist_add),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text('Add Task', style: theme.textTheme.bodyLarge),
+              const SizedBox(width: 20),
+              FloatingActionButton(
+                heroTag: null,
+                onPressed: () async {
+                  final tabIndex = tabController.index;
+                  String? selectedMatkul;
+                  if (tabIndex >= 2) {
+                    if (tabIndex >= (2 + taskTabs.length)) {
+                      selectedMatkul = matkulList[tabIndex - (2 + taskTabs.length)].id;
+                    } else {
+                      selectedMatkul = taskTabs[tabIndex - 2].id;
+                    }
+                  }
+                  fabKey.currentState?.close();
+                  showBarModalBottomSheet<void>(
+                    barrierColor: Colors.black.withValues(alpha: 0.4),
+                    context: context,
+                    useRootNavigator: true,
+                    bounce: true,
+                    backgroundColor: theme.colorScheme.surfaceContainer,
+                    builder: (context) => AddTaskModal(
+                      matkulId: selectedMatkul,
+                      starred: tabIndex == 0,
+                    ),
+                  );
+                },
+                child: const Icon(Icons.add_task),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

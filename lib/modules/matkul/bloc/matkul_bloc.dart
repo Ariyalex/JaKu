@@ -6,24 +6,13 @@ import 'matkul_state.dart';
 class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   final MatkulRepository _repository;
 
-  MatkulBloc(this._repository) : super(MatkulInitial()) {
+  MatkulBloc(this._repository) : super(const MatkulState()) {
     on<LoadListMatkul>(_onLoadListMatkul);
-
-    // Menangani event LoadMatkul
     on<LoadMatkul>(_onLoadMatkul);
-
-    // Menangani event AddMatkul
     on<AddMatkul>(_onAddMatkul);
-
     on<AddListMatkul>(_onAddListMatkul);
-
-    // Menangani event UpdateMatkul
     on<UpdateMatkul>(_onUpdateMatkul);
-
-    // Menangani event DeleteMatkul
     on<DeleteMatkul>(_onDeleteMatkul);
-
-    // Menangani event DeleteAllMatkul
     on<DeleteAllMatkul>(_onDeleteAllMatkul);
   }
 
@@ -31,35 +20,38 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     LoadListMatkul event,
     Emitter<MatkulState> emit,
   ) async {
-    emit(MatkulListLoading());
+    emit(state.copyWith(status: MatkulStatus.loading));
     try {
       final matkuls = _repository.getAllMatkul();
-      emit(MatkulListLoaded(matkuls));
+      emit(state.copyWith(status: MatkulStatus.success, matkuls: matkuls));
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 
-  Future<void> _onLoadMatkul(
-    LoadMatkul event,
-    Emitter<MatkulState> emit,
-  ) async {
-    emit(MatkulListLoading());
+  Future<void> _onLoadMatkul(LoadMatkul event, Emitter<MatkulState> emit) async {
+    // If we have it in list, set it
+    final existing = state.matkuls.where((m) => m.id == event.id).firstOrNull;
+    if (existing != null) {
+      emit(state.copyWith(selectedMatkul: existing));
+      return;
+    }
+
+    emit(state.copyWith(status: MatkulStatus.loading));
     try {
       final matkul = _repository.getMatkulById(event.id);
-      emit(MatkulLoaded(matkul));
+      emit(state.copyWith(status: MatkulStatus.success, selectedMatkul: matkul));
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 
   Future<void> _onAddMatkul(AddMatkul event, Emitter<MatkulState> emit) async {
     try {
       await _repository.addMatkul(event.matkul);
-      // Setelah tambah, kita refresh data
       add(LoadListMatkul());
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 
@@ -71,7 +63,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
       await _repository.addMatkuls(event.matkuls);
       add(LoadListMatkul());
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 
@@ -83,7 +75,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
       await _repository.updateMatkul(event.matkul);
       add(LoadListMatkul());
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 
@@ -95,7 +87,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
       await _repository.deleteMatkul(event.id);
       add(LoadListMatkul());
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 
@@ -107,7 +99,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
       await _repository.deleteAllMatkul();
       add(LoadListMatkul());
     } catch (e) {
-      emit(MatkulError(e.toString()));
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
   }
 }

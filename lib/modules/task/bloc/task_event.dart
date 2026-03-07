@@ -51,3 +51,33 @@ class DeleteTask extends TaskEvent {
 }
 
 class DeleteAllTask extends TaskEvent {}
+
+class UpdateTaskStatus extends TaskEvent {
+  final String id;
+  final bool status;
+
+  const UpdateTaskStatus(this.id, this.status);
+
+  @override
+  List<Object?> get props => [id, status];
+}
+
+class UpdateTaskStarred extends TaskEvent {
+  final String id;
+  final bool isStared;
+
+  const UpdateTaskStarred(this.id, this.isStared);
+
+  @override
+  List<Object?> get props => [id, isStared];
+}
+
+class ReorderTasks extends TaskEvent {
+  final List<Task> tasks;
+  final String? groupId;
+
+  const ReorderTasks(this.tasks, this.groupId);
+
+  @override
+  List<Object?> get props => [tasks, groupId];
+}

@@ -4,19 +4,19 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_bloc.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_event.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_state.dart';
-import 'package:get/get.dart';
 import 'package:jaku/core/theme/theme.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
-
-import '../../../core/routes/route_named.dart';
+import 'package:jaku/core/routes/route_named.dart';
+import 'package:jaku/core/utils/snackbar_widget.dart';
 
 class PdfParsing extends HookWidget {
   const PdfParsing({super.key});
@@ -24,12 +24,11 @@ class PdfParsing extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQueryWidth = MediaQuery.of(context).size.width;
-
     final color = AppTheme.dark;
 
     final pdfBloc = context.read<PdfParseBloc>();
-    final matkulBlocState = context.watch<MatkulBloc>().state;
-    final scheduleBlocState = context.watch<ScheduleBloc>().state;
+    final matkulBloc = context.read<MatkulBloc>();
+    final scheduleBloc = context.read<ScheduleBloc>();
 
     final selectedFile = useState<File?>(null);
     final responseMessage = useState<String>("");
@@ -58,123 +57,139 @@ class PdfParsing extends HookWidget {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("PDF Otomation"),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Get.toNamed(RouteNamed.guidePdf);
-            },
-            icon: const Icon(Icons.info_outline),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            OutlinedButton(
+    return BlocListener<PdfParseBloc, PdfParseState>(
+      listener: (context, state) {
+        if (state is PdfParseSuccess) {
+          // 1. Kirim data hasil parse ke BLoC Matkul dan Schedule
+          matkulBloc.add(AddListMatkul(state.matkuls));
+          scheduleBloc.add(AddListSchedule(state.schedules));
+
+          // 2. Berikan notifikasi sukses
+          showAppSnackbar(
+            title: "Berhasil!",
+            message: "Data jadwal berhasil diimpor dari PDF",
+          );
+
+          // 3. Kembali ke dashboard
+          context.pop();
+        } else if (state is PdfParseFailure) {
+          responseMessage.value = 'Error: ${state.message}';
+          showAppSnackbar(
+            title: "Gagal!",
+            message: state.message,
+            isSuccess: false,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("PDF Otomation"),
+          actions: [
+            IconButton(
               onPressed: () {
-                pickPdfFile();
+                context.pushNamed(RouteNamed.guidePdf);
               },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [Text("Pilih PDF"), Icon(Icons.file_download)],
-              ),
-            ),
-            if (selectedFile.value == null)
-              Container(
-                width: mediaQueryWidth * 2 / 3,
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white, width: 1.3),
-                ),
-                child: const Text(
-                  'Belum ada file dipilih',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                responseMessage.value,
-                style: TextStyle(
-                  color: responseMessage.value.contains('Error')
-                      ? color.colorScheme.error
-                      : Colors.green.shade400,
-                ),
-              ),
-            ),
-            BlocBuilder<PdfParseBloc, PdfParseState>(
-              builder: (context, state) {
-                return FilledButton(
-                  onPressed:
-                      (state is PdfParseLoading) && selectedFile.value == null
-                      ? null
-                      : () {
-                          pdfBloc.add(UploadAndProcessPdf(selectedFile.value!));
-
-                          if (state is PdfParseSuccess) {
-                            context.read<MatkulBloc>().add(
-                              AddListMatkul(state.matkuls),
-                            );
-                            context.read<ScheduleBloc>().add(
-                              AddListSchedule(state.schedules),
-                            );
-
-                            if (matkulBlocState is MatkulError) {
-                              responseMessage.value =
-                                  'Error: ${matkulBlocState.message}';
-                            } else if (scheduleBlocState is ScheduleError) {
-                              responseMessage.value =
-                                  'Error: ${scheduleBlocState.message}';
-                            }
-                          } else if (state is PdfParseFailure) {
-                            responseMessage.value = 'Error: ${state.message}';
-                          }
-                        },
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.resolveWith<Color>((
-                      Set<WidgetState> states,
-                    ) {
-                      if (states.contains(WidgetState.disabled)) {
-                        return color.disabledColor;
-                      }
-                      return Colors.green.shade400;
-                    }),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        (state is PdfParseLoading)
-                            ? "Memproses..."
-                            : "Upload, Proses & Simpan",
-                        style: TextStyle(
-                          color: (state is PdfParseLoading)
-                              ? Colors.black
-                              : Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      (state is PdfParseLoading)
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(Icons.upload_file),
-                    ],
-                  ),
-                );
-              },
+              icon: const Icon(Icons.info_outline),
             ),
           ],
+        ),
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  onPressed: pickPdfFile,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Pilih PDF"),
+                      SizedBox(width: 8),
+                      Icon(Icons.file_download),
+                    ],
+                  ),
+                ),
+                if (selectedFile.value == null)
+                  Container(
+                    width: mediaQueryWidth * 2 / 3,
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white, width: 1.3),
+                    ),
+                    child: const Text(
+                      'Belum ada file dipilih',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (responseMessage.value.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(
+                      bottom: 10,
+                      left: 20,
+                      right: 20,
+                    ),
+                    child: Text(
+                      responseMessage.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: responseMessage.value.contains('Error')
+                            ? color.colorScheme.error
+                            : Colors.green.shade400,
+                      ),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: BlocBuilder<PdfParseBloc, PdfParseState>(
+                    builder: (context, state) {
+                      final isLoading = state is PdfParseLoading;
+                      return SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: isLoading || selectedFile.value == null
+                              ? null
+                              : () {
+                                  pdfBloc.add(
+                                    UploadAndProcessPdf(selectedFile.value!),
+                                  );
+                                },
+
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  isLoading
+                                      ? "Memproses..."
+                                      : "Upload, Proses & Simpan",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 8),
+                                if (isLoading)
+                                  const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                else
+                                  const Icon(Icons.upload_file),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

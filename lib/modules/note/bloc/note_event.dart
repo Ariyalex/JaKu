@@ -52,3 +52,41 @@ class DeleteNote extends NoteEvent {
 }
 
 class DeleteAllNote extends NoteEvent {}
+
+class SearchNotes extends NoteEvent {
+  final String query;
+  const SearchNotes(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
+
+class FilterNotesByMatkul extends NoteEvent {
+  final String matkulId;
+  const FilterNotesByMatkul(this.matkulId);
+
+  @override
+  List<Object?> get props => [matkulId];
+}
+
+class SortNotes extends NoteEvent {
+  final int activeIndex;
+  final bool isAsce;
+  final bool isSorting;
+  final bool isSortByCreatedDate;
+
+  const SortNotes({
+    required this.activeIndex,
+    required this.isAsce,
+    required this.isSorting,
+    required this.isSortByCreatedDate,
+  });
+
+  @override
+  List<Object?> get props => [
+        activeIndex,
+        isAsce,
+        isSorting,
+        isSortByCreatedDate,
+      ];
+}

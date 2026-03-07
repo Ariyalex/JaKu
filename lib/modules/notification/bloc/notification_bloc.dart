@@ -37,7 +37,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       const InitializationSettings initializationSettings =
           InitializationSettings(android: initializationSettingsAndroid);
 
-      await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+      await flutterLocalNotificationsPlugin.initialize(
+        settings: initializationSettings,
+      );
     } catch (e) {
       emit(NotificationError(e.toString()));
     }
@@ -57,11 +59,11 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         ),
       );
       await flutterLocalNotificationsPlugin.zonedSchedule(
-        event.notifId,
-        event.title,
-        event.body,
-        tz.TZDateTime.from(event.scheduledTime, tz.local),
-        platformChannelSpecifics,
+        id: event.notifId,
+        title: event.title,
+        body: event.body,
+        scheduledDate: tz.TZDateTime.from(event.scheduledTime, tz.local),
+        notificationDetails: platformChannelSpecifics,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: event.taskId,
       );
@@ -75,7 +77,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     try {
-      await flutterLocalNotificationsPlugin.cancel(event.notifId);
+      await flutterLocalNotificationsPlugin.cancel(id: event.notifId);
     } catch (e) {
       emit(NotificationError(e.toString()));
     }

@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/modules/schedule/widgets/add_jadwal.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class JadwalKosong extends StatelessWidget {
   const JadwalKosong({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final mediaQueryWidth = Get.width;
+    final mediaQueryWidth = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -42,12 +40,7 @@ class JadwalKosong extends StatelessWidget {
                 children: [
                   FilledButton(
                     onPressed: () async {
-                      await showBarModalBottomSheet<Map<String, dynamic>>(
-                        barrierColor: Colors.black.withValues(alpha: 0.4),
-                        context: context,
-                        useRootNavigator: true,
-                        builder: (context) => const AddJadwal(),
-                      );
+                      context.pushNamed(RouteNamed.addSchedule);
                     },
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
@@ -61,26 +54,30 @@ class JadwalKosong extends StatelessWidget {
                   const SizedBox(height: 10),
                   FilledButton(
                     onPressed: () {
-                      Get.defaultDialog(
-                        backgroundColor: theme.drawerTheme.backgroundColor,
-                        title: "Peringatan!!",
-                        content: const Text(
-                          "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
-                          textAlign: TextAlign.center,
-                        ),
-                        cancel: OutlinedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: const Text("Ga jadi"),
-                        ),
-                        confirm: FilledButton(
-                          onPressed: () {
-                            Get.back();
-                            Get.back();
-                            Get.toNamed(RouteNamed.pdfParsing);
-                          },
-                          child: const Text("Ok Bang"),
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          backgroundColor: theme.dialogTheme.backgroundColor,
+                          title: const Text("Peringatan!!"),
+                          content: const Text(
+                            "Fitur ini hanya untuk\nmahasiswa UIN SUKA.\nAdd matkul menggunakan file PDF yang didapat dari SIA UIN SUKA",
+                            textAlign: TextAlign.center,
+                          ),
+                          actions: [
+                            OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Ga jadi"),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context.pushNamed(RouteNamed.pdfParsing);
+                              },
+                              child: const Text("Ok Bang"),
+                            ),
+                          ],
                         ),
                       );
                     },

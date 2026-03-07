@@ -4,17 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jaku/core/theme/theme_cubit.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
-import 'package:jaku/modules/schedule/controller/pdf_back.dart';
-import 'package:jaku/modules/schedule/widgets/add_jadwal.dart';
 import 'package:jaku/modules/schedule/widgets/card_view/card_view.dart';
 import 'package:jaku/modules/schedule/widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../core/routes/route_named.dart';
 
@@ -58,14 +55,6 @@ class ScheduleDashboard extends HookWidget {
     final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>());
     final fabKey = useMemoized(() => GlobalKey<ExpandableFabState>());
 
-    useEffect(() {
-      Get.put(PdfBack());
-
-      return () {
-        Get.delete<PdfBack>();
-      };
-    }, const []);
-
     final colorTheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final theme = Theme.of(context);
@@ -83,7 +72,7 @@ class ScheduleDashboard extends HookWidget {
             icon: const Icon(Icons.menu),
             onSelected: (value) {
               if (value == "info") {
-                Get.toNamed(RouteNamed.guideGeneral);
+                context.pushNamed(RouteNamed.guideGeneral);
               } else if (value == "clear") {
                 clearAllData(context);
               }
@@ -205,7 +194,7 @@ class ScheduleDashboard extends HookWidget {
                         FilledButton(
                           onPressed: () {
                             Navigator.pop(context);
-                            Get.toNamed(RouteNamed.pdfParsing);
+                            context.pushNamed(RouteNamed.pdfParsing);
                           },
                           child: const Text("Ok Bang"),
                         ),
@@ -225,14 +214,7 @@ class ScheduleDashboard extends HookWidget {
                 heroTag: null,
                 onPressed: () async {
                   fabKey.currentState?.close();
-                  await showBarModalBottomSheet<Map<String, dynamic>>(
-                    barrierColor: Colors.black.withValues(alpha: 0.4),
-                    context: context,
-                    useRootNavigator: true,
-                    bounce: true,
-                    backgroundColor: theme.colorScheme.surfaceContainer,
-                    builder: (context) => const AddJadwal(),
-                  );
+                  context.pushNamed(RouteNamed.addSchedule);
                 },
                 child: const Icon(LucideIcons.plus),
               ),

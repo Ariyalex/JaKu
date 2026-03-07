@@ -1,49 +1,40 @@
 import 'package:equatable/equatable.dart';
 import 'package:jaku/data/entities/task.dart';
 
-abstract class TaskState extends Equatable {
-  const TaskState();
+enum TaskStatus { initial, loading, success, error }
 
-  @override
-  List<Object?> get props => [];
-}
-
-class TaskInitial extends TaskState {}
-
-class TaskListLoading extends TaskState {}
-
-class TaskListLoaded extends TaskState {
+class TaskState extends Equatable {
   final List<Task> tasks;
-  const TaskListLoaded(this.tasks);
+  final List<Task> filteredTasks;
+  final Task? selectedTask;
+  final TaskStatus status;
+  final String? message;
+
+  const TaskState({
+    this.tasks = const [],
+    this.filteredTasks = const [],
+    this.selectedTask,
+    this.status = TaskStatus.initial,
+    this.message,
+  });
+
+  TaskState copyWith({
+    List<Task>? tasks,
+    List<Task>? filteredTasks,
+    Task? selectedTask,
+    TaskStatus? status,
+    String? message,
+    bool clearSelected = false,
+  }) {
+    return TaskState(
+      tasks: tasks ?? this.tasks,
+      filteredTasks: filteredTasks ?? this.filteredTasks,
+      selectedTask: clearSelected ? null : (selectedTask ?? this.selectedTask),
+      status: status ?? this.status,
+      message: message ?? this.message,
+    );
+  }
 
   @override
-  List<Object?> get props => [tasks];
-}
-
-class TaskListByMatkulLoading extends TaskState {}
-
-class TaskListByMatkulLoaded extends TaskState {
-  final List<Task> tasks;
-  const TaskListByMatkulLoaded(this.tasks);
-
-  @override
-  List<Object?> get props => [tasks];
-}
-
-class TaskLoading extends TaskState {}
-
-class TaskLoaded extends TaskState {
-  final Task task;
-  const TaskLoaded(this.task);
-
-  @override
-  List<Object?> get props => [task];
-}
-
-class TaskError extends TaskState {
-  final String message;
-  const TaskError(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [tasks, filteredTasks, selectedTask, status, message];
 }

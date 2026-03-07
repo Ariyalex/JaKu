@@ -2,16 +2,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/main.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:jaku/data/entities/task_tab.dart';
-import 'package:jaku/services/task_tab_service.dart';
+import 'package:jaku/data/repositories/task_tab_repository.dart';
 import 'main_tab_event.dart';
 import 'main_tab_state.dart';
 
 class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
+  final TaskTabRepository _repository;
   final PersistentTabController mainTabController = PersistentTabController(
     initialIndex: 0,
   );
 
-  MainTabBloc() : super(const MainTabState()) {
+  MainTabBloc(this._repository) : super(const MainTabState()) {
     on<LoadAllTaskTabs>(_onLoadAllTaskTabs);
     on<AddTaskTab>(_onAddTaskTab);
     on<EditTaskTab>(_onEditTaskTab);
@@ -27,7 +28,7 @@ class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
 
   void _onLoadAllTaskTabs(LoadAllTaskTabs event, Emitter<MainTabState> emit) {
     try {
-      final tasks = TaskTabService.getAllTaskTabService();
+      final tasks = _repository.getAllTaskTabs();
       emit(state.copyWith(taskTabs: tasks));
     } catch (error) {
       print("error load all task tabs: $error");
@@ -41,7 +42,7 @@ class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
     try {
       TaskTab newTab = TaskTab(id: "tab-${uuid.v4()}", tabName: event.tabName);
       final updatedTabs = List<TaskTab>.from(state.taskTabs)..add(newTab);
-      await TaskTabService.saveTaskTabService(newTab);
+      await _repository.addTaskTab(newTab);
       emit(state.copyWith(taskTabs: updatedTabs));
     } catch (error) {
       print("error adding tab: $error");
@@ -60,7 +61,7 @@ class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
       final updatedTabs = List<TaskTab>.from(state.taskTabs);
       updatedTabs[index] = updatedTab;
 
-      await TaskTabService.saveTaskTabService(updatedTab);
+      await _repository.addTaskTab(updatedTab);
       emit(state.copyWith(taskTabs: updatedTabs));
     } catch (error) {
       print("error editing tab: $error");
@@ -75,7 +76,7 @@ class MainTabBloc extends Bloc<MainTabEvent, MainTabState> {
       final updatedTabs = state.taskTabs
           .where((tab) => tab.id != event.id)
           .toList();
-      await TaskTabService.deleteTaskTabService(event.id);
+      await _repository.deleteTaskTab(event.id);
       emit(state.copyWith(taskTabs: updatedTabs));
     } catch (error) {
       print("error deleting task tab: $error");

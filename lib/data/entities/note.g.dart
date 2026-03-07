@@ -21,7 +21,6 @@ class NoteAdapter extends TypeAdapter<Note> {
       matkulId: fields[1] as String?,
       title: fields[2] as String?,
       desc: fields[3] as String?,
-      matkul: fields[4] as String?,
       createdOn: fields[5] as DateTime,
       editedOn: fields[6] as DateTime,
     );
@@ -30,7 +29,7 @@ class NoteAdapter extends TypeAdapter<Note> {
   @override
   void write(BinaryWriter writer, Note obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,8 +38,6 @@ class NoteAdapter extends TypeAdapter<Note> {
       ..write(obj.title)
       ..writeByte(3)
       ..write(obj.desc)
-      ..writeByte(4)
-      ..write(obj.matkul)
       ..writeByte(5)
       ..write(obj.createdOn)
       ..writeByte(6)

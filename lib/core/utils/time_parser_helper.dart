@@ -56,4 +56,20 @@ class TimeParserHelper {
     final mm = time.minute.toString().padLeft(2, "0");
     return "$hh:$mm";
   }
+
+  static String format2TimeDayToString({
+    TimeOfDay? time1,
+    TimeOfDay? time2,
+    String defaultDisplay = 'Jam Kuliah',
+  }) {
+    if (time1 == null && time2 == null) {
+      return defaultDisplay;
+    } else if (time1 != null && time2 == null) {
+      return formatTimeOfDay(time1);
+    } else if (time1 == null && time2 != null) {
+      return defaultDisplay;
+    } else {
+      return "${formatTimeOfDay(time1!)} - ${formatTimeOfDay(time2!)}";
+    }
+  }
 }

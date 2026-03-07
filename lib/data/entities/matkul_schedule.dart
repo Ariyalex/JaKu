@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:jaku/data/value_objects/day.dart';
 import 'package:jaku/main.dart';
@@ -17,10 +18,10 @@ class MatkulSchedule extends Equatable {
   final Day day;
 
   @HiveField(3)
-  final DateTime startTime;
+  final TimeOfDay startTime;
 
   @HiveField(4)
-  final DateTime? endTime;
+  final TimeOfDay? endTime;
 
   @HiveField(5)
   final String? room;
@@ -40,8 +41,8 @@ class MatkulSchedule extends Equatable {
   factory MatkulSchedule.create({
     required String matkulId,
     required Day day,
-    required DateTime startTime,
-    DateTime? endTime,
+    required TimeOfDay startTime,
+    TimeOfDay? endTime,
     String? room,
   }) {
     return MatkulSchedule(

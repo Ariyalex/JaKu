@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jaku/core/theme/theme.dart';
-import 'package:jaku/core/theme/theme_cubit.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
 import 'package:jaku/modules/note/view/note_dashboard.dart';
@@ -15,68 +13,64 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeDark = AppTheme.dark;
-    final themeLight = AppTheme.light;
+    final theme = Theme.of(context);
+    final mainTabBloc = context.read<MainTabBloc>();
 
-    return BlocBuilder<ThemeCubit, ThemeMode>(
-      builder: (context, themeMode) {
-        final isLight = themeMode == ThemeMode.light;
-        final theme = isLight ? themeLight : themeDark;
-
-        return BlocBuilder<MainTabBloc, MainTabState>(
-          builder: (context, state) {
-            return PersistentTabView(
-              stateManagement: false,
-              controller: context.read<MainTabBloc>().mainTabController,
-              tabs: [
-                PersistentTabConfig(
-                  screen: const ScheduleDashboard(),
-                  item: ItemConfig(
-                    activeForegroundColor: theme.colorScheme.onPrimary,
-                    activeColorSecondary: theme.colorScheme.primary,
-                    icon: const Icon(LucideIcons.calendarRange),
-                    title: "Schedule",
-                  ),
+    return Scaffold(
+      // PersistentTabView sudah mengelola Scaffold internal,
+      // tapi membungkusnya di sini memastikan area aman dan layout yang benar.
+      body: BlocBuilder<MainTabBloc, MainTabState>(
+        buildWhen: (previous, current) =>
+            false, // Jangan rebuild seluruh view saat state berubah (seperti add tab)
+        builder: (context, state) {
+          return PersistentTabView(
+            controller: mainTabBloc.mainTabController,
+            tabs: [
+              PersistentTabConfig(
+                screen: const ScheduleDashboard(),
+                item: ItemConfig(
+                  activeForegroundColor: theme.colorScheme.primary,
+                  inactiveForegroundColor: theme.colorScheme.onSurfaceVariant,
+                  icon: const Icon(LucideIcons.calendarRange),
+                  title: "Schedule",
                 ),
-                PersistentTabConfig(
-                  screen: const NoteDashboard(),
-                  item: ItemConfig(
-                    activeForegroundColor: theme.colorScheme.onPrimary,
-                    activeColorSecondary: theme.colorScheme.primary,
-                    icon: const Icon(LucideIcons.notebook),
-                    title: "Note",
-                  ),
+              ),
+              PersistentTabConfig(
+                screen: const NoteDashboard(),
+                item: ItemConfig(
+                  activeForegroundColor: theme.colorScheme.primary,
+                  inactiveForegroundColor: theme.colorScheme.onSurfaceVariant,
+                  icon: const Icon(LucideIcons.notebook),
+                  title: "Note",
                 ),
-                PersistentTabConfig(
-                  screen: const TaskDashboard(),
-                  item: ItemConfig(
-                    activeForegroundColor: theme.colorScheme.onPrimary,
-                    activeColorSecondary: theme.colorScheme.primary,
-                    icon: const Icon(LucideIcons.listTodo),
-                    title: "Task",
-                  ),
+              ),
+              PersistentTabConfig(
+                screen: const TaskDashboard(),
+                item: ItemConfig(
+                  activeForegroundColor: theme.colorScheme.primary,
+                  inactiveForegroundColor: theme.colorScheme.onSurfaceVariant,
+                  icon: const Icon(LucideIcons.listTodo),
+                  title: "Task",
                 ),
-              ],
-              navBarBuilder: (navBarConfig) {
-                final bgColor = theme.colorScheme.surface;
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.ease,
-                  color: bgColor,
-                  child: Style8BottomNavBar(
-                    navBarConfig: navBarConfig,
-                    navBarDecoration: const NavBarDecoration(
-                      color: Colors.transparent,
+              ),
+            ],
+            navBarBuilder: (navBarConfig) {
+              return Style8BottomNavBar(
+                navBarConfig: navBarConfig,
+                navBarDecoration: NavBarDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.dividerColor.withValues(alpha: 0.1),
+                      width: 1,
                     ),
-                    height: 60,
                   ),
-                );
-              },
-            );
-          },
-        );
-      },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

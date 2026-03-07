@@ -1,75 +1,106 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:jaku/controllers/main_tab_controller.dart';
-import 'package:jaku/controllers/matkul_controller.dart';
-import 'package:jaku/modules/task/controller/task_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
+import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
+import 'package:jaku/modules/notification/bloc/notification_event.dart';
+import 'package:jaku/modules/task/bloc/task_bloc.dart';
+import 'package:jaku/modules/task/bloc/task_event.dart';
 import 'package:jaku/data/entities/matkul.dart';
+import 'package:jaku/data/entities/task.dart';
+import 'package:jaku/data/entities/task_tab.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:uuid/uuid.dart';
 
-class AddTaskModal extends StatefulWidget {
+class AddTaskModal extends HookWidget {
   const AddTaskModal({super.key, this.matkulId, this.starred = false});
   final String? matkulId;
   final bool starred;
 
   @override
-  State<AddTaskModal> createState() => _AddTaskModalState();
-}
-
-class _AddTaskModalState extends State<AddTaskModal> {
-  // final taskC = Get.find<TaskController>();
-  // final matkulC = Get.find<MatkulController>();
-  // final tabC = Get.find<MainTabController>();
-  // late List<Matkul> matkulList;
-
-  bool showDescField = false;
-
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   //init controller
-  //   taskC.matkulIdC.value = widget.matkulId;
-
-  //   matkulList = matkulC.allMatkul;
-  //   print("starred value: ${widget.starred}");
-  //   if (widget.starred) {
-  //     taskC.isStaredC.value = true;
-  //   }
-  // }
-
-  // @override
-  // void dispose() {
-  //   taskC.titleC.clear();
-  //   taskC.descC.clear();
-  //   taskC.isStaredC.value = false;
-  //   taskC.dueDateC.value = null;
-  //   taskC.matkulIdC.value = null;
-  //   super.dispose();
-  // }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    
+    final titleController = useTextEditingController();
+    final descController = useTextEditingController();
+    final selectedMatkulId = useState<String?>(matkulId);
+    final dueDate = useState<DateTime?>(null);
+    final isStared = useState<bool>(starred);
+    final showDescField = useState<bool>(false);
 
-    // String showGroup() {
-    //   try {
-    //     if (taskC.matkulIdC.value == null || taskC.matkulIdC.value == "") {
-    //       return "Select group";
-    //     } else {
-    //       if (taskC.matkulIdC.value!.startsWith("tab")) {
-    //         return tabC.selectTabById(taskC.matkulIdC.value!)!.tabName;
-    //       } else {
-    //         return matkulC
-    //             .selectMatkulById(taskC.matkulIdC.value!)!
-    //             .nameAbbreviation;
-    //       }
-    //     }
-    //   } catch (e) {
-    //     return "Error showing group";
-    //   }
-    // }
+    final matkulState = context.watch<MatkulBloc>().state;
+    final mainTabState = context.watch<MainTabBloc>().state;
+
+    List<Matkul> matkulList = matkulState.matkuls;
+    final taskTabs = mainTabState.taskTabs;
+
+    String showGroup() {
+      try {
+        if (selectedMatkulId.value == null || selectedMatkulId.value == "") {
+          return "Select group";
+        } else {
+          if (selectedMatkulId.value!.startsWith("tab")) {
+            final tab = taskTabs.where((t) => t.id == selectedMatkulId.value).firstOrNull;
+            return tab?.tabName ?? "Unknown Tab";
+          } else {
+            final matkul = matkulList.where((m) => m.id == selectedMatkulId.value).firstOrNull;
+            return matkul?.nameAbbreviation ?? "Unknown Matkul";
+          }
+        }
+      } catch (e) {
+        return "Error showing group";
+      }
+    }
+
+    void addTask() {
+      try {
+        final id = const Uuid().v4();
+        final newTask = Task(
+          id: id,
+          task: titleController.text,
+          status: false,
+          isStared: isStared.value,
+          desc: descController.text,
+          groupId: selectedMatkulId.value,
+          taskDueDate: dueDate.value,
+        );
+
+        context.read<TaskBloc>().add(AddTask(newTask));
+
+        if (dueDate.value != null && dueDate.value!.isAfter(DateTime.now())) {
+          Matkul? matkul;
+          TaskTab? taskTab;
+          bool isCustomTab = selectedMatkulId.value != null && selectedMatkulId.value!.startsWith("tab");
+          if (selectedMatkulId.value != null) {
+            if (isCustomTab) {
+              taskTab = taskTabs.where((t) => t.id == selectedMatkulId.value).firstOrNull;
+            } else {
+              matkul = matkulList.where((m) => m.id == selectedMatkulId.value).firstOrNull;
+            }
+          }
+
+          context.read<NotificationBloc>().add(ScheduleNotification(
+            title: titleController.text,
+            body: matkul == null
+                ? (taskTab != null ? "${taskTab.tabName} Task" : "General Task")
+                : "${matkul.name} Task",
+            scheduledTime: dueDate.value!,
+            notifId: id.hashCode,
+            taskId: id,
+          ));
+        }
+
+        context.pop();
+        showAppSnackbar(title: "Success!", message: "Berhasil menambahkan task");
+      } catch (error) {
+        showAppSnackbar(title: "Error!", message: "Error: $error", isSuccess: false);
+      }
+    }
 
     return SafeArea(
       child: Container(
@@ -84,73 +115,50 @@ class _AddTaskModalState extends State<AddTaskModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonHideUnderline(
-              child: Obx(
-                () => DropdownButton2(
-                  customButton: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 3,
-                      horizontal: 6,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 6,
-                      children: [
-                        // Text(showGroup()),
-                        Text("data"),
-                        // taskC.matkulIdC.value == null ||
-                        //         taskC.matkulIdC.value == ""
-                        //     ? const SizedBox.shrink()
-                        // :
+              child: DropdownButton2<String>(
+                customButton: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 6,
+                    children: [
+                      Text(showGroup()),
+                      if (selectedMatkulId.value != null && selectedMatkulId.value != "")
                         IconButton(
-                          onPressed: () {
-                            // taskC.matkulIdC.value = null;
-                          },
-                          icon: const Icon(LucideIcons.x),
+                          onPressed: () => selectedMatkulId.value = null,
+                          icon: const Icon(LucideIcons.x, size: 16),
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
                         ),
-                        const Icon(LucideIcons.chevronDown),
-                      ],
-                    ),
+                      const Icon(LucideIcons.chevronDown),
+                    ],
                   ),
-                  buttonStyleData: ButtonStyleData(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-
-                  // value: taskC.matkulIdC.value,
-                  items: [
-                    // ...matkulList.map(
-                    //   (item) => DropdownMenuItem<Object>(
-                    //     value: item.id,
-                    //     child: Text(item.nameAbbreviation),
-                    //   ),
-                    // ),
-                    // ...tabC.taskTabs.map(
-                    //   (item) => DropdownMenuItem<Object>(
-                    //     value: item.id,
-                    //     child: Text(item.tabName),
-                    //   ),
-                    // ),
-                  ],
-                  onChanged: (value) {
-                    // taskC.matkulIdC.value = value as String?;
-                    // print("selected matkul: ${taskC.matkulIdC.value}");
-                  },
-                  alignment: AlignmentDirectional.centerStart,
-                  dropdownStyleData: DropdownStyleData(
-                    width: 200,
-                    maxHeight: 200,
-                    direction: DropdownDirection.textDirection,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                ),
+                buttonStyleData: ButtonStyleData(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: [
+                  ...matkulList.map((item) => DropdownItem<String>(
+                    value: item.id,
+                    child: Text(item.nameAbbreviation),
+                  )),
+                  ...taskTabs.map((item) => DropdownItem<String>(
+                    value: item.id,
+                    child: Text(item.tabName),
+                  )),
+                ],
+                onChanged: (value) => selectedMatkulId.value = value,
+                alignment: AlignmentDirectional.centerStart,
+                dropdownStyleData: DropdownStyleData(
+                  width: 200,
+                  maxHeight: 200,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
             TextField(
-              // controller: taskC.titleC,
+              controller: titleController,
               style: theme.textTheme.titleLarge,
               decoration: const InputDecoration(
                 hintText: 'Task',
@@ -159,11 +167,11 @@ class _AddTaskModalState extends State<AddTaskModal> {
                 contentPadding: EdgeInsets.symmetric(vertical: 8),
               ),
             ),
-            if (showDescField)
+            if (showDescField.value || descController.text.isNotEmpty)
               TextField(
-                // controller: taskC.descC,
+                controller: descController,
                 minLines: 1,
-                maxLines: null, // expands vertically when overflow
+                maxLines: null,
                 style: theme.textTheme.titleMedium,
                 decoration: const InputDecoration(
                   hintText: 'Details',
@@ -172,130 +180,75 @@ class _AddTaskModalState extends State<AddTaskModal> {
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
-            Obx(
-              () => Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // if (taskC.dueDateC.value != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: Chip(
-                      label: Text(
-                        // Tampilkan tanggal dan jam jika ada
-                        // taskC.dueDateC.value!.hour == 0 &&
-                        //         taskC.dueDateC.value!.minute == 0
-                        //     ? "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year}"
-                        //     : "${taskC.dueDateC.value!.day}/${taskC.dueDateC.value!.month}/${taskC.dueDateC.value!.year} ${taskC.dueDateC.value!.hour.toString().padLeft(2, '0')}:${taskC.dueDateC.value!.minute.toString().padLeft(2, '0')}",
-                        "jam",
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      onDeleted: () {
-                        // taskC.dueDateC.value = null;
-                      },
-                    ),
+            if (dueDate.value != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Chip(
+                  label: Text(
+                    dueDate.value!.hour == 0 && dueDate.value!.minute == 0
+                        ? "${dueDate.value!.day}/${dueDate.value!.month}/${dueDate.value!.year}"
+                        : "${dueDate.value!.day}/${dueDate.value!.month}/${dueDate.value!.year} ${dueDate.value!.hour.toString().padLeft(2, '0')}:${dueDate.value!.minute.toString().padLeft(2, '0')}",
+                    style: theme.textTheme.bodySmall,
                   ),
-                ],
+                  onDeleted: () => dueDate.value = null,
+                ),
               ),
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
               children: [
-                Obx(
-                  () => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            showDescField = true;
-                          });
-                        },
-                        icon: const Icon(LucideIcons.textAlignStart),
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          // final date = await showDatePicker(
-                          //   context: context,
-                          //   initialDate: taskC.dueDateC.value ?? DateTime.now(),
-                          //   firstDate: DateTime(2000),
-                          //   lastDate: DateTime(2100),
-                          // );
-                          // if (date != null) {
-                          //   // Jika sebelumnya sudah ada jam, pertahankan jam
-                          //   if (taskC.dueDateC.value != null) {
-                          //     final old = taskC.dueDateC.value!;
-                          //     taskC.dueDateC.value = DateTime(
-                          //       date.year,
-                          //       date.month,
-                          //       date.day,
-                          //       old.hour,
-                          //       old.minute,
-                          //     );
-                          //   } else {
-                          //     taskC.dueDateC.value = date;
-                          //   }
-                          // }
-                        },
-                        icon: const Icon(LucideIcons.calendar),
-                      ),
-                      // if (taskC.dueDateC.value != null)
-                      IconButton(
-                        onPressed: () async {
-                          // final time = await showTimePicker(
-                          //   context: context,
-                          //   initialTime: TimeOfDay(
-                          //     hour: taskC.dueDateC.value!.hour,
-                          //     minute: taskC.dueDateC.value!.minute,
-                          //   ),
-                          // );
-                          // if (time != null) {
-                          //   final date = taskC.dueDateC.value!;
-                          //   taskC.dueDateC.value = DateTime(
-                          //     date.year,
-                          //     date.month,
-                          //     date.day,
-                          //     time.hour,
-                          //     time.minute,
-                          //   );
-                          // }
-                        },
-                        icon: const Icon(LucideIcons.clock),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // taskC.isStaredC.value = !taskC.isStaredC.value;
-                        },
-                        icon:
-                            //  taskC.isStaredC.value
-                            //     ? const Icon(Icons.star, color: Colors.amberAccent)
-                            // :
-                            const Icon(Icons.star_border),
-                      ),
-                    ],
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () => showDescField.value = true,
+                      icon: const Icon(LucideIcons.textAlignStart),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: dueDate.value ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (date != null) {
+                          if (dueDate.value != null) {
+                            dueDate.value = DateTime(date.year, date.month, date.day, dueDate.value!.hour, dueDate.value!.minute);
+                          } else {
+                            dueDate.value = date;
+                          }
+                        }
+                      },
+                      icon: const Icon(LucideIcons.calendar),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(
+                            hour: dueDate.value?.hour ?? 0,
+                            minute: dueDate.value?.minute ?? 0,
+                          ),
+                        );
+                        if (time != null) {
+                          final date = dueDate.value ?? DateTime.now();
+                          dueDate.value = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                        }
+                      },
+                      icon: const Icon(LucideIcons.clock),
+                    ),
+                    IconButton(
+                      onPressed: () => isStared.value = !isStared.value,
+                      icon: Icon(isStared.value ? Icons.star : Icons.star_border, color: isStared.value ? Colors.amberAccent : null),
+                    ),
+                  ],
                 ),
-
                 TextButton(
-                  onPressed:
-                      // taskC.titleC.text.trim().isEmpty
-                      //     ? null // tombol disable
-                      //     : () {
-                      //         try {
-                      //           taskC.addTask();
-                      //           Get.back();
-                      //           showAppSnackbar(
-                      //             title: "Sucess!",
-                      //             message: "Berhasil menambahkan task",
-                      //           );
-                      //         } catch (error) {
-                      //           showAppSnackbar(
-                      //             title: "Error!",
-                      //             message: "Error: $error",
-                      //           );
-                      //         }
-                      //       },
-                      () {},
+                  onPressed: () {
+                    if (titleController.text.trim().isNotEmpty) {
+                      addTask();
+                    }
+                  },
                   child: const Text("Save"),
                 ),
               ],

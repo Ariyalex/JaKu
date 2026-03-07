@@ -1,3 +1,4 @@
+import 'package:jaku/core/utils/time_parser_helper.dart';
 import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/value_objects/day.dart';
 
@@ -16,8 +17,8 @@ class ScheduleModel extends MatkulSchedule {
       id: json["id"],
       matkulId: matkulId,
       day: Day.stringToDay(json["day"]),
-      startTime: DateTime.parse(json["start_time"]),
-      endTime: DateTime.tryParse(json["end_time"]),
+      startTime: TimeParserHelper.parseTimeOfDay(json["start_time"]),
+      endTime: TimeParserHelper.parseTimeOfDay(json["end_time"]),
       room: json["room"],
     );
   }

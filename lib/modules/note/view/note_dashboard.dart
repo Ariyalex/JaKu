@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:jaku/modules/note/controller/note_controllers.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jaku/modules/note/bloc/note_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_event.dart';
+import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/core/widgets/note_global.dart';
-import 'package:jaku/core/widgets/search_textfield.dart';
+import 'package:jaku/modules/note/widgets/search_textfield.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class NoteDashboard extends StatefulWidget {
@@ -15,66 +17,34 @@ class NoteDashboard extends StatefulWidget {
 }
 
 class _NoteDashboardState extends State<NoteDashboard> {
-  late NoteControllers noteC;
-
   @override
   void initState() {
     super.initState();
-    noteC = Get.put(NoteControllers());
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    //make sure dispose everything before disposing notecontrollers
-    Get.delete<NoteControllers>();
-    print("dispose noteC");
-    super.dispose();
+    // Dispatch LoadListNote if it hasn't been loaded
+    final noteBloc = context.read<NoteBloc>();
+    if (noteBloc.state.status == NoteStatus.initial) {
+      noteBloc.add(LoadListNote());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    print(noteC.allNote);
-
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Obx(() {
-        final notes = noteC.filteredNotes;
-
-        try {
-          if (noteC.isSortByCreatedDate.value && noteC.isAsce.value) {
-            noteC.sortByCreatedAsc();
-          } else if (noteC.isSortByCreatedDate.value && !noteC.isAsce.value) {
-            noteC.sortByCreatedDesc();
-          } else if (!noteC.isSortByCreatedDate.value && noteC.isAsce.value) {
-            noteC.sortByEditedAsc();
-          } else if (!noteC.isSortByCreatedDate.value && !noteC.isAsce.value) {
-            noteC.sortByEditedDesc();
+      backgroundColor: theme.colorScheme.surface,
+      body: BlocBuilder<NoteBloc, NoteState>(
+        builder: (context, state) {
+          if (state.status == NoteStatus.initial || state.status == NoteStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
           }
-        } catch (error) {
-          showAppSnackbar(
-            title: "Error!",
-            message: "Gagal menambahkan note: $error",
-            isSuccess: false,
-          );
-        }
-        print("sort created: ${noteC.isSortByCreatedDate}");
-        print("sort direction: ${noteC.isAsce}");
 
-        for (var note in notes) {
-          if (noteC.isSortByCreatedDate.value) {
-            print(note.createdOn);
-          } else {
-            print(note.editedOn);
+          if (state.status == NoteStatus.error) {
+            return Center(child: Text("Error: ${state.message}"));
           }
-        }
 
-        final isLoading = noteC.isLoading.value;
-        if (isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else {
+          final notes = state.filteredNotes;
+
           return SafeArea(
             child: Column(
               children: [
@@ -115,12 +85,11 @@ class _NoteDashboardState extends State<NoteDashboard> {
               ],
             ),
           );
-        }
-      }),
-
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Get.toNamed(RouteNamed.addNote);
+          context.pushNamed(RouteNamed.addNote);
         },
         shape: const CircleBorder(),
         child: const Icon(LucideIcons.plus),

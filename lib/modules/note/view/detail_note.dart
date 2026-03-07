@@ -1,115 +1,145 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:jaku/controllers/matkul_controller.dart';
-import 'package:jaku/modules/note/controller/note_controllers.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jaku/data/entities/note.dart';
+import 'package:jaku/modules/note/bloc/note_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_event.dart';
+import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/core/widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class DetailNote extends StatefulWidget {
-  const DetailNote({super.key});
-
-  @override
-  State<DetailNote> createState() => _DetailNoteState();
-}
-
-class _DetailNoteState extends State<DetailNote> {
-  // final noteC = Get.find<NoteControllers>();
-  // final matkulC = Get.find<MatkulController>();
-  // late Note? selectedNote;
-  // late final StreamSubscription _matkulSub;
-  // final noteId = Get.arguments;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Ambil selectedNote dari widget atau dari Get.arguments
-  //   selectedNote = noteC.selectById(noteId);
-  //   noteC.titleC.text = selectedNote?.title ?? '';
-  //   noteC.noteC.text = selectedNote?.desc ?? '';
-  //   noteC.matkulC.value = selectedNote?.matkulId ?? '';
-
-  //   noteC.titleC.addListener(_onAnyChanged);
-  //   noteC.noteC.addListener(_onAnyChanged);
-  //   _matkulSub = noteC.matkulC.listen((_) => _onAnyChanged());
-  // }
-
-  // void _onAnyChanged() {
-  //   print(noteId);
-  //   noteC.onNoteChanged(noteId!);
-  // }
-
-  // @override
-  // void dispose() {
-  //   noteC.titleC.removeListener(_onAnyChanged);
-  //   noteC.noteC.removeListener(_onAnyChanged);
-  //   _matkulSub.cancel();
-
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     noteC.matkulC.value = "";
-  //     noteC.titleC.clear();
-  //     noteC.noteC.clear();
-  //   });
-
-  //   super.dispose();
-  // }
+class DetailNote extends HookWidget {
+  const DetailNote({super.key, this.noteId});
+  
+  final String? noteId;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteBloc = context.read<NoteBloc>();
+    
+    // Read from route extra if not passed via constructor
+    final String? id = noteId ?? (GoRouterState.of(context).extra as String?);
 
-    // void deleteNote() {
-    //   try {
-    //     noteC.deleteNote(noteId);
+    final noteState = context.watch<NoteBloc>().state;
+    
+    useEffect(() {
+      if (id != null) {
+        noteBloc.add(LoadNote(id));
+      }
+      return null;
+    }, [id]);
 
-    //     Get.back(); // Tutup dialog konfirmasi
-    //     Get.back(canPop: true);
+    final existingNote = noteState.selectedNote;
 
-    //     showAppSnackbar(title: "Success", message: "Berhasil menghapus note");
-    //   } catch (e) {
-    //     showAppSnackbar(
-    //       title: "Error!",
-    //       message: "Error ketika menghapus note: $e",
-    //       isSuccess: false,
-    //     );
-    //   }
-    // }
+    final selectedMatkulId = useState<String?>(null);
+    final titleController = useTextEditingController();
+    final noteController = useTextEditingController();
+
+    useEffect(() {
+      if (existingNote != null && existingNote.id == id) {
+        titleController.text = existingNote.title ?? '';
+        noteController.text = existingNote.desc ?? '';
+        selectedMatkulId.value = existingNote.matkulId;
+      }
+      return null;
+    }, [existingNote]);
+
+    useEffect(() {
+      Timer? debounceTimer;
+
+      void saveNote() {
+        if (id == null) return;
+        
+        final newNote = Note(
+          id: id,
+          title: titleController.text,
+          desc: noteController.text,
+          createdOn: existingNote?.createdOn ?? DateTime.now(),
+          editedOn: DateTime.now(),
+          matkulId: selectedMatkulId.value,
+        );
+
+        noteBloc.add(UpdateNote(newNote));
+      }
+
+      void onTextChanged() {
+        if (debounceTimer?.isActive ?? false) debounceTimer!.cancel();
+        debounceTimer = Timer(const Duration(milliseconds: 300), saveNote);
+      }
+
+      titleController.addListener(onTextChanged);
+      noteController.addListener(onTextChanged);
+
+      return () {
+        titleController.removeListener(onTextChanged);
+        noteController.removeListener(onTextChanged);
+        if (debounceTimer?.isActive ?? false) debounceTimer!.cancel();
+      };
+    }, [titleController, noteController, selectedMatkulId.value, existingNote]);
+
+    void deleteNote() {
+      if (id != null) {
+        try {
+          noteBloc.add(DeleteNote(id));
+          context.pop(); // Close dialog
+          context.pop(); // Go back from detail
+          showAppSnackbar(title: "Success", message: "Berhasil menghapus note");
+        } catch (e) {
+          showAppSnackbar(
+            title: "Error!",
+            message: "Error ketika menghapus note: $e",
+            isSuccess: false,
+          );
+        }
+      }
+    }
+
+    if (existingNote == null && noteState.status == NoteStatus.loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       appBar: AppBar(
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child:
-                // matkulC.allMatkul.isNotEmpty
-                //     ? SelectMatkulWidget(matkulId: selectedNote?.matkulId ?? "")
-                //     : null,
-                SelectMatkulWidget(),
+            child: SelectMatkulWidget(
+              matkulId: selectedMatkulId.value,
+              onChanged: (val) {
+                selectedMatkulId.value = val;
+              },
+            ),
           ),
           IconButton(
             onPressed: () {
-              // Get.defaultDialog(
-              //   title: "Hapus note?",
-              //   titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-              //   backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-              //   content: const Text(
-              //     "Yakin ingin menghapus note ini?",
-              //     textAlign: TextAlign.center,
-              //   ),
-              //   cancel: FilledButton(
-              //     onPressed: () {
-              //       Get.back();
-              //     },
-              //     child: const Text("Tidak"),
-              //   ),
-              //   confirm: OutlinedButton(
-              //     onPressed: deleteNote,
-              //     child: const Text("Ya"),
-              //   ),
-              // );
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Hapus note?", style: TextStyle(fontWeight: FontWeight.bold)),
+                  backgroundColor: theme.dialogTheme.backgroundColor,
+                  content: const Text(
+                    "Yakin ingin menghapus note ini?",
+                    textAlign: TextAlign.center,
+                  ),
+                  actions: [
+                    FilledButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      child: const Text("Tidak"),
+                    ),
+                    OutlinedButton(
+                      onPressed: deleteNote,
+                      child: const Text("Ya"),
+                    ),
+                  ],
+                ),
+              );
             },
             icon: const Icon(LucideIcons.trash2),
           ),
@@ -122,9 +152,9 @@ class _DetailNoteState extends State<DetailNote> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
-                // controller: noteC.titleC,
+                controller: titleController,
                 minLines: 1,
-                maxLines: null, // expands vertically when overflow
+                maxLines: null,
                 style: theme.textTheme.titleLarge,
                 decoration: InputDecoration(
                   hintText: 'Title',
@@ -136,7 +166,7 @@ class _DetailNoteState extends State<DetailNote> {
               ),
               Expanded(
                 child: TextField(
-                  // controller: noteC.noteC,
+                  controller: noteController,
                   style: theme.textTheme.bodyMedium,
                   decoration: InputDecoration(
                     hintText: 'Note',

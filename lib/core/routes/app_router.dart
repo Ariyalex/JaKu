@@ -6,50 +6,43 @@ import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/data/providers/remote_pdf_provider.dart';
 import 'package:jaku/data/repositories/pdf_repository.dart';
+import 'package:jaku/modules/main_tab/view/main_screen.dart';
 import 'package:jaku/modules/note/view/add_note.dart';
 import 'package:jaku/modules/note/view/detail_note.dart';
-import 'package:jaku/modules/note/view/note_dashboard.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_bloc.dart';
+import 'package:jaku/modules/schedule/view/add_schedule_screen.dart';
+import 'package:jaku/modules/schedule/view/edit_schedule_screen.dart';
 import 'package:jaku/modules/schedule/view/schedule_detail_screen.dart';
 import 'package:jaku/modules/guides/view/guide_schedule.dart';
 import 'package:jaku/modules/guides/view/guide_pdf.dart';
 import 'package:jaku/modules/pdf_parse/views/pdf_parsing.dart';
-import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
-import 'package:jaku/modules/task/view/task_dashboard.dart';
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: RouteNamed.scheduleDashboard,
+    initialLocation: '/',
     routes: [
+      // Rute Utama: Menampilkan MainScreen (dengan Bottom Nav Bar)
       GoRoute(
-        name: RouteNamed.scheduleDashboard,
-        path: RouteNamed.scheduleDashboard,
-        builder: (context, state) => const ScheduleDashboard(),
+        path: '/',
+        name: RouteNamed.home,
+        builder: (context, state) => const MainScreen(),
       ),
-      GoRoute(
-        name: RouteNamed.noteDashboard,
-        path: RouteNamed.noteDashboard,
-        builder: (context, state) => const NoteDashboard(),
-      ),
-      GoRoute(
-        name: RouteNamed.taskDashboard,
-        path: RouteNamed.taskDashboard,
-        builder: (context, state) => const TaskDashboard(),
-      ),
+
+      // Rute lainnya tetap ada untuk navigasi deep-link atau push page
       GoRoute(
         name: RouteNamed.pdfParsing,
         path: RouteNamed.pdfParsing,
-        builder: (context, state) => const PdfParsing(),
-      ),
-      GoRoute(
-        name: RouteNamed.guidePdf,
-        path: RouteNamed.guidePdf,
         builder: (context, state) => BlocProvider(
           create: (context) => PdfParseBloc(
             PdfRepository(RemotePdfProvider(dio: getIt<DioClient>().dio)),
           ),
-          child: const GuidePdf(),
+          child: const PdfParsing(),
         ),
+      ),
+      GoRoute(
+        name: RouteNamed.guidePdf,
+        path: RouteNamed.guidePdf,
+        builder: (context, state) => const GuidePdf(),
       ),
       GoRoute(
         name: RouteNamed.guideGeneral,
@@ -62,6 +55,19 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ScheduleDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        name: RouteNamed.addSchedule,
+        path: RouteNamed.addSchedule,
+        builder: (context, state) => AddScheduleScreen(),
+      ),
+      GoRoute(
+        name: RouteNamed.editSchedule,
+        path: RouteNamed.editSchedule,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return EditScheduleScreen(scheduleId: id);
         },
       ),
       GoRoute(

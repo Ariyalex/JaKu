@@ -1,34 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:jaku/controllers/main_tab_controller.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class AddGroupModal extends StatefulWidget {
+class AddGroupModal extends HookWidget {
   const AddGroupModal({super.key, this.onUpdateTabs});
-  final VoidCallback? onUpdateTabs;
-
-  @override
-  State<AddGroupModal> createState() => _AddGroupModalState();
-}
-
-class _AddGroupModalState extends State<AddGroupModal> {
-  final tabC = Get.find<MainTabController>();
-  late TextEditingController textC;
-
-  @override
-  void initState() {
-    super.initState();
-    textC = tabC.taskTabC;
-  }
-
-  @override
-  void dispose() {
-    textC.clear();
-    super.dispose();
-  }
+  final void Function(String tabName)? onUpdateTabs;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textController = useTextEditingController();
+    
+    // Listen to text changes to rebuild and enable/disable Save button
+    useListenable(textController);
 
     return SafeArea(
       child: Container(
@@ -47,24 +30,26 @@ class _AddGroupModalState extends State<AddGroupModal> {
               children: [
                 Text("New group", style: theme.textTheme.bodyLarge),
                 TextButton(
-                  onPressed: textC.text.trim().isEmpty
+                  onPressed: textController.text.trim().isEmpty
                       ? null
-                      : widget.onUpdateTabs != null
-                      ? () => widget.onUpdateTabs!()
-                      : null,
+                      : () {
+                          if (onUpdateTabs != null) {
+                            onUpdateTabs!(textController.text);
+                            Navigator.of(context).pop();
+                          }
+                        },
                   child: const Text("save"),
                 ),
               ],
             ),
             const Divider(),
             TextField(
-              controller: textC,
+              controller: textController,
+              autofocus: true,
               decoration: InputDecoration(
-                hint: const Text("Nama group"),
-                helper: Text(
-                  "group tidak termasuk ke dalam matkul",
-                  style: theme.textTheme.labelLarge,
-                ),
+                hintText: "Nama group",
+                helperText: "group tidak termasuk ke dalam matkul",
+                helperStyle: theme.textTheme.labelLarge,
               ),
             ),
           ],

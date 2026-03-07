@@ -37,7 +37,7 @@ class Table extends HookWidget {
       final Set<String> jamPairSet = <String>{};
       for (var schedule in schedules) {
         jamPairSet.add(
-          "${TimeParserHelper.formatDateTimeToString(schedule.startTime)}#${schedule.endTime != null ? TimeParserHelper.formatDateTimeToString(schedule.endTime!) : ""}",
+          "${TimeParserHelper.formatTimeOfDay(schedule.startTime)}#${schedule.endTime != null ? TimeParserHelper.formatTimeOfDay(schedule.endTime!) : ""}",
         );
       }
 
@@ -95,11 +95,11 @@ class Table extends HookWidget {
       final matchingSchedules = schedules.where((jadwal) {
         final sameDay = jadwal.day == day;
         final sameStartTime =
-            TimeParserHelper.formatDateTimeToString(jadwal.startTime) ==
+            TimeParserHelper.formatTimeOfDay(jadwal.startTime) ==
             jamPair['jamAwal'];
         final sameEndTime =
             (jadwal.endTime != null
-                ? TimeParserHelper.formatDateTimeToString(jadwal.endTime!)
+                ? TimeParserHelper.formatTimeOfDay(jadwal.endTime!)
                 : "") ==
             jamPair['jamAkhir'];
         return sameDay && sameStartTime && sameEndTime;
@@ -128,9 +128,7 @@ class Table extends HookWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            matkul.nameAbbreviation.isNotEmpty
-                ? matkul.nameAbbreviation
-                : matkul.name,
+            matkul.name,
             style: isToday
                 ? textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)
                 : textTheme.bodyMedium,
@@ -140,7 +138,7 @@ class Table extends HookWidget {
           ),
         ),
         onTap: () {
-          context.goNamed(
+          context.pushNamed(
             RouteNamed.detailMatkul,
             pathParameters: {"id": matkul.id},
           );

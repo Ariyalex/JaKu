@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:jaku/core/utils/time_parser_helper.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
 
 class InformasiMatkul extends HookWidget {
-  const InformasiMatkul({super.key, required this.matkulId});
-  final String matkulId;
+  const InformasiMatkul({super.key, required this.schedule});
+  final MatkulSchedule schedule;
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +17,9 @@ class InformasiMatkul extends HookWidget {
     final matkulBloc = context.read<MatkulBloc>();
 
     useEffect(() {
-      matkulBloc.add(LoadMatkul(matkulId));
+      matkulBloc.add(LoadMatkul(schedule.matkulId));
       return;
-    }, [matkulId]);
+    }, [schedule.matkulId]);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -32,16 +31,22 @@ class InformasiMatkul extends HookWidget {
       child: BlocBuilder<MatkulBloc, MatkulState>(
         bloc: matkulBloc,
         builder: (context, state) {
-          if (state is MatkulLoading) {
+          if (state.status == MatkulStatus.loading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is MatkulError) {
-            return Center(child: Text(state.message));
+          if (state.status == MatkulStatus.error) {
+            return Center(child: Text(state.message ?? "Error"));
           }
 
-          if (state is MatkulLoaded) {
-            final matkul = state.matkul;
+          final matkul = state.selectedMatkul;
+          if (matkul != null && matkul.id == schedule.matkulId) {
+            final String scheduleStartTime =
+                TimeParserHelper.formatTimeOfDay(schedule.startTime);
+            final String scheduleEndTime = schedule.endTime != null
+                ? TimeParserHelper.formatTimeOfDay(schedule.endTime!)
+                : "";
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -66,13 +71,6 @@ class InformasiMatkul extends HookWidget {
                         ],
                       ),
                     ),
-                    (matkul.className != null && matkul.className!.isNotEmpty)
-                        ? Chip(
-                            label: Text("className ${matkul.className!}"),
-                            backgroundColor: theme.colorScheme.primary
-                                .withValues(alpha: 0.1),
-                          )
-                        : const SizedBox.shrink(),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -103,73 +101,49 @@ class InformasiMatkul extends HookWidget {
                       ),
                     ],
                   ),
-                BlocBuilder<ScheduleBloc, ScheduleState>(
-                  builder: (context, state) {
-                    if (state is ScheduleLoaded) {
-                      final schedule = state.schedule;
-                      final String scheduleStartTime =
-                          TimeParserHelper.formatDateTimeToString(
-                            schedule.startTime,
-                          );
-                      final String scheduleEndTime = schedule.endTime != null
-                          ? TimeParserHelper.formatDateTimeToString(
-                              schedule.endTime!,
-                            )
-                          : "";
-                      return Column(
-                        children: [
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.room,
-                                  color: theme.colorScheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  schedule.room?.isNotEmpty == true
-                                      ? schedule.room!
-                                      : "Ruang belum diisi",
-                                  style: theme.textTheme.bodyLarge,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                schedule.day.label,
-                                style: theme.textTheme.bodyLarge,
-                              ),
-                              const Spacer(),
-                              Icon(
-                                Icons.access_time,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                schedule.endTime != null
-                                    ? "$scheduleStartTime - $scheduleEndTime"
-                                    : scheduleStartTime,
-                                style: theme.textTheme.bodyLarge,
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                    children: [
+                      Icon(Icons.room, color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        schedule.room?.isNotEmpty == true
+                            ? schedule.room!
+                            : "Ruang belum diisi",
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      schedule.day.label,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.access_time,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      schedule.endTime != null
+                          ? "$scheduleStartTime - $scheduleEndTime"
+                          : scheduleStartTime,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ],
                 ),
               ],
             );

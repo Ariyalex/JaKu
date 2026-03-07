@@ -34,7 +34,6 @@ class Matkul extends Equatable {
 
   factory Matkul.create({
     required String name,
-    required String nameAbbreviation,
     String? lecturer1,
     String? lecturer2,
   }) {

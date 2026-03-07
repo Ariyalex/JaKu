@@ -19,19 +19,19 @@ class TableView extends HookWidget {
       context.read<ScheduleBloc>().add(LoadListSchedule());
       context.read<MatkulBloc>().add(LoadListMatkul());
       return null;
-    });
+    }, []);
 
     return BlocBuilder<ScheduleBloc, ScheduleState>(
       builder: (context, scheduleState) {
         return BlocBuilder<MatkulBloc, MatkulState>(
           builder: (context, matkulState) {
-            if (scheduleState is ScheduleListLoading ||
-                matkulState is MatkulListLoading) {
+            if (scheduleState.status == ScheduleStatus.loading ||
+                matkulState.status == MatkulStatus.loading) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (scheduleState is ScheduleListLoaded &&
-                matkulState is MatkulListLoaded) {
+            if (scheduleState.status == ScheduleStatus.success &&
+                matkulState.status == MatkulStatus.success) {
               final schedules = scheduleState.schedules;
               final matkuls = matkulState.matkuls;
 
@@ -42,12 +42,12 @@ class TableView extends HookWidget {
               return tbl.Table(schedules: schedules, matkuls: matkuls);
             }
 
-            if (scheduleState is ScheduleError) {
-              return Center(child: Text(scheduleState.message));
+            if (scheduleState.status == ScheduleStatus.error) {
+              return Center(child: Text(scheduleState.message ?? "Error"));
             }
 
-            if (matkulState is MatkulError) {
-              return Center(child: Text(matkulState.message));
+            if (matkulState.status == MatkulStatus.error) {
+              return Center(child: Text(matkulState.message ?? "Error"));
             }
 
             return const SizedBox.shrink();

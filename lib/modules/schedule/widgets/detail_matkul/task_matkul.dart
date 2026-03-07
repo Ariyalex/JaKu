@@ -27,62 +27,60 @@ class TaskMatkul extends HookWidget {
     return BlocBuilder<TaskBloc, TaskState>(
       bloc: taskBloc,
       builder: (context, state) {
-        if (state is TaskListByMatkulLoading) {
+        if (state.status == TaskStatus.loading) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (state is TaskListByMatkulLoaded) {
-          final tasks = state.tasks;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Tugas",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+        
+        final tasks = state.filteredTasks;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Tugas",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  IconButton(
-                    icon: const Icon(LucideIcons.plus),
-                    tooltip: "Tambah Tugas",
-                    onPressed: () {
-                      showBarModalBottomSheet<Map<String, dynamic>>(
-                        barrierColor: Colors.black.withValues(alpha: 0.4),
-                        context: context,
-                        useRootNavigator: true,
-                        bounce: true,
-                        backgroundColor: theme.colorScheme.surfaceContainer,
-                        builder: (context) => AddTaskModal(matkulId: matkulId),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              tasks.isEmpty
-                  ? Text("Belum ada tugas.", style: theme.textTheme.bodyMedium)
-                  : Column(
-                      children: tasks
-                          .map(
-                            (task) => Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: theme.dividerColor,
-                                  width: 1.2,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
+                ),
+                IconButton(
+                  icon: const Icon(LucideIcons.plus),
+                  tooltip: "Tambah Tugas",
+                  onPressed: () {
+                    showBarModalBottomSheet<void>(
+                      barrierColor: Colors.black.withValues(alpha: 0.4),
+                      context: context,
+                      useRootNavigator: true,
+                      bounce: true,
+                      backgroundColor: theme.colorScheme.surfaceContainer,
+                      builder: (context) => AddTaskModal(matkulId: matkulId),
+                    );
+                  },
+                ),
+              ],
+            ),
+            tasks.isEmpty
+                ? Text("Belum ada tugas.", style: theme.textTheme.bodyMedium)
+                : Column(
+                    children: tasks
+                        .map(
+                          (task) => Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: theme.dividerColor,
+                                width: 1.2,
                               ),
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              child: TaskTile(taskId: task.id, star: false),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          )
-                          .toList(),
-                    ),
-            ],
-          );
-        }
-        return const SizedBox.shrink();
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            child: TaskTile(taskId: task.id, star: false),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ],
+        );
       },
     );
   }

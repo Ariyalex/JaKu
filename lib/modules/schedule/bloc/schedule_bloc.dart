@@ -6,7 +6,7 @@ import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
 class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   final MatkulScheduleRepository _repository;
 
-  ScheduleBloc(this._repository) : super(ScheduleInitial()) {
+  ScheduleBloc(this._repository) : super(const ScheduleState()) {
     on<LoadListSchedule>(_onLoadListSchedule);
     on<LoadSchedule>(_onLoadSchedule);
     on<AddListSchedule>(_onAddListSchedule);
@@ -20,12 +20,12 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     LoadListSchedule event,
     Emitter<ScheduleState> emit,
   ) async {
-    emit(ScheduleListLoading());
+    emit(state.copyWith(status: ScheduleStatus.loading));
     try {
       final schedules = _repository.getAllSchedule();
-      emit(ScheduleListLoaded(schedules));
+      emit(state.copyWith(status: ScheduleStatus.success, schedules: schedules));
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 
@@ -33,12 +33,19 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     LoadSchedule event,
     Emitter<ScheduleState> emit,
   ) async {
-    emit(ScheduleLoading());
+    // If we already have it in list, just set it
+    final existing = state.schedules.where((s) => s.id == event.id).firstOrNull;
+    if (existing != null) {
+      emit(state.copyWith(selectedSchedule: existing));
+      return;
+    }
+
+    emit(state.copyWith(status: ScheduleStatus.loading));
     try {
       final schedule = _repository.getScheduleById(event.id);
-      emit(ScheduleLoaded(schedule));
+      emit(state.copyWith(status: ScheduleStatus.success, selectedSchedule: schedule));
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 
@@ -50,7 +57,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       await _repository.addSchedule(event.schedule);
       add(LoadListSchedule());
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 
@@ -62,7 +69,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       await _repository.addSchedules(event.schedules);
       add(LoadListSchedule());
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 
@@ -74,7 +81,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       await _repository.updateSchedule(event.schedule);
       add(LoadListSchedule());
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 
@@ -86,7 +93,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       await _repository.deleteSchedule(event.id);
       add(LoadListSchedule());
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 
@@ -98,7 +105,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       await _repository.deleteAllSchedule();
       add(LoadListSchedule());
     } catch (e) {
-      emit(ScheduleError(e.toString()));
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
   }
 }

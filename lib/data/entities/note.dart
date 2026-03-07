@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
+import 'package:jaku/main.dart';
 
 part 'note.g.dart';
 
@@ -17,9 +18,6 @@ class Note extends Equatable {
   @HiveField(3)
   final String? desc;
 
-  @HiveField(4)
-  final String? matkul;
-
   @HiveField(5)
   final DateTime createdOn;
 
@@ -31,7 +29,6 @@ class Note extends Equatable {
     this.matkulId,
     this.title,
     this.desc,
-    this.matkul,
     required this.createdOn,
     required this.editedOn,
   });
@@ -54,21 +51,20 @@ class Note extends Equatable {
       matkulId: identical(matkulId, null)
           ? null
           : (matkulId as String?) ?? this.matkulId,
-      matkul: identical(matkul, null)
-          ? null
-          : (matkul as String?) ?? this.matkul,
+    );
+  }
+
+  factory Note.create({String? desc, String? title, String? matkulId}) {
+    return Note(
+      id: uuid.v4(),
+      createdOn: DateTime.now(),
+      editedOn: DateTime.now(),
+      desc: desc,
+      title: title,
+      matkulId: matkulId,
     );
   }
 
   @override
-  // TODO: implement props
-  List<Object?> get props => [
-    id,
-    title,
-    desc,
-    createdOn,
-    editedOn,
-    matkul,
-    matkulId,
-  ];
+  List<Object?> get props => [id, title, desc, createdOn, editedOn, matkulId];
 }
