@@ -45,27 +45,22 @@ class Task extends Equatable {
   });
 
   Task copyWith({
-    String? id,
     String? task,
     String? desc,
     bool? status,
     DateTime? taskDueDate,
-    Object? groupId,
+    String? groupId,
     bool? isStared,
     int? matkulOrder,
     int? starredOrder,
   }) {
     return Task(
-      id: id ?? this.id,
+      id: id,
       task: task ?? this.task,
       desc: desc ?? this.desc,
       status: status ?? this.status,
-      taskDueDate: identical(taskDueDate, null)
-          ? null
-          : (taskDueDate as DateTime?) ?? this.taskDueDate,
-      groupId: identical(groupId, null)
-          ? null
-          : (groupId as String?) ?? this.groupId,
+      taskDueDate: taskDueDate ?? this.taskDueDate,
+      groupId: groupId ?? this.groupId,
       isStared: isStared ?? this.isStared,
       matkulOrder: matkulOrder ?? this.matkulOrder,
       starredOrder: starredOrder ?? this.starredOrder,
@@ -73,7 +68,6 @@ class Task extends Equatable {
   }
 
   @override
-  // TODO: implement props
   List<Object?> get props => [
     id,
     task,

@@ -73,7 +73,6 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
                     ),
                   ),
                   if (isMatkulSelected) ...[
-                    const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.clear),
                       color: theme.colorScheme.primary,
@@ -91,10 +90,8 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
             ),
             items: matkulList
                 .map(
-                  (item) => DropdownItem<Matkul>(
-                    value: item,
-                    child: Text(item.nameAbbreviation),
-                  ),
+                  (item) =>
+                      DropdownItem<Matkul>(value: item, child: Text(item.name)),
                 )
                 .toList(),
             onChanged: (value) {
@@ -102,9 +99,16 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
                 widget.onChanged!(value.id);
               }
             },
+            dropdownSeparator: DropdownSeparator(
+              height: 4,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Divider(),
+              ),
+            ),
             dropdownStyleData: DropdownStyleData(
-              width: 150,
-              maxHeight: 250,
+              width: 200,
+              maxHeight: 300,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(16),

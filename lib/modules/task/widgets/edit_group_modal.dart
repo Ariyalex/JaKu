@@ -1,35 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 
-class EditGroupModal extends HookWidget {
+class EditGroupModal extends StatefulWidget {
   const EditGroupModal({super.key, required this.groupId});
   final String groupId;
 
   @override
+  State<EditGroupModal> createState() => _EditGroupModalState();
+}
+
+class _EditGroupModalState extends State<EditGroupModal> {
+  late TextEditingController textController;
+
+  @override
+  void initState() {
+    super.initState();
+    final mainTabBloc = context.read<MainTabBloc>();
+    final selectedTab = mainTabBloc.state.taskTabs
+        .where((tab) => tab.id == widget.groupId)
+        .firstOrNull;
+    textController = TextEditingController(text: selectedTab?.tabName ?? "");
+    textController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
+  }
+
+  void editTab() {
+    try {
+      context.read<MainTabBloc>().add(
+            EditTaskTab(id: widget.groupId, tabName: textController.text),
+          );
+      context.pop();
+      showAppSnackbar(
+        title: "Success!",
+        message: "Berhasil megubah nama tab",
+      );
+    } catch (error) {
+      showAppSnackbar(
+          title: "Error", message: "Error: $error", isSuccess: false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mainTabBloc = context.read<MainTabBloc>();
-    
-    final selectedTab = mainTabBloc.state.taskTabs.where((tab) => tab.id == groupId).firstOrNull;
-    final textController = useTextEditingController(text: selectedTab?.tabName ?? "");
-
-    void editTab() {
-      try {
-        mainTabBloc.add(EditTaskTab(id: groupId, tabName: textController.text));
-        context.pop();
-        showAppSnackbar(
-          title: "Success!",
-          message: "Berhasil megubah nama tab",
-        );
-      } catch (error) {
-        showAppSnackbar(title: "Error", message: "Error: $error", isSuccess: false);
-      }
-    }
 
     return SafeArea(
       child: Container(
@@ -48,7 +72,8 @@ class EditGroupModal extends HookWidget {
               children: [
                 Text("Edit group", style: theme.textTheme.bodyLarge),
                 TextButton(
-                  onPressed: textController.text.trim().isEmpty ? null : editTab,
+                  onPressed:
+                      textController.text.trim().isEmpty ? null : editTab,
                   child: const Text("save"),
                 ),
               ],

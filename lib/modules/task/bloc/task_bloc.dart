@@ -6,7 +6,7 @@ import 'package:jaku/modules/task/bloc/task_state.dart';
 
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final TaskRepository _repository;
-  
+
   TaskBloc(this._repository) : super(const TaskState()) {
     on<LoadListTask>(_onLoadListTask);
     on<LoadListTaskByMatkul>(_onLoadListTaskByMatkul);
@@ -35,9 +35,10 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onLoadTask(LoadTask event, Emitter<TaskState> emit) async {
     // If we have it in list, set it
+    emit(state.copyWith(status: TaskStatus.loading));
     final existing = state.tasks.where((t) => t.id == event.id).firstOrNull;
     if (existing != null) {
-      emit(state.copyWith(selectedTask: existing));
+      emit(state.copyWith(selectedTask: existing, status: TaskStatus.success));
       return;
     }
 

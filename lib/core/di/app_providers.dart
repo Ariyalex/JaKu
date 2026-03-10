@@ -21,18 +21,15 @@ class AppProviders {
       create: (context) => LocalMatkulProvider(),
     ),
     RepositoryProvider<MatkulRepository>(
-      create:
-          (context) => MatkulRepository(context.read<LocalMatkulProvider>()),
+      create: (context) =>
+          MatkulRepository(context.read<LocalMatkulProvider>()),
     ),
     RepositoryProvider<LocalMatkulScheduleProvider>(
       create: (context) => LocalMatkulScheduleProvider(),
     ),
     RepositoryProvider<MatkulScheduleRepository>(
-      create:
-          (context) =>
-              MatkulScheduleRepository(
-                context.read<LocalMatkulScheduleProvider>(),
-              ),
+      create: (context) =>
+          MatkulScheduleRepository(context.read<LocalMatkulScheduleProvider>()),
     ),
     RepositoryProvider<LocalNoteProvider>(
       create: (context) => LocalNoteProvider(),
@@ -50,9 +47,8 @@ class AppProviders {
       create: (context) => LocalTaskTabProvider(),
     ),
     RepositoryProvider<TaskTabRepository>(
-      create:
-          (context) =>
-              TaskTabRepository(context.read<LocalTaskTabProvider>()),
+      create: (context) =>
+          TaskTabRepository(context.read<LocalTaskTabProvider>()),
     ),
   ];
 
@@ -62,8 +58,8 @@ class AppProviders {
       create: (context) => MatkulBloc(context.read<MatkulRepository>()),
     ),
     BlocProvider<ScheduleBloc>(
-      create:
-          (context) => ScheduleBloc(context.read<MatkulScheduleRepository>()),
+      create: (context) =>
+          ScheduleBloc(context.read<MatkulScheduleRepository>()),
     ),
     BlocProvider<NoteBloc>(
       create: (context) => NoteBloc(context.read<NoteRepository>()),

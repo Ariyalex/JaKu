@@ -68,10 +68,9 @@ void main() async {
           BlocProvider(create: (context) => ThemeCubit()..initTheme()),
           BlocProvider(create: (context) => notificationBloc),
           BlocProvider(
-            create:
-                (context) =>
-                    MainTabBloc(context.read<TaskTabRepository>())
-                      ..add(LoadAllTaskTabs()),
+            create: (context) =>
+                MainTabBloc(context.read<TaskTabRepository>())
+                  ..add(LoadAllTaskTabs()),
           ),
           BlocProvider(create: (context) => ScheduleViewCubit()..initView()),
         ],
@@ -96,7 +95,6 @@ class MyApp extends StatelessWidget {
             return BlocListener<NotificationBloc, NotificationState>(
               listener: (context, state) {
                 if (state is NotificationLoaded && state.payload.isNotEmpty) {
-                  print("payload ada isinya: ${state.payload}");
                   // Jump to Task tab (index 2)
                   context.read<MainTabBloc>().add(const ChangeTab(2));
                 }

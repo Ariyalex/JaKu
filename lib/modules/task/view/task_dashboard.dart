@@ -28,7 +28,7 @@ class TaskDashboard extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fabKey = useMemoized(() => GlobalKey<ExpandableFabState>());
-    
+
     final taskBloc = context.read<TaskBloc>();
     final mainTabBloc = context.read<MainTabBloc>();
     final matkulBloc = context.read<MatkulBloc>();
@@ -46,7 +46,7 @@ class TaskDashboard extends HookWidget {
 
     final mainTabState = context.watch<MainTabBloc>().state;
     final matkulState = context.watch<MatkulBloc>().state;
-    
+
     List<dynamic> matkulList = matkulState.matkuls;
 
     final taskTabs = mainTabState.taskTabs;
@@ -60,7 +60,8 @@ class TaskDashboard extends HookWidget {
 
     // Notification routing logic
     final notificationState = context.watch<NotificationBloc>().state;
-    if (notificationState is NotificationLoaded && notificationState.payload.isNotEmpty) {
+    if (notificationState is NotificationLoaded &&
+        notificationState.payload.isNotEmpty) {
       final payload = notificationState.payload;
       final taskState = taskBloc.state;
       if (taskState.status == TaskStatus.success) {
@@ -69,9 +70,9 @@ class TaskDashboard extends HookWidget {
           final matkulId = task.groupId;
           final matkulIndex = matkulList.indexWhere((m) => m.id == matkulId);
           if (matkulIndex != -1) {
-             WidgetsBinding.instance.addPostFrameCallback((_) {
-               tabController.animateTo(2 + taskTabs.length + matkulIndex);
-             });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              tabController.animateTo(2 + taskTabs.length + matkulIndex);
+            });
           }
         }
       }
@@ -82,16 +83,27 @@ class TaskDashboard extends HookWidget {
         mainTabBloc.add(DeleteTaskTab(groupId));
         showAppSnackbar(title: "Success!", message: "Berhasil menghapus tab");
       } catch (error) {
-        showAppSnackbar(title: "Error!", message: "Error: $error", isSuccess: false);
+        showAppSnackbar(
+          title: "Error!",
+          message: "Error: $error",
+          isSuccess: false,
+        );
       }
     }
 
     void addTabs(String tabName) {
       try {
         mainTabBloc.add(AddTaskTab(tabName));
-        showAppSnackbar(title: "Success!", message: "Berhasil menambahkan tab baru");
+        showAppSnackbar(
+          title: "Success!",
+          message: "Berhasil menambahkan tab baru",
+        );
       } catch (error) {
-        showAppSnackbar(title: "Error!", message: "Error: $error", isSuccess: false);
+        showAppSnackbar(
+          title: "Error!",
+          message: "Error: $error",
+          isSuccess: false,
+        );
       }
     }
 
@@ -134,10 +146,7 @@ class TaskDashboard extends HookWidget {
         ),
       ),
       body: SafeArea(
-        child: TabBarView(
-          controller: tabController,
-          children: tabViews,
-        ),
+        child: TabBarView(controller: tabController, children: tabViews),
       ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
@@ -196,7 +205,8 @@ class TaskDashboard extends HookWidget {
                   String? selectedMatkul;
                   if (tabIndex >= 2) {
                     if (tabIndex >= (2 + taskTabs.length)) {
-                      selectedMatkul = matkulList[tabIndex - (2 + taskTabs.length)].id;
+                      selectedMatkul =
+                          matkulList[tabIndex - (2 + taskTabs.length)].id;
                     } else {
                       selectedMatkul = taskTabs[tabIndex - 2].id;
                     }

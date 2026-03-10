@@ -63,9 +63,15 @@ class AddScheduleScreen extends HookWidget {
                               ),
                             ),
                             popupProps: PopupProps.menu(
+                              searchFieldProps: TextFieldProps(
+                                decoration: const InputDecoration(
+                                  hintText:
+                                      "Cari atau tambahkan matkul baru...",
+                                ),
+                              ),
                               searchDelay: const Duration(milliseconds: 100),
                               showSearchBox: true,
-                              constraints: const BoxConstraints(maxHeight: 500),
+                              // constraints: const BoxConstraints(maxHeight: 500),
                               menuProps: MenuProps(
                                 align: MenuAlign.bottomStart,
                                 backgroundColor:
@@ -83,6 +89,8 @@ class AddScheduleScreen extends HookWidget {
                                       ListTile(
                                         title: Text(item.name),
                                         subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             if (item.lecturer1 != null)
                                               Text(item.lecturer1!),
@@ -148,7 +156,6 @@ class AddScheduleScreen extends HookWidget {
                       ),
                       compareFn: (item1, item2) => item1 == item2,
                       popupProps: PopupProps.menu(
-                        constraints: const BoxConstraints(maxHeight: 200),
                         menuProps: MenuProps(
                           align: MenuAlign.bottomStart,
                           backgroundColor: theme.colorScheme.surfaceContainer,

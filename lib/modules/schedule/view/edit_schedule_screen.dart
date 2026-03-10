@@ -97,6 +97,13 @@ class EditScheduleScreen extends HookWidget {
                               ),
                             ),
                             popupProps: PopupProps.menu(
+                              searchDelay: const Duration(milliseconds: 100),
+                              searchFieldProps: TextFieldProps(
+                                decoration: const InputDecoration(
+                                  hintText:
+                                      "Cari atau tambahkan matkul baru...",
+                                ),
+                              ),
                               showSearchBox: true,
                               constraints: const BoxConstraints(maxHeight: 500),
                               menuProps: MenuProps(

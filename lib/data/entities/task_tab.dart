@@ -14,6 +14,5 @@ class TaskTab extends Equatable {
   const TaskTab({required this.id, required this.tabName});
 
   @override
-  // TODO: implement props
   List<Object?> get props => [id, tabName];
 }
