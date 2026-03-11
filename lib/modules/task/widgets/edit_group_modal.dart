@@ -1,59 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 
-class EditGroupModal extends StatefulWidget {
+class EditGroupModal extends HookWidget {
   const EditGroupModal({super.key, required this.groupId});
   final String groupId;
 
   @override
-  State<EditGroupModal> createState() => _EditGroupModalState();
-}
-
-class _EditGroupModalState extends State<EditGroupModal> {
-  late TextEditingController textController;
-
-  @override
-  void initState() {
-    super.initState();
-    final mainTabBloc = context.read<MainTabBloc>();
-    final selectedTab = mainTabBloc.state.taskTabs
-        .where((tab) => tab.id == widget.groupId)
-        .firstOrNull;
-    textController = TextEditingController(text: selectedTab?.tabName ?? "");
-    textController.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    textController.dispose();
-    super.dispose();
-  }
-
-  void editTab() {
-    try {
-      context.read<MainTabBloc>().add(
-            EditTaskTab(id: widget.groupId, tabName: textController.text),
-          );
-      context.pop();
-      showAppSnackbar(
-        title: "Success!",
-        message: "Berhasil megubah nama tab",
-      );
-    } catch (error) {
-      showAppSnackbar(
-          title: "Error", message: "Error: $error", isSuccess: false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    final TextEditingController textController = useTextEditingController();
+    final isButtonEnabled = useState<bool>(false);
+    useValueListenable(textController);
+
+    void editTab() {
+      try {
+        context.read<MainTabBloc>().add(
+          EditTaskTab(id: groupId, tabName: textController.text),
+        );
+        context.pop();
+        showAppSnackbar(
+          title: "Success!",
+          message: "Berhasil megubah nama tab",
+        );
+      } catch (error) {
+        showAppSnackbar(
+          title: "Error",
+          message: "Error: $error",
+          isSuccess: false,
+        );
+      }
+    }
+
+    // 1. Get the original name and "lock" it in memory
+    final originalName = useMemoized(() {
+      final tabs = context.read<MainTabBloc>().state.taskTabs;
+      return tabs.where((tab) => tab.id == groupId).firstOrNull?.tabName ?? "";
+    }, [groupId]); // Only re-calculate if groupId changes
+
+    useEffect(() {
+      textController.text = originalName;
+      return null;
+    }, [originalName]);
+
+    useEffect(() {
+      isButtonEnabled.value =
+          originalName != textController.text &&
+          textController.text.trim().isNotEmpty;
+
+      return null;
+    }, [textController.text]);
 
     return SafeArea(
       child: Container(
@@ -72,8 +73,7 @@ class _EditGroupModalState extends State<EditGroupModal> {
               children: [
                 Text("Edit group", style: theme.textTheme.bodyLarge),
                 TextButton(
-                  onPressed:
-                      textController.text.trim().isEmpty ? null : editTab,
+                  onPressed: !isButtonEnabled.value ? null : editTab,
                   child: const Text("save"),
                 ),
               ],

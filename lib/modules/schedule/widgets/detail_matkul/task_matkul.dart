@@ -30,7 +30,7 @@ class TaskMatkul extends HookWidget {
         if (state.status == TaskStatus.loading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         final tasks = state.filteredTasks;
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -74,7 +74,7 @@ class TaskMatkul extends HookWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             margin: const EdgeInsets.symmetric(vertical: 4),
-                            child: TaskTile(taskId: task.id, star: false),
+                            child: TaskTile(task: task, star: false),
                           ),
                         )
                         .toList(),

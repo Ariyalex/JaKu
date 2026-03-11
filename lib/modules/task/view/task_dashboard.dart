@@ -52,9 +52,11 @@ class TaskDashboard extends HookWidget {
     final taskTabs = mainTabState.taskTabs;
     final tabLength = 2 + taskTabs.length + matkulList.length;
 
+    final currentIndex = useState<int>(1);
+
     final tabController = useTabController(
       initialLength: tabLength,
-      initialIndex: 1,
+      initialIndex: currentIndex.value < tabLength ? currentIndex.value : 1,
       keys: [tabLength], // Re-create if length changes
     );
 
@@ -93,6 +95,9 @@ class TaskDashboard extends HookWidget {
 
     void addTabs(String tabName) {
       try {
+        final newTabIndex = 2 + taskTabs.length;
+        currentIndex.value = newTabIndex;
+
         mainTabBloc.add(AddTaskTab(tabName));
         showAppSnackbar(
           title: "Success!",
@@ -128,6 +133,17 @@ class TaskDashboard extends HookWidget {
         (m) => BuildTaskWidget(group: m.nameAbbreviation, groupId: m.id),
       ),
     ];
+
+    useEffect(() {
+      void listener() {
+        if (!tabController.indexIsChanging) {
+          currentIndex.value = tabController.index;
+        }
+      }
+
+      tabController.addListener(listener);
+      return () => tabController.removeListener(listener);
+    }, [tabController]);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,

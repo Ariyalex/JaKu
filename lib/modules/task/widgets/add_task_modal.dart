@@ -35,6 +35,9 @@ class AddTaskModal extends HookWidget {
     final isStared = useState<bool>(false);
     final showDescField = useState<bool>(false);
 
+    useValueListenable(titleController);
+    useValueListenable(descController);
+
     void addTask() {
       try {
         final id = const Uuid().v4();
@@ -323,11 +326,9 @@ class AddTaskModal extends HookWidget {
                             ],
                           ),
                           TextButton(
-                            onPressed: () {
-                              if (titleController.text.trim().isNotEmpty) {
-                                addTask();
-                              }
-                            },
+                            onPressed: titleController.text.trim().isNotEmpty
+                                ? () => addTask()
+                                : null,
                             child: const Text("Save"),
                           ),
                         ],

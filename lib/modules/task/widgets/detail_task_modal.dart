@@ -27,15 +27,19 @@ class DetailTaskModal extends HookWidget {
 
     TextEditingController titleController = useTextEditingController();
     TextEditingController descController = useTextEditingController();
-    final selectedMatkulId = useState<String?>(null);
+    final selectedGroupId = useState<String?>(null);
     final dueDate = useState<DateTime?>(null);
     final isStared = useState<bool>(false);
     final showDescField = useState<bool>(false);
+    final isButtonEnabled = useState<bool>(false);
+
+    useValueListenable(titleController);
+    useValueListenable(descController);
 
     void initializeControllers(Task task) {
       titleController.text = task.task;
       descController.text = task.desc ?? '';
-      selectedMatkulId.value = task.groupId;
+      selectedGroupId.value = task.groupId;
       dueDate.value = task.taskDueDate;
       isStared.value = task.isStared;
       showDescField.value = task.desc != null && task.desc!.isNotEmpty;
@@ -47,7 +51,7 @@ class DetailTaskModal extends HookWidget {
           task: titleController.text,
           desc: descController.text,
           isStared: isStared.value,
-          groupId: selectedMatkulId.value,
+          groupId: selectedGroupId.value,
           taskDueDate: dueDate.value,
         );
 
@@ -62,16 +66,16 @@ class DetailTaskModal extends HookWidget {
           Matkul? matkul;
           TaskTab? taskTab;
           bool isCustomTab =
-              selectedMatkulId.value != null &&
-              selectedMatkulId.value!.startsWith("tab");
-          if (selectedMatkulId.value != null) {
+              selectedGroupId.value != null &&
+              selectedGroupId.value!.startsWith("tab");
+          if (selectedGroupId.value != null) {
             if (isCustomTab) {
               taskTab = taskTabs
-                  .where((t) => t.id == selectedMatkulId.value)
+                  .where((t) => t.id == selectedGroupId.value)
                   .firstOrNull;
             } else {
               matkul = matkulList
-                  .where((m) => m.id == selectedMatkulId.value)
+                  .where((m) => m.id == selectedGroupId.value)
                   .firstOrNull;
             }
           }
@@ -140,10 +144,43 @@ class DetailTaskModal extends HookWidget {
       );
     }
 
+    Task? initialTask;
     useEffect(() {
       context.read<TaskBloc>().add(LoadTask(taskId));
       return null;
     }, [taskId]);
+
+    useEffect(() {
+      initialTask = context.read<TaskBloc>().state.selectedTask;
+      return null;
+    }, []);
+
+    useEffect(
+      () {
+        bool isChanged() {
+          final changed =
+              titleController.text != initialTask?.task ||
+              descController.text != initialTask?.desc ||
+              selectedGroupId.value != initialTask?.groupId ||
+              dueDate.value != initialTask?.taskDueDate ||
+              isStared.value != initialTask?.isStared;
+
+          final notNull =
+              titleController.text != "" || titleController.text.isNotEmpty;
+          return notNull && changed;
+        }
+
+        isButtonEnabled.value = isChanged();
+        return null;
+      },
+      [
+        titleController.text,
+        descController.text,
+        selectedGroupId.value,
+        dueDate.value,
+        isStared.value,
+      ],
+    );
 
     return BlocConsumer<TaskBloc, TaskState>(
       listenWhen: (previous, current) {
@@ -152,6 +189,7 @@ class DetailTaskModal extends HookWidget {
       },
       listener: (context, state) {
         initializeControllers(state.selectedTask!);
+        // initialTask = state.selectedTask;
       },
       builder: (context, state) {
         final task = state.selectedTask;
@@ -181,18 +219,17 @@ class DetailTaskModal extends HookWidget {
 
         String showGroup() {
           try {
-            if (selectedMatkulId.value == null ||
-                selectedMatkulId.value == "") {
+            if (selectedGroupId.value == null || selectedGroupId.value == "") {
               return "Select group";
             } else {
-              if (selectedMatkulId.value!.startsWith("tab")) {
+              if (selectedGroupId.value!.startsWith("tab")) {
                 final tab = taskTabs
-                    .where((t) => t.id == selectedMatkulId.value)
+                    .where((t) => t.id == selectedGroupId.value)
                     .firstOrNull;
                 return tab?.tabName ?? "Unknown Tab";
               } else {
                 final matkul = matkulList
-                    .where((m) => m.id == selectedMatkulId.value)
+                    .where((m) => m.id == selectedGroupId.value)
                     .firstOrNull;
                 return matkul?.nameAbbreviation ?? "Unknown Matkul";
               }
@@ -231,11 +268,11 @@ class DetailTaskModal extends HookWidget {
                               spacing: 6,
                               children: [
                                 Text(showGroup()),
-                                if (selectedMatkulId.value != null &&
-                                    selectedMatkulId.value != "")
+                                if (selectedGroupId.value != null &&
+                                    selectedGroupId.value != "")
                                   IconButton(
                                     onPressed: () {
-                                      selectedMatkulId.value = null;
+                                      selectedGroupId.value = null;
                                     },
                                     icon: const Icon(LucideIcons.x, size: 16),
                                     constraints: const BoxConstraints(),
@@ -265,7 +302,7 @@ class DetailTaskModal extends HookWidget {
                             ),
                           ],
                           onChanged: (value) {
-                            selectedMatkulId.value = value;
+                            selectedGroupId.value = value;
                           },
                           alignment: AlignmentDirectional.centerStart,
                           dropdownStyleData: DropdownStyleData(
@@ -397,7 +434,9 @@ class DetailTaskModal extends HookWidget {
                         ],
                       ),
                       TextButton(
-                        onPressed: () => updateTask(task),
+                        onPressed: isButtonEnabled.value
+                            ? () => updateTask(task)
+                            : null,
                         child: const Text("Save"),
                       ),
                     ],

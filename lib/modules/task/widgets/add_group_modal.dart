@@ -1,34 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class AddGroupModal extends StatefulWidget {
+class AddGroupModal extends HookWidget {
   const AddGroupModal({super.key, this.onUpdateTabs});
   final void Function(String tabName)? onUpdateTabs;
 
   @override
-  State<AddGroupModal> createState() => _AddGroupModalState();
-}
-
-class _AddGroupModalState extends State<AddGroupModal> {
-  late TextEditingController textController;
-
-  @override
-  void initState() {
-    super.initState();
-    textController = TextEditingController();
-    textController.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    textController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    final TextEditingController textController = useTextEditingController();
+
+    useValueListenable(textController);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -51,8 +34,8 @@ class _AddGroupModalState extends State<AddGroupModal> {
                     onPressed: textController.text.trim().isEmpty
                         ? null
                         : () {
-                            if (widget.onUpdateTabs != null) {
-                              widget.onUpdateTabs!(textController.text);
+                            if (onUpdateTabs != null) {
+                              onUpdateTabs!(textController.text);
                               Navigator.of(context).pop();
                             }
                           },
