@@ -74,7 +74,11 @@ class TaskMatkul extends HookWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             margin: const EdgeInsets.symmetric(vertical: 4),
-                            child: TaskTile(task: task, star: false),
+                            child: TaskTile(
+                              task: task,
+                              star: false,
+                              showGroup: false,
+                            ),
                           ),
                         )
                         .toList(),

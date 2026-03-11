@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
+import 'package:jaku/modules/note/bloc/note_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/view/note_dashboard.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
+import 'package:jaku/modules/task/bloc/task_bloc.dart';
+import 'package:jaku/modules/task/bloc/task_event.dart';
 import 'package:jaku/modules/task/view/task_dashboard.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
@@ -20,12 +26,19 @@ class MainScreen extends StatelessWidget {
       // PersistentTabView sudah mengelola Scaffold internal,
       // tapi membungkusnya di sini memastikan area aman dan layout yang benar.
       body: BlocBuilder<MainTabBloc, MainTabState>(
-        buildWhen: (previous, current) =>
-            false, // Jangan rebuild seluruh view saat state berubah (seperti add tab)
+        buildWhen: (previous, current) => false,
         builder: (context, state) {
           return PersistentTabView(
             controller: mainTabBloc.mainTabController,
-
+            onTabChanged: (value) {
+              if (value == 0) {
+                context.read<ScheduleBloc>().add(LoadListSchedule());
+              } else if (value == 1) {
+                context.read<NoteBloc>().add(LoadListNote());
+              } else if (value == 2) {
+                context.read<TaskBloc>().add(LoadListTask());
+              }
+            },
             tabs: [
               PersistentTabConfig(
                 screen: const ScheduleDashboard(),

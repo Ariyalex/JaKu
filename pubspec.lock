@@ -470,6 +470,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.33"
+  flutter_reorderable_grid_view:
+    dependency: "direct main"
+    description:
+      name: flutter_reorderable_grid_view
+      sha256: "713e516c4bb4cd7127b01b794acca425b8209fae81ca703f591d54631bc232a1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.5.3"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -504,14 +512,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  get:
-    dependency: "direct main"
-    description:
-      name: get
-      sha256: "5ed34a7925b85336e15d472cc4cfe7d9ebf4ab8e8b9f688585bf6b50f4c3d79a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.7.3"
   get_it:
     dependency: "direct main"
     description:
@@ -928,14 +928,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  reorderables:
+  reorderable_staggered_scroll_view:
     dependency: "direct main"
     description:
-      name: reorderables
-      sha256: "004a886e4878df1ee27321831c838bc1c976311f4ca6a74ce7d561e506540a77"
+      name: reorderable_staggered_scroll_view
+      sha256: "2d4d23be9e2bf833d765b256d2527e74e37957bc623ce13db7a7f507793ba6dc"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.0.2"
   rxdart:
     dependency: transitive
     description:

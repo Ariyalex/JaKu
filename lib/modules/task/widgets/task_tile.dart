@@ -16,7 +16,7 @@ class TaskTile extends HookWidget {
     super.key,
     required this.task,
     this.star = true,
-    this.showGroup = false,
+    required this.showGroup,
   });
   final Task task;
   final bool star;
@@ -26,36 +26,31 @@ class TaskTile extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    String? groupName;
+    final groupName = useMemoized(() {
+      if (showGroup != true) return null;
 
-    useEffect(() {
-      if (showGroup == true) {
-        int matkulIndex = context.read<MatkulBloc>().state.matkuls.indexWhere(
-          (element) => element.id == task.groupId,
-        );
-        if (matkulIndex == -1) {
-          int taskTabIndex = context
-              .read<MainTabBloc>()
-              .state
-              .taskTabs
-              .indexWhere((element) => element.id == task.groupId);
-          if (taskTabIndex != -1) {
-            groupName = context
-                .read<MainTabBloc>()
-                .state
-                .taskTabs[taskTabIndex]
-                .tabName;
-          }
-        } else {
-          groupName = context
-              .read<MatkulBloc>()
-              .state
-              .matkuls[matkulIndex]
-              .nameAbbreviation;
-        }
+      // Cari di MatkulBloc
+      final matkuls = context.read<MatkulBloc>().state.matkuls;
+      int matkulIndex = matkuls.indexWhere(
+        (element) => element.id == task.groupId,
+      );
+
+      if (matkulIndex != -1) {
+        return matkuls[matkulIndex].nameAbbreviation;
       }
+
+      // Cari di MainTabBloc jika tidak ketemu di Matkul
+      final taskTabs = context.read<MainTabBloc>().state.taskTabs;
+      int taskTabIndex = taskTabs.indexWhere(
+        (element) => element.id == task.groupId,
+      );
+
+      if (taskTabIndex != -1) {
+        return taskTabs[taskTabIndex].tabName;
+      }
+
       return null;
-    }, [showGroup]);
+    }, [task.groupId, showGroup]);
 
     bool isToday(DateTime date) {
       final now = DateTime.now();
@@ -166,7 +161,7 @@ class TaskTile extends HookWidget {
 
                 if (groupName != null)
                   Chip(
-                    label: Text(groupName!),
+                    label: Text(groupName),
                     padding: const EdgeInsets.symmetric(
                       vertical: 0,
                       horizontal: 3,

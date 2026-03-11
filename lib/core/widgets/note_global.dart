@@ -31,7 +31,10 @@ class NoteGlobal extends StatelessWidget {
 
         return InkWell(
           onTap: () {
-            context.pushNamed(RouteNamed.detailNote, pathParameters: {'id': note.id});
+            context.pushNamed(
+              RouteNamed.detailNote,
+              pathParameters: {'id': note.id},
+            );
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(
@@ -54,13 +57,22 @@ class NoteGlobal extends StatelessWidget {
                     ),
                   const SizedBox(height: 6),
                   if (note.desc != null && note.desc!.isNotEmpty)
-                    Text(note.desc!, style: theme.textTheme.bodySmall, maxLines: 5, overflow: TextOverflow.ellipsis),
-                  if (showMatkul && note.matkulId != null && note.matkulId!.isNotEmpty)
+                    Text(
+                      note.desc!,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 5,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (showMatkul &&
+                      note.matkulId != null &&
+                      note.matkulId!.isNotEmpty)
                     BlocBuilder<MatkulBloc, MatkulState>(
                       builder: (context, state) {
                         String matkulName = '';
                         if (state.status == MatkulStatus.success) {
-                          final m = state.matkuls.where((m) => m.id == note.matkulId).firstOrNull;
+                          final m = state.matkuls
+                              .where((m) => m.id == note.matkulId)
+                              .firstOrNull;
                           if (m != null) matkulName = m.nameAbbreviation;
                         }
                         if (matkulName.isEmpty) return const SizedBox.shrink();

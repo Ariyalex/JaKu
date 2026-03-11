@@ -182,11 +182,18 @@ class AddTaskModal extends HookWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
+                          dropdownSeparator: const DropdownSeparator(
+                            height: 4,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Divider(),
+                            ),
+                          ),
                           items: [
                             ...matkulList.map(
                               (item) => DropdownItem<String>(
                                 value: item.id,
-                                child: Text(item.nameAbbreviation),
+                                child: Text(item.name),
                               ),
                             ),
                             ...taskTabs.map(

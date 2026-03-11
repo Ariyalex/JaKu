@@ -135,16 +135,29 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     ReorderTasks event,
     Emitter<TaskState> emit,
   ) async {
-    try {
-      final updatedTasks = <Task>[];
-      for (var i = 0; i < event.tasks.length; i++) {
-        final task = event.tasks[i];
-        if (event.groupId == "0") {
-          updatedTasks.add(task.copyWith(starredOrder: i));
-        } else {
-          updatedTasks.add(task.copyWith(matkulOrder: i));
-        }
+    final updatedTasks = <Task>[];
+    for (var i = 0; i < event.tasks.length; i++) {
+      final task = event.tasks[i];
+      if (event.groupId == "0") {
+        updatedTasks.add(task.copyWith(allOrder: i));
+      } else if (event.groupId == "1") {
+        updatedTasks.add(task.copyWith(starredOrder: i));
+      } else {
+        updatedTasks.add(task.copyWith(groupOrder: i));
       }
+    }
+
+    final newList = List<Task>.from(state.tasks);
+    for (var updatedTask in updatedTasks) {
+      int index = newList.indexWhere((element) => element.id == updatedTask.id);
+      if (index != -1) {
+        newList[index] = updatedTask;
+      }
+    }
+
+    emit(state.copyWith(tasks: newList));
+
+    try {
       await _repository.addTasks(updatedTasks);
       add(LoadListTask());
     } catch (e) {

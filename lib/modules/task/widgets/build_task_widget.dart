@@ -11,18 +11,17 @@ import 'package:jaku/modules/task/widgets/edit_group_modal.dart';
 import 'package:jaku/modules/task/widgets/task_tile.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:reorderables/reorderables.dart';
 
 class BuildTaskWidget extends HookWidget {
   const BuildTaskWidget({
     super.key,
-    required this.group,
-    this.groupId,
+    required this.tabName,
+    this.tabIndex,
     this.deleteTabFunction,
   });
 
-  final String group;
-  final String? groupId;
+  final String tabName;
+  final String? tabIndex;
   final void Function(String groupId)? deleteTabFunction;
 
   @override
@@ -40,7 +39,7 @@ class BuildTaskWidget extends HookWidget {
           ),
           backgroundColor: theme.dialogTheme.backgroundColor,
           content: Text(
-            "Yakin ingin menghapus tab $group?",
+            "Yakin ingin menghapus tab $tabName?",
             textAlign: TextAlign.center,
           ),
           actions: [
@@ -51,8 +50,8 @@ class BuildTaskWidget extends HookWidget {
             OutlinedButton(
               onPressed: () {
                 context.pop();
-                if (deleteTabFunction != null && groupId != null) {
-                  deleteTabFunction!(groupId!);
+                if (deleteTabFunction != null && tabIndex != null) {
+                  deleteTabFunction!(tabIndex!);
                 }
               },
               child: const Text("Ya"),
@@ -70,24 +69,30 @@ class BuildTaskWidget extends HookWidget {
 
         if (state.status == TaskStatus.success) {
           late List<Task> groupTasks;
-          if (groupId == "0") {
+
+          if (tabIndex == "0") {
+            groupTasks = state.tasks;
+            groupTasks.sort(
+              (a, b) => (a.allOrder ?? 0).compareTo(b.allOrder ?? 0),
+            );
+          } else if (tabIndex == "1") {
             groupTasks = state.tasks.where((t) => t.isStared).toList();
             groupTasks.sort(
               (a, b) => (a.starredOrder ?? 0).compareTo(b.starredOrder ?? 0),
             );
-          } else if (groupId == "1") {
+          } else if (tabIndex == "2") {
             groupTasks = state.tasks
                 .where((t) => t.groupId == null || t.groupId == "")
                 .toList();
             groupTasks.sort(
-              (a, b) => (a.matkulOrder ?? 0).compareTo(b.matkulOrder ?? 0),
+              (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
             );
           } else {
             groupTasks = state.tasks
-                .where((t) => t.groupId == groupId)
+                .where((t) => t.groupId == tabIndex)
                 .toList();
             groupTasks.sort(
-              (a, b) => (a.matkulOrder ?? 0).compareTo(b.matkulOrder ?? 0),
+              (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
             );
           }
 
@@ -100,9 +105,15 @@ class BuildTaskWidget extends HookWidget {
 
           void onReorder(List<Task> tasks, int oldIndex, int newIndex) {
             final reorderedList = List<Task>.from(tasks);
+
+            if (oldIndex < newIndex) {
+              newIndex -= 1;
+            }
+
             final item = reorderedList.removeAt(oldIndex);
             reorderedList.insert(newIndex, item);
-            context.read<TaskBloc>().add(ReorderTasks(reorderedList, groupId));
+
+            context.read<TaskBloc>().add(ReorderTasks(reorderedList, tabIndex));
           }
 
           return ListView(
@@ -127,8 +138,8 @@ class BuildTaskWidget extends HookWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(group, style: theme.textTheme.bodyLarge),
-                          if (groupId != null && groupId!.startsWith("tab"))
+                          Text(tabName, style: theme.textTheme.bodyLarge),
+                          if (tabIndex != null && tabIndex!.startsWith("tab"))
                             DropdownButtonHideUnderline(
                               child: DropdownButton2<int>(
                                 customButton: const Icon(
@@ -168,7 +179,7 @@ class BuildTaskWidget extends HookWidget {
                                       backgroundColor:
                                           theme.colorScheme.surfaceContainer,
                                       builder: (context) =>
-                                          EditGroupModal(groupId: groupId!),
+                                          EditGroupModal(groupId: tabIndex!),
                                     );
                                   } else if (value == 1) {
                                     deleteTabDialog();
@@ -230,11 +241,44 @@ class BuildTaskWidget extends HookWidget {
                         ),
                       )
                     else
-                      ReorderableColumn(
+                      ReorderableListView(
+                        shrinkWrap: true,
                         padding: const EdgeInsets.symmetric(
                           vertical: 12,
                           horizontal: 20,
                         ),
+                        proxyDecorator:
+                            (
+                              Widget child,
+                              int index,
+                              Animation<double> animation,
+                            ) {
+                              return AnimatedBuilder(
+                                animation: animation,
+                                builder: (BuildContext context, Widget? child) {
+                                  return Material(
+                                    // Gunakan elevasi agar terlihat melayang
+                                    elevation: 4,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        // Mengatur Border Side saja
+                                        color:
+                                            theme.colorScheme.surfaceContainer,
+                                        border: Border.all(
+                                          color: theme
+                                              .colorScheme
+                                              .secondary, // Ganti ke warna border yang diinginkan
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: child,
+                              );
+                            },
                         onReorder: (oldIndex, newIndex) =>
                             onReorder(incompleteTasks, oldIndex, newIndex),
                         children: incompleteTasks
@@ -242,7 +286,9 @@ class BuildTaskWidget extends HookWidget {
                               (task) => TaskTile(
                                 task: task,
                                 key: ValueKey(task.id),
-                                showGroup: groupId == "0" ? true : false,
+                                showGroup: tabIndex == "0" || tabIndex == "1"
+                                    ? true
+                                    : false,
                               ),
                             )
                             .toList(),
@@ -286,7 +332,8 @@ class BuildTaskWidget extends HookWidget {
                         ),
                       ),
                       if (showCompleted.value)
-                        ReorderableColumn(
+                        ReorderableListView(
+                          shrinkWrap: true,
                           padding: const EdgeInsets.symmetric(
                             vertical: 12,
                             horizontal: 20,
@@ -298,7 +345,7 @@ class BuildTaskWidget extends HookWidget {
                                 (task) => TaskTile(
                                   task: task,
                                   key: ValueKey(task.id),
-                                  showGroup: groupId == "0" ? true : false,
+                                  showGroup: tabIndex == "0" ? true : false,
                                 ),
                               )
                               .toList(),

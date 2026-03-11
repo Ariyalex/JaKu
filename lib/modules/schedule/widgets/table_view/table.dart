@@ -29,7 +29,10 @@ class Table extends HookWidget {
 
     // 1. Compute Days and Time Pairs
     final List<Day> days = useMemoized(
-      () => MatkulUtils.getListDayOfSchedule(schedules),
+      () => MatkulUtils.getListDayOfSchedule(
+        schedules: schedules,
+        sortByCurrentDay: false,
+      ),
       [schedules],
     );
 

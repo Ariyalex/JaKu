@@ -12,7 +12,6 @@ import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
 import 'package:jaku/modules/notification/bloc/notification_state.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
-import 'package:jaku/modules/task/bloc/task_event.dart';
 import 'package:jaku/modules/task/bloc/task_state.dart';
 import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/modules/task/widgets/add_group_modal.dart';
@@ -34,7 +33,6 @@ class TaskDashboard extends HookWidget {
     final matkulBloc = context.read<MatkulBloc>();
 
     useEffect(() {
-      taskBloc.add(LoadListTask());
       if (mainTabBloc.state.taskTabs.isEmpty) {
         mainTabBloc.add(LoadAllTaskTabs());
       }
@@ -50,13 +48,13 @@ class TaskDashboard extends HookWidget {
     List<dynamic> matkulList = matkulState.matkuls;
 
     final taskTabs = mainTabState.taskTabs;
-    final tabLength = 2 + taskTabs.length + matkulList.length;
+    final tabLength = 3 + taskTabs.length + matkulList.length;
 
-    final currentIndex = useState<int>(1);
+    final currentIndex = useState<int>(0);
 
     final tabController = useTabController(
       initialLength: tabLength,
-      initialIndex: currentIndex.value < tabLength ? currentIndex.value : 1,
+      initialIndex: currentIndex.value < tabLength ? currentIndex.value : 0,
       keys: [tabLength], // Re-create if length changes
     );
 
@@ -73,7 +71,7 @@ class TaskDashboard extends HookWidget {
           final matkulIndex = matkulList.indexWhere((m) => m.id == matkulId);
           if (matkulIndex != -1) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              tabController.animateTo(2 + taskTabs.length + matkulIndex);
+              tabController.animateTo(3 + taskTabs.length + matkulIndex);
             });
           }
         }
@@ -95,7 +93,7 @@ class TaskDashboard extends HookWidget {
 
     void addTabs(String tabName) {
       try {
-        final newTabIndex = 2 + taskTabs.length;
+        final newTabIndex = 3 + taskTabs.length;
         currentIndex.value = newTabIndex;
 
         mainTabBloc.add(AddTaskTab(tabName));
@@ -113,6 +111,7 @@ class TaskDashboard extends HookWidget {
     }
 
     final List<Widget> tabs = [
+      const Tab(text: "Semua"),
       const Tab(icon: Icon(Icons.star)),
       const Tab(text: "Umum"),
       ...taskTabs.map((tab) => Tab(text: tab.tabName)),
@@ -120,17 +119,18 @@ class TaskDashboard extends HookWidget {
     ];
 
     final List<Widget> tabViews = [
-      const BuildTaskWidget(group: 'Starred', groupId: "0"),
-      const BuildTaskWidget(group: 'Umum', groupId: "1"),
+      const BuildTaskWidget(tabName: "Semua", tabIndex: "0"),
+      const BuildTaskWidget(tabName: 'Starred', tabIndex: "1"),
+      const BuildTaskWidget(tabName: 'Umum', tabIndex: "2"),
       ...taskTabs.map(
         (tab) => BuildTaskWidget(
-          group: tab.tabName,
-          groupId: tab.id,
+          tabName: tab.tabName,
+          tabIndex: tab.id,
           deleteTabFunction: (groupId) => deleteTabs(groupId),
         ),
       ),
       ...matkulList.map(
-        (m) => BuildTaskWidget(group: m.nameAbbreviation, groupId: m.id),
+        (m) => BuildTaskWidget(tabName: m.nameAbbreviation, tabIndex: m.id),
       ),
     ];
 

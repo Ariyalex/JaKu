@@ -24,15 +24,16 @@ class TaskAdapter extends TypeAdapter<Task> {
       taskDueDate: fields[4] as DateTime?,
       groupId: fields[5] as String?,
       isStared: fields[6] as bool,
-      matkulOrder: fields[7] as int?,
+      groupOrder: fields[7] as int?,
       starredOrder: fields[8] as int?,
+      allOrder: fields[9] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -48,9 +49,11 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(6)
       ..write(obj.isStared)
       ..writeByte(7)
-      ..write(obj.matkulOrder)
+      ..write(obj.groupOrder)
       ..writeByte(8)
-      ..write(obj.starredOrder);
+      ..write(obj.starredOrder)
+      ..writeByte(9)
+      ..write(obj.allOrder);
   }
 
   @override

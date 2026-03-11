@@ -27,10 +27,13 @@ class Task extends Equatable {
   final bool isStared;
 
   @HiveField(7)
-  final int? matkulOrder;
+  final int? groupOrder;
 
   @HiveField(8)
   final int? starredOrder;
+
+  @HiveField(9)
+  final int? allOrder;
 
   const Task({
     required this.id,
@@ -40,8 +43,9 @@ class Task extends Equatable {
     this.taskDueDate,
     this.groupId,
     required this.isStared,
-    this.matkulOrder,
+    this.groupOrder,
     this.starredOrder,
+    this.allOrder,
   });
 
   Task copyWith({
@@ -51,8 +55,9 @@ class Task extends Equatable {
     DateTime? taskDueDate,
     String? groupId,
     bool? isStared,
-    int? matkulOrder,
+    int? groupOrder,
     int? starredOrder,
+    int? allOrder,
   }) {
     return Task(
       id: id,
@@ -62,8 +67,9 @@ class Task extends Equatable {
       taskDueDate: taskDueDate ?? this.taskDueDate,
       groupId: groupId ?? this.groupId,
       isStared: isStared ?? this.isStared,
-      matkulOrder: matkulOrder ?? this.matkulOrder,
+      groupOrder: groupOrder ?? this.groupOrder,
       starredOrder: starredOrder ?? this.starredOrder,
+      allOrder: allOrder ?? this.allOrder,
     );
   }
 
@@ -76,7 +82,8 @@ class Task extends Equatable {
     taskDueDate,
     groupId,
     isStared,
-    matkulOrder,
+    groupOrder,
     starredOrder,
+    allOrder,
   ];
 }

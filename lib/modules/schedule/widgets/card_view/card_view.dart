@@ -30,12 +30,15 @@ class CardView extends HookWidget {
 
     return BlocBuilder<ScheduleBloc, ScheduleState>(
       builder: (context, state) {
-        if (state.status == ScheduleStatus.loading || state.status == ScheduleStatus.initial) {
+        if (state.status == ScheduleStatus.loading ||
+            state.status == ScheduleStatus.initial) {
           return const Center(child: CircularProgressIndicator());
         }
 
         if (state.status == ScheduleStatus.error) {
-          return Center(child: Text(state.message ?? "Error loading schedules"));
+          return Center(
+            child: Text(state.message ?? "Error loading schedules"),
+          );
         }
 
         if (state.status == ScheduleStatus.success) {
@@ -46,11 +49,17 @@ class CardView extends HookWidget {
           }
 
           final List<Day> sortedDay = MatkulUtils.getListDayOfSchedule(
-            schedules,
+            schedules: schedules,
+            sortByCurrentDay: true,
           );
 
           return ListView.builder(
-            padding: const EdgeInsets.only(top: 5, right: 5, left: 5, bottom: 60),
+            padding: const EdgeInsets.only(
+              top: 5,
+              right: 5,
+              left: 5,
+              bottom: 60,
+            ),
             itemCount: sortedDay.length,
             itemBuilder: (context, index) {
               final scheduleDay = sortedDay[index];
@@ -87,7 +96,8 @@ class CardView extends HookWidget {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: scheduleListPerDay.length,
-                              separatorBuilder: (context, index) => Container(height: 3),
+                              separatorBuilder: (context, index) =>
+                                  Container(height: 3),
                               itemBuilder: (context, index) {
                                 final schedule = scheduleListPerDay[index];
                                 final matkul = matkuls.firstWhere(
