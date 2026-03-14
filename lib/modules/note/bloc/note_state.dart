@@ -16,7 +16,6 @@ class NoteState extends Equatable {
   final String filterMatkulId;
   final int sortActiveIndex;
   final bool isAsce;
-  final bool isSorting;
   final bool isSortByCreatedDate;
 
   const NoteState({
@@ -29,8 +28,7 @@ class NoteState extends Equatable {
     this.searchQuery = '',
     this.filterMatkulId = 'all',
     this.sortActiveIndex = 0,
-    this.isAsce = true,
-    this.isSorting = false,
+    this.isAsce = false,
     this.isSortByCreatedDate = true,
   });
 
@@ -45,7 +43,6 @@ class NoteState extends Equatable {
     String? filterMatkulId,
     int? sortActiveIndex,
     bool? isAsce,
-    bool? isSorting,
     bool? isSortByCreatedDate,
     bool clearSelected = false,
   }) {
@@ -60,7 +57,6 @@ class NoteState extends Equatable {
       filterMatkulId: filterMatkulId ?? this.filterMatkulId,
       sortActiveIndex: sortActiveIndex ?? this.sortActiveIndex,
       isAsce: isAsce ?? this.isAsce,
-      isSorting: isSorting ?? this.isSorting,
       isSortByCreatedDate: isSortByCreatedDate ?? this.isSortByCreatedDate,
     );
   }
@@ -77,7 +73,6 @@ class NoteState extends Equatable {
     filterMatkulId,
     sortActiveIndex,
     isAsce,
-    isSorting,
     isSortByCreatedDate,
   ];
 }

@@ -84,9 +84,9 @@ class SortNotes extends NoteEvent {
 
   @override
   List<Object?> get props => [
-        activeIndex,
-        isAsce,
-        isSorting,
-        isSortByCreatedDate,
-      ];
+    activeIndex,
+    isAsce,
+    isSorting,
+    isSortByCreatedDate,
+  ];
 }

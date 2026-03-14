@@ -25,54 +25,45 @@ class SortNoteModal extends StatelessWidget {
             const Divider(),
             BlocBuilder<NoteBloc, NoteState>(
               builder: (context, state) {
+                // Sekarang index 0 adalah Modified/Updated, index 1 adalah Created
                 int activeIndex = state.sortActiveIndex;
                 bool isAsce = state.isAsce;
-                bool isSortByCreated = state.isSortByCreatedDate;
 
-                void updateSort(int newActiveIndex, bool newIsAsce, bool newIsSorting, bool newIsSortByCreated) {
-                  context.read<NoteBloc>().add(SortNotes(
-                    activeIndex: newActiveIndex,
-                    isAsce: newIsAsce,
-                    isSorting: newIsSorting,
-                    isSortByCreatedDate: newIsSortByCreated,
-                  ));
+                void updateSort(
+                  int newActiveIndex,
+                  bool newIsAsce,
+                  bool newIsSortByCreated,
+                ) {
+                  context.read<NoteBloc>().add(
+                    SortNotes(
+                      activeIndex: newActiveIndex,
+                      isAsce: newIsAsce,
+                      isSorting:
+                          true, // Karena 'None' sudah dihapus, isSorting selalu true
+                      isSortByCreatedDate: newIsSortByCreated,
+                    ),
+                  );
                 }
 
                 return Column(
                   children: [
+                    // Index 0: Sort by Modified/Updated Date
                     SortTile(
                       isActive: activeIndex == 0,
-                      title: 'None',
-                      isSortable: false,
+                      title: "Sort by Modified Date",
                       onTap: () {
-                        updateSort(0, isAsce, false, isSortByCreated);
+                        bool newIsAsce = (activeIndex != 0) ? true : !isAsce;
+                        updateSort(0, newIsAsce, false);
                       },
+                      isAsce: isAsce,
                     ),
+                    // Index 1: Sort by Created Date
                     SortTile(
                       isActive: activeIndex == 1,
                       title: "Sort by Created Date",
                       onTap: () {
-                        bool newIsAsce = isAsce;
-                        if (activeIndex != 1) {
-                          newIsAsce = true;
-                        } else {
-                          newIsAsce = !isAsce;
-                        }
-                        updateSort(1, newIsAsce, true, true);
-                      },
-                      isAsce: isAsce,
-                    ),
-                    SortTile(
-                      isActive: activeIndex == 2,
-                      title: "Sort by Modified Date",
-                      onTap: () {
-                        bool newIsAsce = isAsce;
-                        if (activeIndex != 2) {
-                          newIsAsce = true;
-                        } else {
-                          newIsAsce = !isAsce;
-                        }
-                        updateSort(2, newIsAsce, true, false);
+                        bool newIsAsce = (activeIndex != 1) ? true : !isAsce;
+                        updateSort(1, newIsAsce, true);
                       },
                       isAsce: isAsce,
                     ),

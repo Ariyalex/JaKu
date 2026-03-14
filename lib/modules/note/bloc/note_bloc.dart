@@ -60,19 +60,17 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     }
 
     // 3. Sort
-    if (currentState.isSorting) {
-      if (currentState.isSortByCreatedDate) {
-        if (currentState.isAsce) {
-          result.sort((a, b) => a.createdOn.compareTo(b.createdOn));
-        } else {
-          result.sort((a, b) => b.createdOn.compareTo(a.createdOn));
-        }
+    if (currentState.isSortByCreatedDate) {
+      if (currentState.isAsce) {
+        result.sort((a, b) => a.createdOn.compareTo(b.createdOn));
       } else {
-        if (currentState.isAsce) {
-          result.sort((a, b) => a.editedOn.compareTo(b.editedOn));
-        } else {
-          result.sort((a, b) => b.editedOn.compareTo(a.editedOn));
-        }
+        result.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+      }
+    } else {
+      if (currentState.isAsce) {
+        result.sort((a, b) => a.editedOn.compareTo(b.editedOn));
+      } else {
+        result.sort((a, b) => b.editedOn.compareTo(a.editedOn));
       }
     }
 
@@ -131,27 +129,33 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     // Optimization: If we have it in list, set it immediately
     final existing = state.allNotes.where((n) => n.id == event.id).firstOrNull;
     if (existing != null) {
-      emit(state.copyWith(
-        selectedNote: existing,
-        status: NoteStatus.success,
-        lastLoadedId: event.id,
-      ));
+      emit(
+        state.copyWith(
+          selectedNote: existing,
+          status: NoteStatus.success,
+          lastLoadedId: event.id,
+        ),
+      );
       return;
     }
 
     // Otherwise, clear and load from repository
-    emit(state.copyWith(
-      status: NoteStatus.loading,
-      clearSelected: true,
-      lastLoadedId: event.id,
-    ));
+    emit(
+      state.copyWith(
+        status: NoteStatus.loading,
+        clearSelected: true,
+        lastLoadedId: event.id,
+      ),
+    );
     try {
       final note = _repository.getNoteById(event.id);
-      emit(state.copyWith(
-        status: NoteStatus.success,
-        selectedNote: note,
-        lastLoadedId: event.id,
-      ));
+      emit(
+        state.copyWith(
+          status: NoteStatus.success,
+          selectedNote: note,
+          lastLoadedId: event.id,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -171,7 +175,9 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
       await _repository.updateNote(event.note);
       final notes = _repository.getAllNote();
 
-      final updatedAllNotes = notes.map((n) => n.id == event.note.id ? event.note : n).toList();
+      final updatedAllNotes = notes
+          .map((n) => n.id == event.note.id ? event.note : n)
+          .toList();
 
       final newState = state.copyWith(
         allNotes: updatedAllNotes,
@@ -222,7 +228,6 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         state.copyWith(
           sortActiveIndex: event.activeIndex,
           isAsce: event.isAsce,
-          isSorting: event.isSorting,
           isSortByCreatedDate: event.isSortByCreatedDate,
         ),
       ),

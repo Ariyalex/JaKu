@@ -17,10 +17,12 @@ class TaskTile extends HookWidget {
     required this.task,
     this.star = true,
     required this.showGroup,
+    this.matkulId,
   });
   final Task task;
   final bool star;
   final bool showGroup;
+  final String? matkulId;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +131,9 @@ class TaskTile extends HookWidget {
         value: task.status,
         onChanged: (val) {
           context.read<TaskBloc>().add(UpdateTaskStatus(task.id, val ?? false));
+          if (matkulId != null) {
+            context.read<TaskBloc>().add(LoadListTaskByMatkul(matkulId!));
+          }
         },
       ),
       title: Text(

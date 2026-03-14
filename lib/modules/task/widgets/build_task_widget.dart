@@ -257,18 +257,16 @@ class BuildTaskWidget extends HookWidget {
                                 animation: animation,
                                 builder: (BuildContext context, Widget? child) {
                                   return Material(
-                                    // Gunakan elevasi agar terlihat melayang
                                     elevation: 4,
+                                    // WAJIB: Tambahkan borderRadius di sini agar tidak lancip 🛠️
+                                    borderRadius: BorderRadius.circular(12),
+                                    // Pindahkan warna background ke sini
+                                    color: theme.colorScheme.surfaceContainer,
                                     child: Container(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(12),
-                                        // Mengatur Border Side saja
-                                        color:
-                                            theme.colorScheme.surfaceContainer,
                                         border: Border.all(
-                                          color: theme
-                                              .colorScheme
-                                              .secondary, // Ganti ke warna border yang diinginkan
+                                          color: theme.colorScheme.secondary,
                                           width: 2.0,
                                         ),
                                       ),
@@ -340,6 +338,38 @@ class BuildTaskWidget extends HookWidget {
                           ),
                           onReorder: (oldIndex, newIndex) =>
                               onReorder(completedTasks, oldIndex, newIndex),
+                          proxyDecorator:
+                              (
+                                Widget child,
+                                int index,
+                                Animation<double> animation,
+                              ) {
+                                return AnimatedBuilder(
+                                  animation: animation,
+                                  builder: (BuildContext context, Widget? child) {
+                                    return Material(
+                                      elevation: 4,
+                                      // WAJIB: Tambahkan borderRadius di sini agar tidak lancip 🛠️
+                                      borderRadius: BorderRadius.circular(12),
+                                      // Pindahkan warna background ke sini
+                                      color: theme.colorScheme.surfaceContainer,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: theme.colorScheme.secondary,
+                                            width: 2.0,
+                                          ),
+                                        ),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: child,
+                                );
+                              },
                           children: completedTasks
                               .map(
                                 (task) => TaskTile(

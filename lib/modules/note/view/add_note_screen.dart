@@ -88,6 +88,32 @@ class AddNoteScreen extends HookWidget {
       };
     }, [titleController, noteController, selectedMatkulId.value]);
 
+    useEffect(() {
+      // Jangan simpan jika data belum pernah ada di DB dan teks masih kosong
+      if (!isAddedToDb.value &&
+          titleController.text.isEmpty &&
+          noteController.text.isEmpty) {
+        return;
+      }
+
+      // Langsung simpan saat Matkul berubah 🔄
+      final updatedNote = initialNote.copyWith(
+        title: titleController.text,
+        desc: noteController.text,
+        editedOn: DateTime.now(),
+        matkulId: selectedMatkulId.value,
+      );
+
+      if (!isAddedToDb.value) {
+        noteBloc.add(AddNote(updatedNote));
+        isAddedToDb.value = true;
+      } else {
+        noteBloc.add(UpdateNote(updatedNote));
+      }
+
+      return null;
+    }, [selectedMatkulId.value]);
+
     return Scaffold(
       appBar: AppBar(
         actions: [

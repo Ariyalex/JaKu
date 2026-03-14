@@ -5,7 +5,7 @@ import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/widgets/filter_note_modal.dart';
-import 'package:jaku/core/widgets/sort_note_modal.dart';
+import 'package:jaku/modules/note/widgets/sort_note_modal.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -18,11 +18,11 @@ class SearchTextfield extends HookWidget {
     final noteBloc = context.read<NoteBloc>();
     final focusNode = useFocusNode();
     final searchController = useTextEditingController();
-    
+
     // Track focus state to trigger rebuilds
     useListenable(focusNode);
     useListenable(searchController);
-    
+
     final isFocused = focusNode.hasFocus;
     final isNotEmpty = searchController.text.trim().isNotEmpty;
 
@@ -52,21 +52,22 @@ class SearchTextfield extends HookWidget {
                     BlocBuilder<NoteBloc, NoteState>(
                       builder: (context, state) {
                         bool isAsce = state.isAsce;
-                        bool isSorting = state.isSorting;
 
                         return IconButton(
                           icon: Icon(
-                            !isSorting
-                                ? LucideIcons.arrowDownUp
-                                : (isAsce ? LucideIcons.arrowUp : LucideIcons.arrowDown),
+                            isAsce
+                                ? LucideIcons.arrowUp
+                                : LucideIcons.arrowDown,
                           ),
+
                           onPressed: () {
                             showBarModalBottomSheet<void>(
                               barrierColor: Colors.black.withValues(alpha: 0.4),
                               context: context,
                               useRootNavigator: true,
                               bounce: true,
-                              backgroundColor: theme.colorScheme.surfaceContainer,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainer,
                               builder: (context) => const SortNoteModal(),
                             );
                           },
@@ -81,11 +82,14 @@ class SearchTextfield extends HookWidget {
                           return RawMaterialButton(
                             onPressed: () {
                               showBarModalBottomSheet<void>(
-                                barrierColor: Colors.black.withValues(alpha: 0.4),
+                                barrierColor: Colors.black.withValues(
+                                  alpha: 0.4,
+                                ),
                                 context: context,
                                 useRootNavigator: true,
                                 bounce: true,
-                                backgroundColor: theme.colorScheme.surfaceContainer,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainer,
                                 builder: (context) => const FilterNoteModal(),
                               );
                             },
@@ -114,7 +118,8 @@ class SearchTextfield extends HookWidget {
                               context: context,
                               useRootNavigator: true,
                               bounce: true,
-                              backgroundColor: theme.colorScheme.surfaceContainer,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainer,
                               builder: (context) => const FilterNoteModal(),
                             );
                           },

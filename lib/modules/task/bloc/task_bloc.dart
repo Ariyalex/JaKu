@@ -109,7 +109,12 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     try {
       final task = _repository.getTaskById(event.id);
-      final updatedTask = task.copyWith(status: event.status);
+      final updatedTask = task.copyWith(
+        status: event.status,
+        allOrder: 0,
+        groupOrder: 0,
+        starredOrder: 0,
+      );
       await _repository.updateTask(updatedTask);
       add(LoadListTask());
     } catch (e) {

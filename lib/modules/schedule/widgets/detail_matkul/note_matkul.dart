@@ -47,20 +47,19 @@ class NoteMatkul extends HookWidget {
                 IconButton(
                   icon: const Icon(LucideIcons.plus),
                   tooltip: "Tambah Catatan",
-                  onPressed: () {
-                    context.pushNamed(
+                  onPressed: () async {
+                    await context.pushNamed(
                       RouteNamed.addNote,
                       extra: matkulId,
                     );
+
+                    noteBloc.add(LoadListNoteByMatkul(matkulId));
                   },
                 ),
               ],
             ),
             notes.isEmpty
-                ? Text(
-                    "Belum ada catatan.",
-                    style: theme.textTheme.bodyMedium,
-                  )
+                ? Text("Belum ada catatan.", style: theme.textTheme.bodyMedium)
                 : NoteGlobal(showMatkul: false, notes: notes),
           ],
         );

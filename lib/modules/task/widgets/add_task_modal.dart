@@ -29,11 +29,18 @@ class AddTaskModal extends HookWidget {
 
     final TextEditingController titleController = useTextEditingController();
     final TextEditingController descController = useTextEditingController();
-    ;
+
     final selectedMatkulId = useState<String?>(null);
     final dueDate = useState<DateTime?>(null);
     final isStared = useState<bool>(false);
     final showDescField = useState<bool>(false);
+
+    useEffect(() {
+      if (matkulId != null) {
+        selectedMatkulId.value = matkulId;
+      }
+      return null;
+    }, [matkulId]);
 
     useValueListenable(titleController);
     useValueListenable(descController);

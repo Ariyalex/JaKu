@@ -219,12 +219,12 @@ class TaskDashboard extends HookWidget {
                 onPressed: () async {
                   final tabIndex = tabController.index;
                   String? selectedMatkul;
-                  if (tabIndex >= 2) {
-                    if (tabIndex >= (2 + taskTabs.length)) {
+                  if (tabIndex >= 3) {
+                    if (tabIndex >= (3 + taskTabs.length)) {
                       selectedMatkul =
-                          matkulList[tabIndex - (2 + taskTabs.length)].id;
+                          matkulList[tabIndex - (3 + taskTabs.length)].id;
                     } else {
-                      selectedMatkul = taskTabs[tabIndex - 2].id;
+                      selectedMatkul = taskTabs[tabIndex - 3].id;
                     }
                   }
                   fabKey.currentState?.close();

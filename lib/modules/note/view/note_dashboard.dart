@@ -64,11 +64,8 @@ class NoteDashboard extends HookWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // LANGKAH TERBAIK: Langsung buka layar AddNote.
-          // Layar tersebut sudah memiliki logika Note.create() sendiri
-          // dan auto-save yang aman dari race condition.
-          context.pushNamed(RouteNamed.addNote);
+        onPressed: () async {
+          await context.pushNamed(RouteNamed.addNote);
         },
         shape: const CircleBorder(),
         child: const Icon(LucideIcons.plus),
