@@ -14,6 +14,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     on<UpdateMatkul>(_onUpdateMatkul);
     on<DeleteMatkul>(_onDeleteMatkul);
     on<DeleteAllMatkul>(_onDeleteAllMatkul);
+    on<UpdateListMatkulSemester>(_onUpdateListMatkulSemester);
   }
 
   Future<void> _onLoadListMatkul(
@@ -29,7 +30,10 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     }
   }
 
-  Future<void> _onLoadMatkul(LoadMatkul event, Emitter<MatkulState> emit) async {
+  Future<void> _onLoadMatkul(
+    LoadMatkul event,
+    Emitter<MatkulState> emit,
+  ) async {
     // If we have it in list, set it
     final existing = state.matkuls.where((m) => m.id == event.id).firstOrNull;
     if (existing != null) {
@@ -40,7 +44,9 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     emit(state.copyWith(status: MatkulStatus.loading));
     try {
       final matkul = _repository.getMatkulById(event.id);
-      emit(state.copyWith(status: MatkulStatus.success, selectedMatkul: matkul));
+      emit(
+        state.copyWith(status: MatkulStatus.success, selectedMatkul: matkul),
+      );
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -97,6 +103,22 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   ) async {
     try {
       await _repository.deleteAllMatkul();
+      add(LoadListMatkul());
+    } catch (e) {
+      emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateListMatkulSemester(
+    UpdateListMatkulSemester event,
+    Emitter<MatkulState> emit,
+  ) async {
+    try {
+      for (var matkul in event.matkuls) {
+        final newMatkul = matkul.copyWith(semester: event.semester);
+        await _repository.updateMatkul(newMatkul);
+      }
+
       add(LoadListMatkul());
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));

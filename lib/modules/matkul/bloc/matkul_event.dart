@@ -42,6 +42,18 @@ class UpdateMatkul extends MatkulEvent {
   List<Object?> get props => [matkul];
 }
 
+class UpdateListMatkulSemester extends MatkulEvent {
+  final List<Matkul> matkuls;
+  final int semester;
+  const UpdateListMatkulSemester({
+    required this.matkuls,
+    required this.semester,
+  });
+
+  @override
+  List<Object?> get props => [matkuls, semester];
+}
+
 class DeleteMatkul extends MatkulEvent {
   final String id;
   const DeleteMatkul(this.id);

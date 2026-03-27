@@ -21,21 +21,33 @@ class Matkul extends Equatable {
   @HiveField(4)
   final String? lecturer2;
 
+  @HiveField(5)
+  final int? semester;
+
   const Matkul({
     required this.id,
     required this.name,
     required this.nameAbbreviation,
     this.lecturer1,
     this.lecturer2,
+    this.semester,
   });
 
   @override
-  List<Object?> get props => [id, name, nameAbbreviation, lecturer1, lecturer2];
+  List<Object?> get props => [
+    id,
+    name,
+    nameAbbreviation,
+    lecturer1,
+    lecturer2,
+    semester,
+  ];
 
   factory Matkul.create({
     required String name,
     String? lecturer1,
     String? lecturer2,
+    int? semester,
   }) {
     return Matkul(
       id: uuid.v4(),
@@ -43,6 +55,25 @@ class Matkul extends Equatable {
       nameAbbreviation: matkulAbbreviation(name),
       lecturer1: lecturer1,
       lecturer2: lecturer2,
+      semester: semester,
+    );
+  }
+
+  Matkul copyWith({
+    String? id,
+    String? name,
+    String? lecturer1,
+    String? lecturer2,
+    String? nameAbbreviation,
+    int? semester,
+  }) {
+    return Matkul(
+      id: this.id,
+      name: name ?? this.name,
+      nameAbbreviation: nameAbbreviation ?? this.nameAbbreviation,
+      lecturer1: lecturer1 ?? this.lecturer1,
+      lecturer2: lecturer2 ?? this.lecturer2,
+      semester: semester ?? this.semester,
     );
   }
 

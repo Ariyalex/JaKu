@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
+import 'package:jaku/modules/matkul/view/matkul_dashboard.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/view/note_dashboard.dart';
@@ -33,9 +34,9 @@ class MainScreen extends StatelessWidget {
             onTabChanged: (value) {
               if (value == 0) {
                 context.read<ScheduleBloc>().add(LoadListSchedule());
-              } else if (value == 1) {
-                context.read<NoteBloc>().add(LoadListNote());
               } else if (value == 2) {
+                context.read<NoteBloc>().add(LoadListNote());
+              } else if (value == 3) {
                 context.read<TaskBloc>().add(LoadListTask());
               }
             },
@@ -43,17 +44,20 @@ class MainScreen extends StatelessWidget {
               PersistentTabConfig(
                 screen: const ScheduleDashboard(),
                 item: ItemConfig(
-                  activeForegroundColor: theme.colorScheme.primary,
-                  inactiveForegroundColor: theme.colorScheme.onSurfaceVariant,
-                  icon: const Icon(LucideIcons.calendarRange),
+                  icon: const Icon(Icons.event_note),
                   title: "Schedule",
+                ),
+              ),
+              PersistentTabConfig(
+                screen: const MatkulDashboard(),
+                item: ItemConfig(
+                  icon: const Icon(LucideIcons.library),
+                  title: "Matkul",
                 ),
               ),
               PersistentTabConfig(
                 screen: const NoteDashboard(),
                 item: ItemConfig(
-                  activeForegroundColor: theme.colorScheme.primary,
-                  inactiveForegroundColor: theme.colorScheme.onSurfaceVariant,
                   icon: const Icon(LucideIcons.notebook),
                   title: "Note",
                 ),
@@ -61,8 +65,6 @@ class MainScreen extends StatelessWidget {
               PersistentTabConfig(
                 screen: const TaskDashboard(),
                 item: ItemConfig(
-                  activeForegroundColor: theme.colorScheme.primary,
-                  inactiveForegroundColor: theme.colorScheme.onSurfaceVariant,
                   icon: const Icon(LucideIcons.listTodo),
                   title: "Task",
                 ),
