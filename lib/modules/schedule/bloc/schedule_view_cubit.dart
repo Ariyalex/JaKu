@@ -3,17 +3,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 class ScheduleViewCubit extends Cubit<bool> {
   ScheduleViewCubit() : super(true);
+  Box get _box => Hive.box("settings");
 
   void initView() async {
-    final box = await Hive.openBox("settings");
-    final isCard = box.get('cardView', defaultValue: true);
+    final isCard = _box.get('cardView', defaultValue: true);
     emit(isCard);
   }
 
   void toggleView() async {
     final newValue = !state;
     emit(newValue);
-    final box = await Hive.openBox("settings");
-    await box.put('cardView', newValue);
+    await _box.put('cardView', newValue);
   }
 }

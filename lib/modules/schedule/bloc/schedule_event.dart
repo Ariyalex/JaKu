@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/matkul_schedule.dart';
 
 abstract class ScheduleEvent extends Equatable {
@@ -8,7 +9,13 @@ abstract class ScheduleEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadListSchedule extends ScheduleEvent {}
+class LoadListSchedule extends ScheduleEvent {
+  final List<Matkul> matkuls;
+  const LoadListSchedule(this.matkuls);
+
+  @override
+  List<Object?> get props => [matkuls];
+}
 
 class LoadSchedule extends ScheduleEvent {
   final String id;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/view/matkul_dashboard.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
@@ -33,10 +35,20 @@ class MainScreen extends StatelessWidget {
             controller: mainTabBloc.mainTabController,
             onTabChanged: (value) {
               if (value == 0) {
-                context.read<ScheduleBloc>().add(LoadListSchedule());
+                final currentMatkul = context
+                    .read<MatkulBloc>()
+                    .state
+                    .activeMatkuls;
+                context.read<ScheduleBloc>().add(
+                  LoadListSchedule(currentMatkul),
+                );
+              } else if (value == 1) {
+                context.read<MatkulBloc>().add(LoadAllMatkul());
               } else if (value == 2) {
+                //TODO: penyesuaian list note berdasarkan active matkul
                 context.read<NoteBloc>().add(LoadListNote());
               } else if (value == 3) {
+                //TODO: penyesuaian list task berdasarkan active matkul
                 context.read<TaskBloc>().add(LoadListTask());
               }
             },

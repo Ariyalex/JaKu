@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
@@ -13,7 +14,6 @@ import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
 import 'package:jaku/modules/notification/bloc/notification_state.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
 import 'package:jaku/modules/task/bloc/task_state.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/modules/task/widgets/add_group_modal.dart';
 import 'package:jaku/modules/task/widgets/add_task_modal.dart';
 import 'package:jaku/modules/task/widgets/build_task_widget.dart';
@@ -37,7 +37,7 @@ class TaskDashboard extends HookWidget {
         mainTabBloc.add(LoadAllTaskTabs());
       }
       if (matkulBloc.state.status == MatkulStatus.initial) {
-        matkulBloc.add(LoadListMatkul());
+        matkulBloc.add(LoadAllMatkul());
       }
       return null;
     }, []);
@@ -81,13 +81,12 @@ class TaskDashboard extends HookWidget {
     void deleteTabs(String groupId) async {
       try {
         mainTabBloc.add(DeleteTaskTab(groupId));
-        showAppSnackbar(title: "Success!", message: "Berhasil menghapus tab");
-      } catch (error) {
-        showAppSnackbar(
-          title: "Error!",
-          message: "Error: $error",
-          isSuccess: false,
+        MySnackbar.success(
+          title: "Success!",
+          message: "Berhasil menghapus tab",
         );
+      } catch (error) {
+        MySnackbar.error(title: "Error!", message: "Error: $error");
       }
     }
 
@@ -97,16 +96,12 @@ class TaskDashboard extends HookWidget {
         currentIndex.value = newTabIndex;
 
         mainTabBloc.add(AddTaskTab(tabName));
-        showAppSnackbar(
+        MySnackbar.success(
           title: "Success!",
           message: "Berhasil menambahkan tab baru",
         );
       } catch (error) {
-        showAppSnackbar(
-          title: "Error!",
-          message: "Error: $error",
-          isSuccess: false,
-        );
+        MySnackbar.error(title: "Error!", message: "Error: $error");
       }
     }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
@@ -14,7 +15,6 @@ import 'package:jaku/modules/task/bloc/task_event.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/task.dart';
 import 'package:jaku/data/entities/task_tab.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:uuid/uuid.dart';
 
@@ -99,16 +99,12 @@ class AddTaskModal extends HookWidget {
         }
 
         context.pop();
-        showAppSnackbar(
+        MySnackbar.success(
           title: "Success!",
           message: "Berhasil menambahkan task",
         );
       } catch (error) {
-        showAppSnackbar(
-          title: "Error!",
-          message: "Error: $error",
-          isSuccess: false,
-        );
+        MySnackbar.error(title: "Error!", message: "Error: $error");
       }
     }
 

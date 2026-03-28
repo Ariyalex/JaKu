@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:jaku/data/entities/matkul_schedule.dart';
 
-enum ScheduleStatus { initial, loading, success, error }
+enum ScheduleStatus { initial, loading, success, actionSuccess, error }
 
 class ScheduleState extends Equatable {
   final List<MatkulSchedule> schedules;
@@ -25,7 +25,9 @@ class ScheduleState extends Equatable {
   }) {
     return ScheduleState(
       schedules: schedules ?? this.schedules,
-      selectedSchedule: clearSelected ? null : (selectedSchedule ?? this.selectedSchedule),
+      selectedSchedule: clearSelected
+          ? null
+          : (selectedSchedule ?? this.selectedSchedule),
       status: status ?? this.status,
       message: message ?? this.message,
     );

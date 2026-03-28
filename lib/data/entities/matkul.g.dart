@@ -22,7 +22,7 @@ class MatkulAdapter extends TypeAdapter<Matkul> {
       nameAbbreviation: fields[2] as String,
       lecturer1: fields[3] as String?,
       lecturer2: fields[4] as String?,
-      semester: fields[5] as int?,
+      semester: fields[5] as int,
     );
   }
 

@@ -39,7 +39,7 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
     // Ensure matkul is loaded
     final matkulBloc = context.read<MatkulBloc>();
     if (matkulBloc.state.status == MatkulStatus.initial) {
-      matkulBloc.add(LoadListMatkul());
+      matkulBloc.add(LoadAllMatkul());
     }
   }
 

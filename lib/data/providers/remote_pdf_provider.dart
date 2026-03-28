@@ -37,11 +37,14 @@ class RemotePdfProvider {
       List<MatkulModel> matkulList = [];
       List<ScheduleModel> scheduleList = [];
 
-      for (Map<String, dynamic> matkul
-          in data['matkuls'] as List<dynamic>) {
+      for (Map<String, dynamic> matkul in data['matkuls'] as List<dynamic>) {
         List<dynamic> lecturerList = matkul['lecturers'] ?? [];
-        String? lecturer1 = lecturerList.isNotEmpty ? lecturerList[0]['name'] : null;
-        String? lecturer2 = lecturerList.length > 1 ? lecturerList[1]['name'] : null;
+        String? lecturer1 = lecturerList.isNotEmpty
+            ? lecturerList[0]['name']
+            : null;
+        String? lecturer2 = lecturerList.length > 1
+            ? lecturerList[1]['name']
+            : null;
 
         matkulList.add(
           MatkulModel(
@@ -50,6 +53,7 @@ class RemotePdfProvider {
             nameAbbreviation: Matkul.matkulAbbreviation(matkul['name']),
             lecturer1: lecturer1,
             lecturer2: lecturer2,
+            semester: -1,
           ),
         );
 

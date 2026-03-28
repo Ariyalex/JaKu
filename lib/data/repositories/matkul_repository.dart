@@ -14,6 +14,14 @@ class MatkulRepository {
     }
   }
 
+  List<Matkul> getListMatkulSemester(int semester) {
+    try {
+      return _localProvider.getListMatkulSemester(semester);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Matkul getMatkulById(String id) {
     try {
       final result = _localProvider.getMatkulById(id);
@@ -70,6 +78,22 @@ class MatkulRepository {
       await _localProvider.deleteAllMatkul();
     } catch (e) {
       print("error delete all matkul: $e");
+      rethrow;
+    }
+  }
+
+  int getActiveSemester() {
+    try {
+      return _localProvider.getActiveSemester();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateActiveSemester(int semester) async {
+    try {
+      await _localProvider.saveActiveSemester(semester);
+    } catch (e) {
       rethrow;
     }
   }

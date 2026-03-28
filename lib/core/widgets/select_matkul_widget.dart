@@ -23,7 +23,7 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
     super.initState();
     final matkulBloc = context.read<MatkulBloc>();
     if (matkulBloc.state.status == MatkulStatus.initial) {
-      matkulBloc.add(LoadListMatkul());
+      matkulBloc.add(LoadAllMatkul());
     }
   }
 

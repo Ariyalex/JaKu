@@ -15,9 +15,16 @@ class TableView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheduleBloc = context.read<ScheduleBloc>();
+    final matkulBloc = context.read<MatkulBloc>();
+    final matkulState = context.watch<MatkulBloc>().state;
+
     useEffect(() {
-      context.read<ScheduleBloc>().add(LoadListSchedule());
-      context.read<MatkulBloc>().add(LoadListMatkul());
+      matkulBloc.add(LoadListMatkulSemester());
+      if (matkulState.status == MatkulStatus.success) {
+        final currentMatkul = matkulBloc.state.activeMatkuls;
+        scheduleBloc.add(LoadListSchedule(currentMatkul));
+      }
       return null;
     }, []);
 

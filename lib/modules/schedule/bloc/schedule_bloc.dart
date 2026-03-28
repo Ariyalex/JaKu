@@ -7,7 +7,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   final MatkulScheduleRepository _repository;
 
   ScheduleBloc(this._repository) : super(const ScheduleState()) {
-    on<LoadListSchedule>(_onLoadListSchedule);
+    on<LoadListSchedule>(_onLoadListScheduleByMatkuls);
     on<LoadSchedule>(_onLoadSchedule);
     on<AddListSchedule>(_onAddListSchedule);
     on<AddSchedule>(_onAddSchedule);
@@ -16,13 +16,15 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     on<DeleteAllSchedule>(_onDeleteAllSchedule);
   }
 
-  Future<void> _onLoadListSchedule(
+  Future<void> _onLoadListScheduleByMatkuls(
     LoadListSchedule event,
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(status: ScheduleStatus.loading));
     try {
-      final schedules = _repository.getAllSchedule();
+      final schedules = _repository.getListScheduleByMatkuls(
+        event.matkuls.map((e) => e.id).toList(),
+      );
       emit(
         state.copyWith(status: ScheduleStatus.success, schedules: schedules),
       );
@@ -62,7 +64,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       await _repository.addSchedule(event.schedule);
-      add(LoadListSchedule());
+      emit(state.copyWith(status: ScheduleStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
@@ -74,7 +76,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       await _repository.addSchedules(event.schedules);
-      add(LoadListSchedule());
+      emit(state.copyWith(status: ScheduleStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
@@ -86,7 +88,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       await _repository.updateSchedule(event.schedule);
-      add(LoadListSchedule());
+      emit(state.copyWith(status: ScheduleStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
@@ -98,7 +100,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       await _repository.deleteSchedule(event.id);
-      add(LoadListSchedule());
+      emit(state.copyWith(status: ScheduleStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }
@@ -110,7 +112,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       await _repository.deleteAllSchedule();
-      add(LoadListSchedule());
+      emit(state.copyWith(status: ScheduleStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
     }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 
 class EditGroupModal extends HookWidget {
   const EditGroupModal({super.key, required this.groupId});
@@ -24,16 +24,12 @@ class EditGroupModal extends HookWidget {
           EditTaskTab(id: groupId, tabName: textController.text),
         );
         context.pop();
-        showAppSnackbar(
+        MySnackbar.success(
           title: "Success!",
           message: "Berhasil megubah nama tab",
         );
       } catch (error) {
-        showAppSnackbar(
-          title: "Error",
-          message: "Error: $error",
-          isSuccess: false,
-        );
+        MySnackbar.error(title: "Error", message: "Error: $error");
       }
     }
 

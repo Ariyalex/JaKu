@@ -22,7 +22,7 @@ class Matkul extends Equatable {
   final String? lecturer2;
 
   @HiveField(5)
-  final int? semester;
+  final int semester;
 
   const Matkul({
     required this.id,
@@ -30,7 +30,7 @@ class Matkul extends Equatable {
     required this.nameAbbreviation,
     this.lecturer1,
     this.lecturer2,
-    this.semester,
+    required this.semester,
   });
 
   @override
@@ -55,7 +55,7 @@ class Matkul extends Equatable {
       nameAbbreviation: matkulAbbreviation(name),
       lecturer1: lecturer1,
       lecturer2: lecturer2,
-      semester: semester,
+      semester: semester ?? -1,
     );
   }
 

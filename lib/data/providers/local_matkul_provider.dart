@@ -3,10 +3,21 @@ import 'package:jaku/data/entities/matkul.dart';
 
 class LocalMatkulProvider {
   Box<Matkul> get _matkulBox => Hive.box<Matkul>("matkulBox");
+  Box get _settingsBox => Hive.box("settings");
 
   List<Matkul> getAllMatkul() {
     try {
       return _matkulBox.values.toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  List<Matkul> getListMatkulSemester(int semester) {
+    try {
+      return _matkulBox.values
+          .where((matkul) => matkul.semester == semester)
+          .toList();
     } catch (e) {
       rethrow;
     }
@@ -49,6 +60,22 @@ class LocalMatkulProvider {
   Matkul? getMatkulById(String id) {
     try {
       return _matkulBox.get(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveActiveSemester(int semester) async {
+    try {
+      await _settingsBox.put("activeSemester", semester);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  int getActiveSemester() {
+    try {
+      return _settingsBox.get("activeSemester", defaultValue: -1);
     } catch (e) {
       rethrow;
     }

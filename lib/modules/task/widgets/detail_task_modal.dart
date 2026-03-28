@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
@@ -14,7 +15,6 @@ import 'package:jaku/modules/task/bloc/task_state.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/task.dart';
 import 'package:jaku/data/entities/task_tab.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DetailTaskModal extends HookWidget {
@@ -96,13 +96,12 @@ class DetailTaskModal extends HookWidget {
         }
 
         context.pop();
-        showAppSnackbar(title: "Success!", message: "Berhasil mengubah task");
-      } catch (error) {
-        showAppSnackbar(
-          title: "Error!",
-          message: "Error: $error",
-          isSuccess: false,
+        MySnackbar.success(
+          title: "Success!",
+          message: "Berhasil mengubah task",
         );
+      } catch (error) {
+        MySnackbar.error(title: "Error!", message: "Error: $error");
       }
     }
 
@@ -132,7 +131,7 @@ class DetailTaskModal extends HookWidget {
                 context.read<NotificationBloc>().add(
                   CancelNotification(task.id.hashCode),
                 );
-                showAppSnackbar(
+                MySnackbar.success(
                   title: "Success!",
                   message: "Berhasil menghapus task",
                 );

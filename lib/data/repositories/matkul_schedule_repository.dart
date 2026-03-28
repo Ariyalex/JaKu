@@ -5,9 +5,9 @@ class MatkulScheduleRepository {
   final LocalMatkulScheduleProvider localProvider;
   MatkulScheduleRepository(this.localProvider);
 
-  List<MatkulSchedule> getAllSchedule() {
+  List<MatkulSchedule> getListScheduleByMatkuls(List<String> matkulIds) {
     try {
-      return localProvider.getAllSchedule();
+      return localProvider.getListScheduleByMatkuls(matkulIds);
     } catch (e) {
       print("error get all schedule(repo): $e");
       rethrow;

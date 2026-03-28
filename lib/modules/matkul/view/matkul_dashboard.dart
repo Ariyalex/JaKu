@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:jaku/modules/matkul/widgets/edit_semester_dialog.dart';
+import 'package:jaku/modules/matkul/widgets/matkul_list_card_widget.dart';
+import 'package:jaku/modules/matkul/widgets/matkul_semester_card_head.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 final dummyGroup = ["Semester 1", "Semester 2", "Tidak tekelompokkan"];
@@ -15,12 +17,14 @@ class MatkulDashboard extends HookWidget {
     final isSelectionMode = useState<bool>(false);
     final selectedMatkul = useState<Set<int>>({});
 
-    void toggleMatkul(int index) {
+    final editSemesterController = useTextEditingController();
+
+    void toggleMatkul(int id) {
       final newSet = Set<int>.from(selectedMatkul.value);
-      if (newSet.contains(index)) {
-        newSet.remove(index);
+      if (newSet.contains(id)) {
+        newSet.remove(id);
       } else {
-        newSet.add(index);
+        newSet.add(id);
       }
 
       selectedMatkul.value = newSet;
@@ -30,7 +34,6 @@ class MatkulDashboard extends HookWidget {
       }
     }
 
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: isSelectionMode.value
           ? AppBar(
@@ -42,7 +45,19 @@ class MatkulDashboard extends HookWidget {
                 icon: Icon(Icons.close),
               ),
               actions: [
-                IconButton(onPressed: () {}, icon: Icon(LucideIcons.squarePen)),
+                IconButton(
+                  onPressed: () async {
+                    await EditSemesterDialog.show(
+                      context,
+                      editSemesterController,
+                    );
+                  },
+                  icon: Icon(LucideIcons.squarePen),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.delete, color: Colors.red),
+                ),
               ],
             )
           : AppBar(title: Text("Matkul organizer")),
@@ -51,83 +66,20 @@ class MatkulDashboard extends HookWidget {
           itemCount: dummyGroup.length,
           padding: EdgeInsets.all(8),
           itemBuilder: (context, index) => Card(
+            elevation: 0,
             child: Column(
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                  alignment: Alignment.centerLeft,
-                  decoration: BoxDecoration(color: theme.colorScheme.tertiary),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        dummyGroup[index],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                      Switch(value: true, onChanged: (value) {}),
-                    ],
-                  ),
+                MatkulSemesterCardHead(
+                  title: dummyGroup[index],
+                  isSelected: false,
+                  onToggle: (value) {},
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                  child: MasonryGridView.builder(
-                    shrinkWrap: true,
-                    itemCount: dummyMatkul.length,
-                    gridDelegate:
-                        const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                        ),
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    itemBuilder: (context, index) {
-                      final isSelected = selectedMatkul.value.contains(index);
-
-                      return InkWell(
-                        onLongPress: () {
-                          if (!isSelectionMode.value) {
-                            isSelectionMode.value = true;
-                            toggleMatkul(index);
-                          }
-                        },
-
-                        onTap: () {
-                          if (isSelectionMode.value) {
-                            toggleMatkul(index);
-                          }
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? theme.cardTheme.color
-                                : theme.highlightColor,
-                            borderRadius: BorderRadius.circular(6),
-                            border: BoxBorder.all(
-                              width: 2,
-                              color: isSelected
-                                  ? theme.colorScheme.tertiary
-                                  : Colors.transparent,
-                            ),
-                          ),
-                          child: Text(
-                            dummyMatkul[index],
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                MatkulListCardWidget(
+                  selectedMatkul: selectedMatkul.value,
+                  isSelectionMode: isSelectionMode.value,
+                  dummyMatkul: dummyMatkul,
+                  setSelectionMode: (value) => isSelectionMode.value = value,
+                  toggleMatkul: toggleMatkul,
                 ),
               ],
             ),
@@ -239,6 +191,12 @@ class MatkulDashboard extends HookWidget {
           //   ),
           // ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: null,
+        onPressed: () {},
+        shape: const CircleBorder(),
+        child: Icon(Icons.add),
       ),
     );
   }

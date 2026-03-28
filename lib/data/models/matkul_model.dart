@@ -7,6 +7,7 @@ class MatkulModel extends Matkul {
     required super.nameAbbreviation,
     super.lecturer1,
     super.lecturer2,
+    required super.semester,
   });
 
   factory MatkulModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +17,7 @@ class MatkulModel extends Matkul {
       nameAbbreviation: Matkul.matkulAbbreviation(json["name"]),
       lecturer1: json["lecturers"][0]["name"],
       lecturer2: json["lecturers"][1]["name"],
+      semester: -1,
     );
   }
 
@@ -26,6 +28,7 @@ class MatkulModel extends Matkul {
       nameAbbreviation: nameAbbreviation,
       lecturer1: lecturer1,
       lecturer2: lecturer2,
+      semester: semester,
     );
   }
 }

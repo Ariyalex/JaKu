@@ -4,9 +4,11 @@ import 'package:jaku/data/entities/matkul_schedule.dart';
 class LocalMatkulScheduleProvider {
   Box<MatkulSchedule> get _box => Hive.box<MatkulSchedule>("scheduleBox");
 
-  List<MatkulSchedule> getAllSchedule() {
+  List<MatkulSchedule> getListScheduleByMatkuls(List<String> matkulIds) {
     try {
-      return _box.values.toList();
+      return _box.values
+          .where((schedule) => matkulIds.contains(schedule.matkulId))
+          .toList();
     } catch (e) {
       rethrow;
     }

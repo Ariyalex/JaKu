@@ -19,12 +19,15 @@ class CardView extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheduleBloc = context.read<ScheduleBloc>();
+    final matkulBloc = context.read<MatkulBloc>();
+    final matkulState = context.watch<MatkulBloc>().state;
 
     useEffect(() {
-      if (scheduleBloc.state.status != ScheduleStatus.success) {
-        scheduleBloc.add(LoadListSchedule());
+      matkulBloc.add(LoadListMatkulSemester());
+      if (matkulState.status == MatkulStatus.success) {
+        final currentMatkul = matkulBloc.state.activeMatkuls;
+        scheduleBloc.add(LoadListSchedule(currentMatkul));
       }
-      context.read<MatkulBloc>().add(LoadListMatkul());
       return null;
     }, []);
 

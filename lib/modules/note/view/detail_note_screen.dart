@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 import 'package:jaku/core/widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -31,7 +31,7 @@ class DetailNoteScreen extends HookWidget {
     final titleController = useTextEditingController();
     final noteController = useTextEditingController();
     final selectedMatkulId = useState<String?>(null);
-    
+
     // Track ID yang sedang ditampilkan di controller
     final displayedId = useRef<String?>(null);
 
@@ -40,14 +40,15 @@ class DetailNoteScreen extends HookWidget {
       noteBloc.add(LoadNote(id));
       // Pastikan matkul dimuat jika belum
       if (matkulBloc.state.status == MatkulStatus.initial) {
-        matkulBloc.add(LoadListMatkul());
+        matkulBloc.add(LoadAllMatkul());
       }
       return null;
     }, [id]);
 
     // 2. Sinkronisasi data ke controller jika data sudah benar
     useEffect(() {
-      if (noteState.status == NoteStatus.success && noteState.lastLoadedId == id) {
+      if (noteState.status == NoteStatus.success &&
+          noteState.lastLoadedId == id) {
         final note = noteState.selectedNote;
         if (note != null && displayedId.value != id) {
           titleController.text = note.title ?? '';
@@ -63,28 +64,42 @@ class DetailNoteScreen extends HookWidget {
     final debounceTimer = useRef<Timer?>(null);
 
     // Function untuk mentrigger save dengan debouncing
-    final triggerSave = useCallback(() {
-      if (noteState.selectedNote == null || noteState.selectedNote!.id != id) return;
+    final triggerSave = useCallback(
+      () {
+        if (noteState.selectedNote == null ||
+            noteState.selectedNote!.id != id) {
+          return;
+        }
 
-      final updatedNote = noteState.selectedNote!.copyWith(
-        title: titleController.text,
-        desc: noteController.text,
-        editedOn: DateTime.now(),
-        matkulId: selectedMatkulId.value,
-      );
+        final updatedNote = noteState.selectedNote!.copyWith(
+          title: titleController.text,
+          desc: noteController.text,
+          editedOn: DateTime.now(),
+          matkulId: selectedMatkulId.value,
+        );
 
-      // Hanya save jika ada perubahan nyata dari data di state
-      final currentNote = noteState.selectedNote!;
-      if (updatedNote.title != currentNote.title ||
-          updatedNote.desc != currentNote.desc ||
-          updatedNote.matkulId != currentNote.matkulId) {
-        
-        if (debounceTimer.value?.isActive ?? false) debounceTimer.value!.cancel();
-        debounceTimer.value = Timer(const Duration(milliseconds: 300), () {
-          noteBloc.add(UpdateNote(updatedNote));
-        });
-      }
-    }, [noteState.selectedNote, id, titleController, noteController, selectedMatkulId.value, noteBloc]);
+        // Hanya save jika ada perubahan nyata dari data di state
+        final currentNote = noteState.selectedNote!;
+        if (updatedNote.title != currentNote.title ||
+            updatedNote.desc != currentNote.desc ||
+            updatedNote.matkulId != currentNote.matkulId) {
+          if (debounceTimer.value?.isActive ?? false) {
+            debounceTimer.value!.cancel();
+          }
+          debounceTimer.value = Timer(const Duration(milliseconds: 300), () {
+            noteBloc.add(UpdateNote(updatedNote));
+          });
+        }
+      },
+      [
+        noteState.selectedNote,
+        id,
+        titleController,
+        noteController,
+        selectedMatkulId.value,
+        noteBloc,
+      ],
+    );
 
     // Listener untuk text changes
     useEffect(() {
@@ -109,18 +124,18 @@ class DetailNoteScreen extends HookWidget {
         noteBloc.add(DeleteNote(id));
         context.pop();
         context.pop();
-        showAppSnackbar(title: "Success", message: "Berhasil menghapus note");
-      } catch (e) {
-        showAppSnackbar(
-          title: "Error!",
-          message: "Gagal menghapus note: $e",
-          isSuccess: false,
+        MySnackbar.success(
+          title: "Success",
+          message: "Berhasil menghapus note",
         );
+      } catch (e) {
+        MySnackbar.error(title: "Error!", message: "Gagal menghapus note: $e");
       }
     }
 
     // Logic Loading yang lebih fleksibel
-    final isNoteLoading = noteState.status == NoteStatus.loading || noteState.lastLoadedId != id;
+    final isNoteLoading =
+        noteState.status == NoteStatus.loading || noteState.lastLoadedId != id;
 
     if (isNoteLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -128,7 +143,9 @@ class DetailNoteScreen extends HookWidget {
 
     // Tampilan jika data tidak ditemukan
     if (noteState.selectedNote == null) {
-      return const Scaffold(body: Center(child: Text("Catatan tidak ditemukan")));
+      return const Scaffold(
+        body: Center(child: Text("Catatan tidak ditemukan")),
+      );
     }
 
     return Scaffold(

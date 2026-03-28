@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_bloc.dart';
@@ -14,7 +15,6 @@ import 'package:jaku/core/theme/theme.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/core/utils/snackbar_widget.dart';
 
 class PdfParsing extends HookWidget {
   const PdfParsing({super.key});
@@ -63,7 +63,7 @@ class PdfParsing extends HookWidget {
           scheduleBloc.add(AddListSchedule(state.schedules));
 
           // 2. Berikan notifikasi sukses
-          showAppSnackbar(
+          MySnackbar.success(
             title: "Berhasil!",
             message: "Data jadwal berhasil diimpor dari PDF",
           );
@@ -72,11 +72,7 @@ class PdfParsing extends HookWidget {
           context.pop();
         } else if (state is PdfParseFailure) {
           responseMessage.value = 'Error: ${state.message}';
-          showAppSnackbar(
-            title: "Gagal!",
-            message: state.message,
-            isSuccess: false,
-          );
+          MySnackbar.error(title: "Gagal!", message: state.message);
         }
       },
       child: Scaffold(

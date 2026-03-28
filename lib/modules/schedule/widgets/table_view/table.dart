@@ -117,8 +117,12 @@ class Table extends HookWidget {
       final schedule = matchingSchedules.first;
       final matkul = matkuls.firstWhere(
         (m) => m.id == schedule.matkulId,
-        orElse: () =>
-            const Matkul(id: "", name: "Unknown", nameAbbreviation: "???"),
+        orElse: () => const Matkul(
+          id: "",
+          name: "Unknown",
+          nameAbbreviation: "???",
+          semester: -1,
+        ),
       );
 
       return DataCell(
