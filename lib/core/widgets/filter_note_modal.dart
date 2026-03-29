@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
@@ -34,12 +33,6 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
           .where((element) => element.isNotEmpty)
           .toSet();
       if (_selectedMatkuls.isEmpty) _selectedMatkuls = {'all'};
-    }
-
-    // Ensure matkul is loaded
-    final matkulBloc = context.read<MatkulBloc>();
-    if (matkulBloc.state.status == MatkulStatus.initial) {
-      matkulBloc.add(LoadAllMatkul());
     }
   }
 

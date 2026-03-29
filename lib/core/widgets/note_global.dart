@@ -6,6 +6,8 @@ import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/data/entities/note.dart';
 import 'package:jaku/core/routes/route_named.dart';
+import 'package:jaku/modules/note/bloc/note_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_event.dart';
 
 class NoteGlobal extends StatelessWidget {
   const NoteGlobal({super.key, this.showMatkul = true, required this.notes});
@@ -16,6 +18,8 @@ class NoteGlobal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final matkulBloc = context.read<MatkulBloc>();
+    final noteBloc = context.read<NoteBloc>();
 
     return MasonryGridView.builder(
       shrinkWrap: true,
@@ -30,11 +34,13 @@ class NoteGlobal extends StatelessWidget {
         final Note note = notes[index];
 
         return InkWell(
-          onTap: () {
-            context.pushNamed(
+          onTap: () async {
+            await context.pushNamed(
               RouteNamed.detailNote,
               pathParameters: {'id': note.id},
             );
+
+            noteBloc.add(LoadListNote(matkulBloc.state.activeMatkuls));
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(

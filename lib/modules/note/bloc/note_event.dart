@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/note.dart';
 
 abstract class NoteEvent extends Equatable {
@@ -8,7 +9,13 @@ abstract class NoteEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadListNote extends NoteEvent {}
+class LoadListNote extends NoteEvent {
+  final List<Matkul> matkuls;
+  const LoadListNote(this.matkuls);
+
+  @override
+  List<Object?> get props => [matkuls];
+}
 
 class LoadListNoteByMatkul extends NoteEvent {
   final String matkulId;

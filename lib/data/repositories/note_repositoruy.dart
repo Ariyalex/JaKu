@@ -5,9 +5,9 @@ class NoteRepository {
   final LocalNoteProvider _localProvider;
   NoteRepository(this._localProvider);
 
-  List<Note> getAllNote() {
+  List<Note> getListNoteByMatkuls(List<String> matkulIds) {
     try {
-      return _localProvider.getAllNote();
+      return _localProvider.getListNoteByMatkuls(matkulIds);
     } catch (e) {
       print("error get all note(repo): $e");
       rethrow;

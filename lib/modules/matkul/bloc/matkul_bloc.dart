@@ -75,7 +75,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     try {
       await _repository.addMatkul(event.matkul);
 
-      _refreshAllData(emit);
+      await _refreshAllData(emit);
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -87,7 +87,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   ) async {
     try {
       await _repository.addMatkuls(event.matkuls);
-      _refreshAllData(emit);
+      await _refreshAllData(emit);
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -100,7 +100,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     try {
       await _repository.updateMatkul(event.matkul);
 
-      _refreshAllData(emit);
+      await _refreshAllData(emit);
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -113,7 +113,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     try {
       await _repository.deleteMatkul(event.id);
 
-      _refreshAllData(emit);
+      await _refreshAllData(emit);
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -125,7 +125,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   ) async {
     try {
       await _repository.deleteAllMatkul();
-      _refreshAllData(emit);
+      await _refreshAllData(emit);
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -141,7 +141,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
         await _repository.updateMatkul(newMatkul);
       }
 
-      _refreshAllData(emit);
+      await _refreshAllData(emit);
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }
@@ -151,10 +151,10 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     LoadActiveSemester event,
     Emitter<MatkulState> emit,
   ) async {
-    emit(state.copyWith(status: MatkulStatus.success));
     try {
       final result = _repository.getActiveSemester();
       emit(state.copyWith(activeSemester: result));
+      add(LoadListMatkulSemester());
     } catch (e) {
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));
     }

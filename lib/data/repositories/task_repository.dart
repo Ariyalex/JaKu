@@ -5,9 +5,9 @@ class TaskRepository {
   final LocalTaskProvider _localProvider;
   TaskRepository(this._localProvider);
 
-  List<Task> getAllTask() {
+  List<Task> getListTaskByMatkuls(List<String> matkulids) {
     try {
-      return _localProvider.getAllTask();
+      return _localProvider.getListTaskByMatkuls(matkulids);
     } catch (e) {
       print("error get all task(repo): $e");
       rethrow;

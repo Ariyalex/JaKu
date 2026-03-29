@@ -4,9 +4,16 @@ import 'package:jaku/data/entities/task.dart';
 class LocalTaskProvider {
   Box<Task> get _taskBox => Hive.box<Task>("taskBox");
 
-  List<Task> getAllTask() {
+  List<Task> getListTaskByMatkuls(List<String> matkulIds) {
     try {
-      return _taskBox.values.toList();
+      return _taskBox.values.where((task) {
+        if (task.groupId != null) {
+          return matkulIds.contains(task.groupId) ||
+              task.groupId!.startsWith("tab-");
+        }
+
+        return true;
+      }).toList();
     } catch (e) {
       rethrow;
     }

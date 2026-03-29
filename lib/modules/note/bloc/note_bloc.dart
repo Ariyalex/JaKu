@@ -83,7 +83,9 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   ) async {
     emit(state.copyWith(status: NoteStatus.loading, lastLoadedId: null));
     try {
-      final notes = _repository.getAllNote();
+      final notes = _repository.getListNoteByMatkuls(
+        event.matkuls.map((matkul) => matkul.id).toList(),
+      );
 
       // Filter out empty notes
       final validNotes = <Note>[];
@@ -113,7 +115,9 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     emit(state.copyWith(status: NoteStatus.loading));
     try {
       final notes = _repository.getNotesByMatkul(event.matkulId);
-      emit(state.copyWith(status: NoteStatus.success, filteredNotes: notes));
+      emit(
+        state.copyWith(status: NoteStatus.success, filteredNoteByMatkul: notes),
+      );
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -164,7 +168,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   Future<void> _onAddNote(AddNote event, Emitter<NoteState> emit) async {
     try {
       await _repository.addNote(event.note);
-      add(LoadListNote());
+      emit(state.copyWith(status: NoteStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -173,9 +177,8 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   Future<void> _onUpdateNote(UpdateNote event, Emitter<NoteState> emit) async {
     try {
       await _repository.updateNote(event.note);
-      final notes = _repository.getAllNote();
 
-      final updatedAllNotes = notes
+      final updatedAllNotes = state.allNotes
           .map((n) => n.id == event.note.id ? event.note : n)
           .toList();
 
@@ -193,7 +196,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   Future<void> _onDeleteNote(DeleteNote event, Emitter<NoteState> emit) async {
     try {
       await _repository.deleteNote(event.id);
-      add(LoadListNote());
+      emit(state.copyWith(status: NoteStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }
@@ -205,7 +208,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   ) async {
     try {
       await _repository.deleteAllNote();
-      add(LoadListNote());
+      emit(state.copyWith(status: NoteStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: NoteStatus.error, message: e.toString()));
     }

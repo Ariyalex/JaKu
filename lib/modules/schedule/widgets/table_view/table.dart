@@ -115,6 +115,7 @@ class Table extends HookWidget {
       }
 
       final schedule = matchingSchedules.first;
+      // print(schedule);
       final matkul = matkuls.firstWhere(
         (m) => m.id == schedule.matkulId,
         orElse: () => const Matkul(

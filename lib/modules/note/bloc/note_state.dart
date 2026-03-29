@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:jaku/data/entities/note.dart';
 
-enum NoteStatus { initial, loading, success, error }
+enum NoteStatus { initial, loading, success, actionSuccess, error }
 
 class NoteState extends Equatable {
   final List<Note> allNotes;
   final List<Note> filteredNotes;
+  final List<Note> filteredNoteByMatkul;
   final Note? selectedNote;
   final String? lastLoadedId;
   final NoteStatus status;
@@ -21,6 +22,7 @@ class NoteState extends Equatable {
   const NoteState({
     this.allNotes = const [],
     this.filteredNotes = const [],
+    this.filteredNoteByMatkul = const [],
     this.selectedNote,
     this.lastLoadedId,
     this.status = NoteStatus.initial,
@@ -35,6 +37,7 @@ class NoteState extends Equatable {
   NoteState copyWith({
     List<Note>? allNotes,
     List<Note>? filteredNotes,
+    List<Note>? filteredNoteByMatkul,
     Note? selectedNote,
     String? lastLoadedId,
     NoteStatus? status,
@@ -49,6 +52,7 @@ class NoteState extends Equatable {
     return NoteState(
       allNotes: allNotes ?? this.allNotes,
       filteredNotes: filteredNotes ?? this.filteredNotes,
+      filteredNoteByMatkul: filteredNoteByMatkul ?? this.filteredNoteByMatkul,
       selectedNote: clearSelected ? null : (selectedNote ?? this.selectedNote),
       lastLoadedId: lastLoadedId ?? this.lastLoadedId,
       status: status ?? this.status,
@@ -65,6 +69,7 @@ class NoteState extends Equatable {
   List<Object?> get props => [
     allNotes,
     filteredNotes,
+    filteredNoteByMatkul,
     selectedNote,
     lastLoadedId,
     status,

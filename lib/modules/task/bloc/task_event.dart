@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/task.dart';
 
 abstract class TaskEvent extends Equatable {
@@ -8,7 +9,13 @@ abstract class TaskEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadListTask extends TaskEvent {}
+class LoadListTask extends TaskEvent {
+  final List<Matkul> matkuls;
+  const LoadListTask(this.matkuls);
+
+  @override
+  List<Object?> get props => [matkuls];
+}
 
 class LoadTask extends TaskEvent {
   final String id;

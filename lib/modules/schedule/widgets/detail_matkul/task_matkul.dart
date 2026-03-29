@@ -25,6 +25,24 @@ class TaskMatkul extends HookWidget {
       return;
     }, [matkulId]);
 
+    void onReorder(List<Task> tasks, int oldIndex, int newIndex) {
+      final reorderedList = List<Task>.from(tasks);
+
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+
+      final item = reorderedList.removeAt(oldIndex);
+      reorderedList.insert(newIndex, item);
+
+      final List<Task> finalUpdatedList = [];
+      for (int i = 0; i < reorderedList.length; i++) {
+        finalUpdatedList.add(reorderedList[i].copyWith(groupOrder: i));
+      }
+
+      taskBloc.add(ReorderTasks(finalUpdatedList, matkulId));
+    }
+
     return BlocBuilder<TaskBloc, TaskState>(
       bloc: taskBloc,
       builder: (context, state) {
@@ -33,25 +51,11 @@ class TaskMatkul extends HookWidget {
         }
 
         if (state.status == TaskStatus.success) {
-          final List<Task> tasks = state.filteredTasks;
+          final List<Task> tasks = List<Task>.from(state.filteredTasks);
 
           tasks.sort(
             (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
           );
-
-          void onReorder(List<Task> tasks, int oldIndex, int newIndex) {
-            final reorderedList = List<Task>.from(tasks);
-
-            if (oldIndex < newIndex) {
-              newIndex -= 1;
-            }
-
-            final item = reorderedList.removeAt(oldIndex);
-            reorderedList.insert(newIndex, item);
-
-            taskBloc.add(ReorderTasks(reorderedList, null));
-            taskBloc.add(LoadListTaskByMatkul(matkulId));
-          }
 
           return Column(
             mainAxisSize: MainAxisSize.min,

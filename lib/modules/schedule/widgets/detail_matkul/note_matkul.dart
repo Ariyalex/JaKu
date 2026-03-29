@@ -31,7 +31,7 @@ class NoteMatkul extends HookWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final notes = state.filteredNotes;
+        final notes = state.filteredNoteByMatkul;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [

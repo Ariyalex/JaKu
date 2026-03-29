@@ -14,7 +14,6 @@ import 'package:jaku/core/theme/theme_cubit.dart';
 import 'package:jaku/data/repositories/task_tab_repository.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
 import 'package:jaku/modules/notification/bloc/notification_event.dart';
 import 'package:jaku/modules/notification/bloc/notification_state.dart';
@@ -90,13 +89,10 @@ class MyApp extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final matkulBloc = context.read<MatkulBloc>();
-    final matkulState = context.watch<MatkulBloc>().state;
 
     useEffect(() {
       matkulBloc.add(LoadActiveSemester());
-      if (matkulState.status == MatkulStatus.success) {
-        matkulBloc.add(LoadListMatkulSemester());
-      }
+
       return null;
     }, []);
 

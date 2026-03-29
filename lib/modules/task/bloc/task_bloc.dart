@@ -26,7 +26,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     emit(state.copyWith(status: TaskStatus.loading));
     try {
-      final tasks = _repository.getAllTask();
+      final tasks = _repository.getListTaskByMatkuls(
+        event.matkuls.map((matkul) => matkul.id).toList(),
+      );
       emit(state.copyWith(status: TaskStatus.success, tasks: tasks));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
@@ -67,7 +69,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onAddTask(AddTask event, Emitter<TaskState> emit) async {
     try {
       await _repository.addTask(event.task);
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }
@@ -76,7 +78,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onUpdateTask(UpdateTask event, Emitter<TaskState> emit) async {
     try {
       await _repository.updateTask(event.task);
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }
@@ -85,7 +87,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onDeleteTask(DeleteTask event, Emitter<TaskState> emit) async {
     try {
       await _repository.deleteTask(event.id);
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }
@@ -97,7 +99,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     try {
       await _repository.deleteAllTask();
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }
@@ -116,7 +118,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         starredOrder: 0,
       );
       await _repository.updateTask(updatedTask);
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }
@@ -130,7 +132,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       final task = _repository.getTaskById(event.id);
       final updatedTask = task.copyWith(isStared: event.isStared);
       await _repository.updateTask(updatedTask);
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.actionSuccess));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }
@@ -160,11 +162,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       }
     }
 
-    emit(state.copyWith(tasks: newList));
+    emit(state.copyWith(tasks: newList, filteredTasks: updatedTasks));
 
     try {
       await _repository.addTasks(updatedTasks);
-      add(LoadListTask());
+      emit(state.copyWith(status: TaskStatus.success));
     } catch (e) {
       emit(state.copyWith(status: TaskStatus.error, message: e.toString()));
     }

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:jaku/data/entities/task.dart';
 
-enum TaskStatus { initial, loading, success, error }
+enum TaskStatus { initial, loading, success, actionSuccess, error }
 
 class TaskState extends Equatable {
   final List<Task> tasks;
@@ -36,5 +36,11 @@ class TaskState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [tasks, filteredTasks, selectedTask, status, message];
+  List<Object?> get props => [
+    tasks,
+    filteredTasks,
+    selectedTask,
+    status,
+    message,
+  ];
 }

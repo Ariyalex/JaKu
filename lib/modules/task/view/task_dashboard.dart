@@ -8,8 +8,6 @@ import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
 import 'package:jaku/modules/notification/bloc/notification_state.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
@@ -30,24 +28,19 @@ class TaskDashboard extends HookWidget {
 
     final taskBloc = context.read<TaskBloc>();
     final mainTabBloc = context.read<MainTabBloc>();
-    final matkulBloc = context.read<MatkulBloc>();
 
     useEffect(() {
       if (mainTabBloc.state.taskTabs.isEmpty) {
         mainTabBloc.add(LoadAllTaskTabs());
       }
-      if (matkulBloc.state.status == MatkulStatus.initial) {
-        matkulBloc.add(LoadAllMatkul());
-      }
       return null;
     }, []);
 
-    final mainTabState = context.watch<MainTabBloc>().state;
-    final matkulState = context.watch<MatkulBloc>().state;
+    List<dynamic> matkulList = context.select(
+      (MatkulBloc bloc) => bloc.state.activeMatkuls,
+    );
+    final taskTabs = context.select((MainTabBloc bloc) => bloc.state.taskTabs);
 
-    List<dynamic> matkulList = matkulState.matkuls;
-
-    final taskTabs = mainTabState.taskTabs;
     final tabLength = 3 + taskTabs.length + matkulList.length;
 
     final currentIndex = useState<int>(0);
@@ -60,23 +53,29 @@ class TaskDashboard extends HookWidget {
 
     // Notification routing logic
     final notificationState = context.watch<NotificationBloc>().state;
-    if (notificationState is NotificationLoaded &&
-        notificationState.payload.isNotEmpty) {
-      final payload = notificationState.payload;
-      final taskState = taskBloc.state;
-      if (taskState.status == TaskStatus.success) {
-        final task = taskState.tasks.where((t) => t.id == payload).firstOrNull;
-        if (task != null) {
-          final matkulId = task.groupId;
-          final matkulIndex = matkulList.indexWhere((m) => m.id == matkulId);
-          if (matkulIndex != -1) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              tabController.animateTo(3 + taskTabs.length + matkulIndex);
-            });
+
+    useEffect(() {
+      if (notificationState is NotificationLoaded &&
+          notificationState.payload.isNotEmpty) {
+        final payload = notificationState.payload;
+        final taskState = taskBloc.state;
+        if (taskState.status == TaskStatus.success) {
+          final task = taskState.tasks
+              .where((t) => t.id == payload)
+              .firstOrNull;
+          if (task != null) {
+            final matkulId = task.groupId;
+            final matkulIndex = matkulList.indexWhere((m) => m.id == matkulId);
+            if (matkulIndex != -1) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                tabController.animateTo(3 + taskTabs.length + matkulIndex);
+              });
+            }
           }
         }
       }
-    }
+      return null;
+    }, [notificationState]);
 
     void deleteTabs(String groupId) async {
       try {
@@ -105,29 +104,33 @@ class TaskDashboard extends HookWidget {
       }
     }
 
-    final List<Widget> tabs = [
-      const Tab(text: "Semua"),
-      const Tab(icon: Icon(Icons.star)),
-      const Tab(text: "Umum"),
-      ...taskTabs.map((tab) => Tab(text: tab.tabName)),
-      ...matkulList.map((m) => Tab(text: m.nameAbbreviation)),
-    ];
+    final List<Widget> tabs = useMemoized(() {
+      return [
+        const Tab(text: "Semua"),
+        const Tab(icon: Icon(Icons.star)),
+        const Tab(text: "Umum"),
+        ...taskTabs.map((tab) => Tab(text: tab.tabName)),
+        ...matkulList.map((m) => Tab(text: m.nameAbbreviation)),
+      ];
+    }, [taskTabs, matkulList]);
 
-    final List<Widget> tabViews = [
-      const BuildTaskWidget(tabName: "Semua", tabIndex: "0"),
-      const BuildTaskWidget(tabName: 'Starred', tabIndex: "1"),
-      const BuildTaskWidget(tabName: 'Umum', tabIndex: "2"),
-      ...taskTabs.map(
-        (tab) => BuildTaskWidget(
-          tabName: tab.tabName,
-          tabIndex: tab.id,
-          deleteTabFunction: (groupId) => deleteTabs(groupId),
+    final List<Widget> tabViews = useMemoized(() {
+      return [
+        const BuildTaskWidget(tabName: "Semua", tabIndex: "0"),
+        const BuildTaskWidget(tabName: 'Starred', tabIndex: "1"),
+        const BuildTaskWidget(tabName: 'Umum', tabIndex: "2"),
+        ...taskTabs.map(
+          (tab) => BuildTaskWidget(
+            tabName: tab.tabName,
+            tabIndex: tab.id,
+            deleteTabFunction: (groupId) => deleteTabs(groupId),
+          ),
         ),
-      ),
-      ...matkulList.map(
-        (m) => BuildTaskWidget(tabName: m.nameAbbreviation, tabIndex: m.id),
-      ),
-    ];
+        ...matkulList.map(
+          (m) => BuildTaskWidget(tabName: m.nameAbbreviation, tabIndex: m.id),
+        ),
+      ];
+    }, [taskTabs, matkulList]);
 
     useEffect(() {
       void listener() {

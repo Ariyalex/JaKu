@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
@@ -16,51 +15,48 @@ class TableView extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final scheduleBloc = context.read<ScheduleBloc>();
-    final matkulBloc = context.read<MatkulBloc>();
-    final matkulState = context.watch<MatkulBloc>().state;
 
-    useEffect(() {
-      matkulBloc.add(LoadListMatkulSemester());
-      if (matkulState.status == MatkulStatus.success) {
-        final currentMatkul = matkulBloc.state.activeMatkuls;
-        scheduleBloc.add(LoadListSchedule(currentMatkul));
-      }
-      return null;
-    }, []);
-
-    return BlocBuilder<ScheduleBloc, ScheduleState>(
-      builder: (context, scheduleState) {
-        return BlocBuilder<MatkulBloc, MatkulState>(
-          builder: (context, matkulState) {
-            if (scheduleState.status == ScheduleStatus.loading ||
-                matkulState.status == MatkulStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (scheduleState.status == ScheduleStatus.success &&
-                matkulState.status == MatkulStatus.success) {
-              final schedules = scheduleState.schedules;
-              final matkuls = matkulState.matkuls;
-
-              if (schedules.isEmpty) {
-                return const JadwalKosong();
+    return BlocListener<MatkulBloc, MatkulState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status &&
+          current.status == MatkulStatus.success,
+      listener: (context, state) {
+        scheduleBloc.add(LoadListSchedule(state.activeMatkuls));
+      },
+      child: BlocBuilder<ScheduleBloc, ScheduleState>(
+        builder: (context, scheduleState) {
+          return BlocBuilder<MatkulBloc, MatkulState>(
+            builder: (context, matkulState) {
+              if (scheduleState.status == ScheduleStatus.loading ||
+                  matkulState.status == MatkulStatus.loading) {
+                return const Center(child: CircularProgressIndicator());
               }
 
-              return tbl.Table(schedules: schedules, matkuls: matkuls);
-            }
+              if (scheduleState.status == ScheduleStatus.success &&
+                  matkulState.status == MatkulStatus.success) {
+                final schedules = scheduleState.schedules;
+                final matkuls = matkulState.activeMatkuls;
 
-            if (scheduleState.status == ScheduleStatus.error) {
-              return Center(child: Text(scheduleState.message ?? "Error"));
-            }
+                if (schedules.isEmpty) {
+                  return const JadwalKosong();
+                }
 
-            if (matkulState.status == MatkulStatus.error) {
-              return Center(child: Text(matkulState.message ?? "Error"));
-            }
+                return tbl.Table(schedules: schedules, matkuls: matkuls);
+              }
 
-            return const SizedBox.shrink();
-          },
-        );
-      },
+              if (scheduleState.status == ScheduleStatus.error) {
+                return Center(child: Text(scheduleState.message ?? "Error"));
+              }
+
+              if (matkulState.status == MatkulStatus.error) {
+                return Center(child: Text(matkulState.message ?? "Error"));
+              }
+
+              return const SizedBox.shrink();
+            },
+          );
+        },
+      ),
     );
   }
 }

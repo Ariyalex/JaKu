@@ -3,29 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class SelectMatkulWidget extends StatefulWidget {
+class SelectMatkulWidget extends StatelessWidget {
   const SelectMatkulWidget({super.key, this.matkulId, this.onChanged});
 
   final String? matkulId;
   final ValueChanged<String?>? onChanged;
-
-  @override
-  State<SelectMatkulWidget> createState() => _SelectMatkulWidgetState();
-}
-
-class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
-  @override
-  void initState() {
-    super.initState();
-    final matkulBloc = context.read<MatkulBloc>();
-    if (matkulBloc.state.status == MatkulStatus.initial) {
-      matkulBloc.add(LoadAllMatkul());
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +21,9 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
         List<Matkul> matkulList = state.matkuls;
 
         Matkul? selectedMatkul;
-        if (widget.matkulId != null && widget.matkulId!.isNotEmpty) {
+        if (matkulId != null && matkulId!.isNotEmpty) {
           selectedMatkul = matkulList
-              .where((m) => m.id == widget.matkulId)
+              .where((m) => m.id == matkulId)
               .firstOrNull;
         }
 
@@ -78,8 +63,8 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
                       color: theme.colorScheme.primary,
                       padding: EdgeInsets.zero,
                       onPressed: () {
-                        if (widget.onChanged != null) {
-                          widget.onChanged!(null);
+                        if (onChanged != null) {
+                          onChanged!(null);
                         }
                       },
                       tooltip: 'Reset matkul',
@@ -95,8 +80,8 @@ class _SelectMatkulWidgetState extends State<SelectMatkulWidget> {
                 )
                 .toList(),
             onChanged: (value) {
-              if (widget.onChanged != null && value != null) {
-                widget.onChanged!(value.id);
+              if (onChanged != null && value != null) {
+                onChanged!(value.id);
               }
             },
             dropdownSeparator: DropdownSeparator(

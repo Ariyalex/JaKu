@@ -68,32 +68,39 @@ class BuildTaskWidget extends HookWidget {
         }
 
         if (state.status == TaskStatus.success) {
-          late List<Task> groupTasks;
+          List<Task> groupTasks = List<Task>.from(state.tasks);
 
-          if (tabIndex == "0") {
-            groupTasks = state.tasks;
-            groupTasks.sort(
-              (a, b) => (a.allOrder ?? 0).compareTo(b.allOrder ?? 0),
-            );
-          } else if (tabIndex == "1") {
-            groupTasks = state.tasks.where((t) => t.isStared).toList();
-            groupTasks.sort(
-              (a, b) => (a.starredOrder ?? 0).compareTo(b.starredOrder ?? 0),
-            );
-          } else if (tabIndex == "2") {
-            groupTasks = state.tasks
-                .where((t) => t.groupId == null || t.groupId == "")
-                .toList();
-            groupTasks.sort(
-              (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
-            );
-          } else {
-            groupTasks = state.tasks
-                .where((t) => t.groupId == tabIndex)
-                .toList();
-            groupTasks.sort(
-              (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
-            );
+          // 2. Tentukan logika filter dan sorting berdasarkan tabIndex
+          switch (tabIndex) {
+            case "0": // All Tasks
+              groupTasks.sort(
+                (a, b) => (a.allOrder ?? 0).compareTo(b.allOrder ?? 0),
+              );
+              break;
+
+            case "1": // Starred Tasks
+              groupTasks = groupTasks.where((t) => t.isStared).toList();
+              groupTasks.sort(
+                (a, b) => (a.starredOrder ?? 0).compareTo(b.starredOrder ?? 0),
+              );
+              break;
+
+            case "2": // Uncategorized (No Group)
+              groupTasks = groupTasks
+                  .where((t) => t.groupId == null || t.groupId == "")
+                  .toList();
+              groupTasks.sort(
+                (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
+              );
+              break;
+
+            default: // Specific Group/Tab
+              groupTasks = groupTasks
+                  .where((t) => t.groupId == tabIndex)
+                  .toList();
+              groupTasks.sort(
+                (a, b) => (a.groupOrder ?? 0).compareTo(b.groupOrder ?? 0),
+              );
           }
 
           final completedTasks = groupTasks

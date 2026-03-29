@@ -5,9 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/utils/my_snackbar.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
@@ -23,7 +20,6 @@ class DetailNoteScreen extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final noteBloc = context.read<NoteBloc>();
-    final matkulBloc = context.read<MatkulBloc>();
 
     // Mendengarkan perubahan state
     final noteState = context.watch<NoteBloc>().state;
@@ -38,10 +34,6 @@ class DetailNoteScreen extends HookWidget {
     // 1. Initial Load
     useEffect(() {
       noteBloc.add(LoadNote(id));
-      // Pastikan matkul dimuat jika belum
-      if (matkulBloc.state.status == MatkulStatus.initial) {
-        matkulBloc.add(LoadAllMatkul());
-      }
       return null;
     }, [id]);
 

@@ -4,9 +4,14 @@ import 'package:jaku/data/entities/note.dart';
 class LocalNoteProvider {
   Box<Note> get _noteBox => Hive.box<Note>("noteBox");
 
-  List<Note> getAllNote() {
+  List<Note> getListNoteByMatkuls(List<String> matkulIds) {
     try {
-      return _noteBox.values.toList();
+      return _noteBox.values
+          .where(
+            (note) =>
+                matkulIds.contains(note.matkulId) || note.matkulId == null,
+          )
+          .toList();
     } catch (e) {
       rethrow;
     }
