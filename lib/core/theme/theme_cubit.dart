@@ -8,12 +8,9 @@ class ThemeCubit extends Cubit<ThemeMode> {
   final _box = Hive.box('settings');
 
   void initTheme() {
-    final bool? isLight = _box.get("isLight");
-    if (isLight == null) {
-      emit(ThemeMode.system);
-    } else {
-      emit(isLight ? ThemeMode.light : ThemeMode.dark);
-    }
+    final bool isLight = _box.get("isLight", defaultValue: true);
+
+    emit(isLight ? ThemeMode.light : ThemeMode.dark);
   }
 
   void toggleTheme() {

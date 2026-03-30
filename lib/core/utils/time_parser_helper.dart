@@ -18,10 +18,7 @@ class TimeParserHelper {
     final parts = timeString.split(":");
     final hour = int.tryParse(parts[0]) ?? 0;
     final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
-    final now = DateTime.now();
-    final utcDt = DateTime.utc(now.year, now.month, now.day, hour, minute);
-    final localDt = utcDt.toLocal();
-    return TimeOfDay(hour: localDt.hour, minute: localDt.minute);
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   ///Formats a TimeOfDay into a string with format "HH:MM".
@@ -45,9 +42,8 @@ class TimeParserHelper {
       time.hour,
       time.minute,
     );
-    final utcDt = localDt.toUtc();
-    final hh = utcDt.hour.toString().padLeft(2, '0');
-    final mm = utcDt.minute.toString().padLeft(2, '0');
+    final hh = localDt.hour.toString().padLeft(2, '0');
+    final mm = localDt.minute.toString().padLeft(2, '0');
     return '$hh:$mm';
   }
 

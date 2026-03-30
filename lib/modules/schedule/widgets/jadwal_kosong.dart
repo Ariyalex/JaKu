@@ -45,7 +45,7 @@ class JadwalKosong extends StatelessWidget {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text("Add Matkul", style: TextStyle(fontSize: 17)),
+                        Text("Tambah Schedule", style: TextStyle(fontSize: 17)),
                         SizedBox(width: 5),
                         Icon(Icons.add),
                       ],

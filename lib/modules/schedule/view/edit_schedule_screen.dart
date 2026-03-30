@@ -68,12 +68,7 @@ class EditScheduleScreen extends HookWidget {
       body: SafeArea(
         child: Container(
           width: mediaQueryWidth,
-          padding: EdgeInsets.only(
-            right: 20,
-            left: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
+          padding: EdgeInsets.all(20),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Column(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/modules/matkul/widgets/edit_semester_dialog.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_list_card_widget.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_semester_card_head.dart';
@@ -42,7 +44,7 @@ class MatkulDashboard extends HookWidget {
                   isSelectionMode.value = false;
                   selectedMatkul.value.clear();
                 },
-                icon: Icon(Icons.close),
+                icon: Icon(LucideIcons.x),
               ),
               actions: [
                 IconButton(
@@ -56,7 +58,7 @@ class MatkulDashboard extends HookWidget {
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: Icon(Icons.delete, color: Colors.red),
+                  icon: Icon(LucideIcons.trash2, color: Colors.red),
                 ),
               ],
             )
@@ -194,7 +196,7 @@ class MatkulDashboard extends HookWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: null,
-        onPressed: () {},
+        onPressed: () => context.pushNamed(RouteNamed.addMatkul),
         shape: const CircleBorder(),
         child: Icon(Icons.add),
       ),
