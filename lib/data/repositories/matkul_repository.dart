@@ -18,6 +18,7 @@ class MatkulRepository {
     try {
       return _localProvider.getListMatkulSemester(semester);
     } catch (e) {
+      print("error get list matkul semester: $e");
       rethrow;
     }
   }
@@ -62,11 +63,9 @@ class MatkulRepository {
     }
   }
 
-  Future<void> deleteMatkul(String id) async {
+  Future<void> deleteMatkuls(List<String> ids) async {
     try {
-      final getMatkul = _localProvider.getMatkulById(id);
-      if (getMatkul == null) throw Exception("Matkul tidak ditemukan");
-      await _localProvider.deleteMatkul(id);
+      await _localProvider.deleteMatkuls(ids);
     } catch (e) {
       print("error delete matkul: $e");
       rethrow;

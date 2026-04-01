@@ -60,6 +60,21 @@ class LocalNoteProvider {
     }
   }
 
+  Future<void> deleteNotesByMatkulIds(List<String> matkulIds) async {
+    try {
+      final keysToDelete = _noteBox.values
+          .where((note) => matkulIds.contains(note.matkulId))
+          .map((note) => note.id)
+          .toList();
+
+      if (keysToDelete.isNotEmpty) {
+        await _noteBox.deleteAll(keysToDelete);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Note? getNoteById(String id) {
     try {
       return _noteBox.get(id);

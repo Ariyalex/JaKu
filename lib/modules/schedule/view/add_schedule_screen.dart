@@ -46,7 +46,14 @@ class AddScheduleScreen extends HookWidget {
                   children: [
                     BlocBuilder<MatkulBloc, MatkulState>(
                       builder: (context, state) {
-                        if (state.status == MatkulStatus.success) {
+                        if (state.status == MatkulStatus.loading ||
+                            state.status == MatkulStatus.initial) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state.status == MatkulStatus.success ||
+                            state.status == MatkulStatus.actionSuccess) {
                           return DropdownSearch<Matkul>(
                             selectedItem: selectedMatkul.value,
                             itemAsString: (item) => item.name,

@@ -56,7 +56,8 @@ class EditScheduleScreen extends HookWidget {
 
     // 3. Hook untuk sinkronisasi data Matkul ke State Lokal
     useEffect(() {
-      if (matkulState.status == MatkulStatus.success &&
+      if ((matkulState.status == MatkulStatus.success ||
+              matkulState.status == MatkulStatus.actionSuccess) &&
           matkulState.selectedMatkul != null) {
         selectedMatkul.value = matkulState.selectedMatkul;
       }
@@ -80,7 +81,14 @@ class EditScheduleScreen extends HookWidget {
                   children: [
                     BlocBuilder<MatkulBloc, MatkulState>(
                       builder: (context, state) {
-                        if (state.status == MatkulStatus.success) {
+                        if (state.status == MatkulStatus.loading ||
+                            state.status == MatkulStatus.initial) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state.status == MatkulStatus.success ||
+                            state.status == MatkulStatus.actionSuccess) {
                           return DropdownSearch<Matkul>(
                             selectedItem: selectedMatkul.value,
                             itemAsString: (item) => item.name,

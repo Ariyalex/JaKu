@@ -55,7 +55,12 @@ class AppProviders {
   // --- Bloc Providers ---
   static List<BlocProvider> get blocProviders => [
     BlocProvider<MatkulBloc>(
-      create: (context) => MatkulBloc(context.read<MatkulRepository>()),
+      create: (context) => MatkulBloc(
+        context.read<MatkulRepository>(),
+        context.read<MatkulScheduleRepository>(),
+        context.read<NoteRepository>(),
+        context.read<TaskRepository>(),
+      ),
     ),
     BlocProvider<ScheduleBloc>(
       create: (context) =>

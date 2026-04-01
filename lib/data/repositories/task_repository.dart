@@ -74,6 +74,14 @@ class TaskRepository {
     }
   }
 
+  Future<void> deleteTasksByMatkulIds(List<String> matkulIds) async {
+    try {
+      await _localProvider.deleteTasksByMatkulIds(matkulIds);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteAllTask() async {
     try {
       await _localProvider.deleteAllTask();

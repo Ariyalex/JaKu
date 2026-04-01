@@ -66,12 +66,12 @@ class UpdateListMatkulSemester extends MatkulEvent {
   List<Object?> get props => [matkuls, semester];
 }
 
-class DeleteMatkul extends MatkulEvent {
-  final String id;
-  const DeleteMatkul(this.id);
+class DeleteMatkuls extends MatkulEvent {
+  final List<String> ids;
+  const DeleteMatkuls(this.ids);
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [ids];
 }
 
 class DeleteAllMatkul extends MatkulEvent {}

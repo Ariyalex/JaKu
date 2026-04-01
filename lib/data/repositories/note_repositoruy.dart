@@ -74,6 +74,14 @@ class NoteRepository {
     }
   }
 
+  Future<void> deleteNotesByMatkulIds(List<String> matkulIds) async {
+    try {
+      await _localProvider.deleteNotesByMatkulIds(matkulIds);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteAllNote() async {
     try {
       await _localProvider.deleteAllNote();

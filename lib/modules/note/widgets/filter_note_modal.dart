@@ -84,8 +84,10 @@ class _FilterNoteModalState extends State<FilterNoteModal> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: BlocBuilder<MatkulBloc, MatkulState>(
+              buildWhen: (previous, current) =>
+                  previous.activeMatkuls != current.activeMatkuls,
               builder: (context, state) {
-                List<Matkul> matkuls = state.matkuls;
+                List<Matkul> matkuls = state.activeMatkuls;
 
                 return Wrap(
                   spacing: 8,

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/routes/route_named.dart';
 
-class JadwalKosong extends StatelessWidget {
-  const JadwalKosong({super.key});
+class MatkulEmptyWidget extends StatelessWidget {
+  const MatkulEmptyWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class JadwalKosong extends StatelessWidget {
             Column(
               children: [
                 const Text(
-                  "Jadwal Kosong??!!!",
+                  "Mata Kuliah Kosong??!!!",
                   style: TextStyle(fontSize: 25),
                 ),
                 const SizedBox(height: 10),
@@ -40,12 +40,15 @@ class JadwalKosong extends StatelessWidget {
                 children: [
                   FilledButton(
                     onPressed: () async {
-                      context.pushNamed(RouteNamed.addSchedule);
+                      context.pushNamed(RouteNamed.addMatkul);
                     },
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text("Tambah Jadwal", style: TextStyle(fontSize: 17)),
+                        Text(
+                          "Tambah Mata Kuliah",
+                          style: TextStyle(fontSize: 17),
+                        ),
                         SizedBox(width: 5),
                         Icon(Icons.add),
                       ],
@@ -68,14 +71,14 @@ class JadwalKosong extends StatelessWidget {
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: const Text("Ga jadi"),
+                              child: const Text("Tidak"),
                             ),
                             FilledButton(
                               onPressed: () {
                                 Navigator.pop(context);
                                 context.pushNamed(RouteNamed.pdfParsing);
                               },
-                              child: const Text("Ok Bang"),
+                              child: const Text("Iya"),
                             ),
                           ],
                         ),

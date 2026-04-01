@@ -19,7 +19,6 @@ class HiveClient {
     Hive.registerAdapter(TaskTabAdapter());
     Hive.registerAdapter(DayAdapter());
 
-    await Hive.openBox("settings");
     await Hive.openBox<Matkul>("matkulBox");
     await Hive.openBox<MatkulSchedule>("scheduleBox");
     await Hive.openBox<Note>("noteBox");

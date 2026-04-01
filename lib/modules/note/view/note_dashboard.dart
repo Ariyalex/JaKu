@@ -7,7 +7,7 @@ import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/core/widgets/note_global.dart';
+import 'package:jaku/core/widgets/note_list_masonry_builder.dart';
 import 'package:jaku/modules/note/widgets/search_textfield.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -39,7 +39,7 @@ class NoteDashboard extends HookWidget {
                   SearchTextfield(),
                   Expanded(
                     child: notes.isNotEmpty
-                        ? NoteGlobal(notes: notes)
+                        ? NoteListMasonryBuilder(notes: notes)
                         : Center(
                             child: Column(
                               children: [

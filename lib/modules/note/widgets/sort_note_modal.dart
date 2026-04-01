@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
-import 'package:jaku/core/widgets/sort_tile.dart';
+import 'package:jaku/modules/note/widgets/sort_tile_widget.dart';
 
 class SortNoteModal extends StatelessWidget {
   const SortNoteModal({super.key});
@@ -18,7 +18,7 @@ class SortNoteModal extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
-                'Sorting',
+                'Urutkan Berdasarkan',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
@@ -48,9 +48,9 @@ class SortNoteModal extends StatelessWidget {
                 return Column(
                   children: [
                     // Index 0: Sort by Modified/Updated Date
-                    SortTile(
+                    SortTileWidget(
                       isActive: activeIndex == 0,
-                      title: "Sort by Modified Date",
+                      title: "Tanggal Diubah",
                       onTap: () {
                         bool newIsAsce = (activeIndex != 0) ? true : !isAsce;
                         updateSort(0, newIsAsce, false);
@@ -58,9 +58,9 @@ class SortNoteModal extends StatelessWidget {
                       isAsce: isAsce,
                     ),
                     // Index 1: Sort by Created Date
-                    SortTile(
+                    SortTileWidget(
                       isActive: activeIndex == 1,
-                      title: "Sort by Created Date",
+                      title: "Tanggal Dibuat",
                       onTap: () {
                         bool newIsAsce = (activeIndex != 1) ? true : !isAsce;
                         updateSort(1, newIsAsce, true);

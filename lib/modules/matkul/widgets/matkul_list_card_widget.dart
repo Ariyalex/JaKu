@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jaku/core/routes/route_named.dart';
+import 'package:jaku/data/entities/matkul.dart';
 
 class MatkulListCardWidget extends StatelessWidget {
   const MatkulListCardWidget({
     super.key,
     required this.selectedMatkul,
     required this.isSelectionMode,
-    required this.dummyMatkul,
+    required this.matkuls,
     required this.toggleMatkul,
     required this.setSelectionMode,
   });
 
-  final Set<int> selectedMatkul;
+  final Set<String> selectedMatkul;
   final bool isSelectionMode;
 
-  //TODO: change data type and name
-  final List<String> dummyMatkul;
+  final List<Matkul> matkuls;
 
-  final ValueChanged<int> toggleMatkul;
+  final ValueChanged<String> toggleMatkul;
   final ValueChanged<bool> setSelectionMode;
 
   @override
@@ -26,27 +28,34 @@ class MatkulListCardWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       child: MasonryGridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemCount: dummyMatkul.length,
+        itemCount: matkuls.length,
         gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
         ),
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
         itemBuilder: (context, index) {
-          final isSelected = selectedMatkul.contains(index);
+          final matkul = matkuls[index];
+          final isSelected = selectedMatkul.contains(matkul.id);
 
           return InkWell(
             onLongPress: () {
               if (!isSelectionMode) {
                 setSelectionMode(true);
-                toggleMatkul(index);
+                toggleMatkul(matkul.id);
               }
             },
 
             onTap: () {
               if (isSelectionMode) {
-                toggleMatkul(index);
+                toggleMatkul(matkul.id);
+              } else {
+                context.pushNamed(
+                  RouteNamed.editMatkul,
+                  pathParameters: {"id": matkul.id},
+                );
               }
             },
             child: Container(
@@ -65,7 +74,7 @@ class MatkulListCardWidget extends StatelessWidget {
                 ),
               ),
               child: Text(
-                dummyMatkul[index],
+                matkul.name,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),

@@ -8,6 +8,7 @@ import 'package:jaku/data/providers/remote_pdf_provider.dart';
 import 'package:jaku/data/repositories/pdf_repository.dart';
 import 'package:jaku/modules/main_tab/view/main_screen.dart';
 import 'package:jaku/modules/matkul/view/add_matkul_screen.dart';
+import 'package:jaku/modules/matkul/view/edit_matkul_screen.dart';
 import 'package:jaku/modules/note/view/add_note_screen.dart';
 import 'package:jaku/modules/note/view/detail_note_screen.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_bloc.dart';
@@ -88,6 +89,14 @@ class AppRouter {
         path: RouteNamed.addMatkul,
         name: RouteNamed.addMatkul,
         builder: (context, state) => const AddMatkulScreen(),
+      ),
+      GoRoute(
+        path: RouteNamed.editMatkul,
+        name: RouteNamed.editMatkul,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return EditMatkulScreen(id: id);
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

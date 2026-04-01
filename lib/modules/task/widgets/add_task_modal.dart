@@ -63,7 +63,7 @@ class AddTaskModal extends HookWidget {
         if (dueDate.value != null && dueDate.value!.isAfter(DateTime.now())) {
           final matkulState = context.read<MatkulBloc>().state;
           final mainTabState = context.read<MainTabBloc>().state;
-          List<Matkul> matkulList = matkulState.matkuls;
+          List<Matkul> matkulList = matkulState.activeMatkuls;
           final taskTabs = mainTabState.taskTabs;
 
           Matkul? matkul;
@@ -112,7 +112,7 @@ class AddTaskModal extends HookWidget {
       builder: (context, matkulState) {
         return BlocBuilder<MainTabBloc, MainTabState>(
           builder: (context, mainTabState) {
-            List<Matkul> matkulList = matkulState.matkuls;
+            List<Matkul> matkulList = matkulState.activeMatkuls;
             final taskTabs = mainTabState.taskTabs;
 
             final timeNow = TimeOfDay.now();

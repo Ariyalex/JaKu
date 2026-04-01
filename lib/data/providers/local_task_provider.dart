@@ -62,6 +62,20 @@ class LocalTaskProvider {
     }
   }
 
+  Future<void> deleteTasksByMatkulIds(List<String> matkulIds) async {
+    try {
+      final keysToDelete = _taskBox.values
+          .where((matkul) => matkulIds.contains(matkul.groupId))
+          .map((matkul) => matkul.id);
+
+      if (keysToDelete.isNotEmpty) {
+        _taskBox.deleteAll(keysToDelete);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Task? getTaskById(String id) {
     try {
       return _taskBox.get(id);

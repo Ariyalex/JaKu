@@ -5,7 +5,7 @@ import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/core/widgets/note_global.dart';
+import 'package:jaku/core/widgets/note_list_masonry_builder.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 
@@ -60,7 +60,7 @@ class NoteMatkul extends HookWidget {
             ),
             notes.isEmpty
                 ? Text("Belum ada catatan.", style: theme.textTheme.bodyMedium)
-                : NoteGlobal(showMatkul: false, notes: notes),
+                : NoteListMasonryBuilder(showMatkul: false, notes: notes),
           ],
         );
       },

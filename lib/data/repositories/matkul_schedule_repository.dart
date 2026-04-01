@@ -65,6 +65,14 @@ class MatkulScheduleRepository {
     }
   }
 
+  Future<void> deleteSchedulesByMatkulIds(List<String> matkulIds) async {
+    try {
+      await localProvider.deleteSchedulesByMatkulIds(matkulIds);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteAllSchedule() async {
     try {
       await localProvider.deleteAllSchedule();

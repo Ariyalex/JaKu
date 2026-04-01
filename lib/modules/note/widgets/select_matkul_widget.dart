@@ -18,7 +18,7 @@ class SelectMatkulWidget extends StatelessWidget {
 
     return BlocBuilder<MatkulBloc, MatkulState>(
       builder: (context, state) {
-        List<Matkul> matkulList = state.matkuls;
+        List<Matkul> matkulList = state.activeMatkuls;
 
         Matkul? selectedMatkul;
         if (matkulId != null && matkulId!.isNotEmpty) {

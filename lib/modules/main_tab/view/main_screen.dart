@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/matkul/view/matkul_dashboard.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
@@ -11,6 +13,7 @@ import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/modules/note/view/note_dashboard.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
 import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
 import 'package:jaku/modules/task/bloc/task_event.dart';
@@ -43,17 +46,100 @@ class MainScreen extends StatelessWidget {
                   context.read<NoteBloc>().add(LoadListNote(currentMatkul));
                 },
               ),
-              // BlocListener<MatkulBloc, MatkulState>(
-              //   listenWhen: (previous, current) => current.status == MatkulStatus.success,
-              //   listener: (context, state) {
-              //     // TODO: implement listener
-              //   },
-              // ),
+              BlocListener<MatkulBloc, MatkulState>(
+                listenWhen: (previous, current) =>
+                    previous.activeMatkuls != current.activeMatkuls,
+                listener: (context, state) {
+                  context.read<ScheduleBloc>().add(
+                    LoadListSchedule(state.activeMatkuls),
+                  );
+                  context.read<NoteBloc>().add(
+                    LoadListNote(state.activeMatkuls),
+                  );
+                  context.read<TaskBloc>().add(
+                    LoadListTask(state.activeMatkuls),
+                  );
+                },
+              ),
+              BlocListener<MatkulBloc, MatkulState>(
+                listenWhen: (previous, current) =>
+                    current.status == MatkulStatus.actionSuccess ||
+                    current.status == MatkulStatus.error,
+                listener: (context, state) {
+                  if (state.message != null) {
+                    switch (state.status) {
+                      case MatkulStatus.error:
+                        MySnackbar.error(message: state.message!);
+                        break;
+                      case MatkulStatus.actionSuccess:
+                        MySnackbar.success(message: state.message!);
+                        break;
+                      default:
+                        break;
+                    }
+                  }
+                },
+              ),
+
+              BlocListener<ScheduleBloc, ScheduleState>(
+                listenWhen: (previous, current) =>
+                    current.status == ScheduleStatus.actionSuccess,
+                listener: (context, state) {
+                  final currentMatkul = context
+                      .read<MatkulBloc>()
+                      .state
+                      .activeMatkuls;
+
+                  context.read<ScheduleBloc>().add(
+                    LoadListSchedule(currentMatkul),
+                  );
+                },
+              ),
+
+              BlocListener<ScheduleBloc, ScheduleState>(
+                listenWhen: (previous, current) =>
+                    current.status == ScheduleStatus.actionSuccess ||
+                    current.status == ScheduleStatus.error,
+                listener: (context, state) {
+                  if (state.message != null) {
+                    switch (state.status) {
+                      case ScheduleStatus.error:
+                        MySnackbar.error(message: state.message!);
+                        break;
+                      case ScheduleStatus.actionSuccess:
+                        MySnackbar.success(message: state.message!);
+                        break;
+                      default:
+                        break;
+                    }
+                  }
+                },
+              ),
               BlocListener<TaskBloc, TaskState>(
                 listenWhen: (previous, current) =>
                     current.status == TaskStatus.actionSuccess,
                 listener: (context, taskState) {
                   context.read<TaskBloc>().add(LoadListTask(currentMatkul));
+                },
+              ),
+
+              BlocListener<TaskBloc, TaskState>(
+                listenWhen: (previous, current) =>
+                    current.status == TaskStatus.actionSuccess ||
+                    current.status == TaskStatus.error,
+                listener: (context, state) {
+                  if (state.message != null) {
+                    switch (state.status) {
+                      case TaskStatus.error:
+                        MySnackbar.error(message: state.message!);
+                        break;
+                      case TaskStatus.actionSuccess:
+                        MySnackbar.success(message: state.message!);
+                        break;
+                      default:
+                        break;
+                    }
+                  }
                 },
               ),
             ],
@@ -65,7 +151,7 @@ class MainScreen extends StatelessWidget {
                     LoadListSchedule(currentMatkul),
                   );
                 } else if (value == 1) {
-                  context.read<MatkulBloc>().add(LoadListMatkulSemester());
+                  context.read<MatkulBloc>().add(LoadAllMatkul());
                 } else if (value == 2) {
                   context.read<NoteBloc>().add(LoadListNote(currentMatkul));
                 } else if (value == 3) {

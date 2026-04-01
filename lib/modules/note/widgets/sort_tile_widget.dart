@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class SortTile extends StatefulWidget {
-  const SortTile({
+class SortTileWidget extends StatefulWidget {
+  const SortTileWidget({
     super.key,
     required this.isActive,
     this.isSortable = true,
@@ -17,10 +17,10 @@ class SortTile extends StatefulWidget {
   final bool isAsce;
 
   @override
-  State<SortTile> createState() => _SortTileState();
+  State<SortTileWidget> createState() => _SortTileWidgetState();
 }
 
-class _SortTileState extends State<SortTile> {
+class _SortTileWidgetState extends State<SortTileWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

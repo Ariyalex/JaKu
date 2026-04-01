@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
-import 'package:jaku/core/widgets/filter_note_modal.dart';
+import 'package:jaku/modules/note/widgets/filter_note_modal.dart';
 import 'package:jaku/modules/note/widgets/sort_note_modal.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';

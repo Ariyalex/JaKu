@@ -146,7 +146,7 @@ class TaskDashboard extends HookWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text("Task"),
+        title: const Text("Tugas"),
         bottom: TabBar(
           controller: tabController,
           isScrollable: true,

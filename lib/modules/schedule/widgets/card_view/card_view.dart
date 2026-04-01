@@ -88,7 +88,9 @@ class CardView extends HookWidget {
                         color: theme.colorScheme.surfaceContainer,
                         child: BlocBuilder<MatkulBloc, MatkulState>(
                           builder: (context, matkulState) {
-                            if (matkulState.status == MatkulStatus.success) {
+                            if (matkulState.status == MatkulStatus.success ||
+                                matkulState.status ==
+                                    MatkulStatus.actionSuccess) {
                               final matkuls = matkulState.activeMatkuls;
                               return ListView.separated(
                                 shrinkWrap: true,

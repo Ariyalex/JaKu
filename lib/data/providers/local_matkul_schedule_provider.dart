@@ -56,6 +56,21 @@ class LocalMatkulScheduleProvider {
     }
   }
 
+  Future<void> deleteSchedulesByMatkulIds(List<String> matkulIds) async {
+    try {
+      final keysToDelete = _box.values
+          .where((schedule) => matkulIds.contains(schedule.matkulId))
+          .map((schedule) => schedule.id)
+          .toList();
+
+      if (keysToDelete.isNotEmpty) {
+        await _box.deleteAll(keysToDelete);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteAllSchedule() async {
     try {
       await _box.clear();

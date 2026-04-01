@@ -32,8 +32,10 @@ class TableView extends HookWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (scheduleState.status == ScheduleStatus.success &&
-                  matkulState.status == MatkulStatus.success) {
+              if ((scheduleState.status == ScheduleStatus.success ||
+                      scheduleState.status == ScheduleStatus.actionSuccess) &&
+                  (matkulState.status == MatkulStatus.success ||
+                      matkulState.status == MatkulStatus.actionSuccess)) {
                 final schedules = scheduleState.schedules;
                 final matkuls = matkulState.activeMatkuls;
 

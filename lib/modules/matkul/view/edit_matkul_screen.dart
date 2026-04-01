@@ -8,34 +8,71 @@ import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class AddMatkulScreen extends HookWidget {
-  const AddMatkulScreen({super.key});
+class EditMatkulScreen extends HookWidget {
+  final String id;
+  const EditMatkulScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
-    final semester = useState<int>(0);
+    final matkulBloc = context.read<MatkulBloc>();
+
+    useEffect(() {
+      matkulBloc.add(LoadMatkul(id));
+      return null;
+    }, [id]);
+
     final formKey = GlobalKey<FormState>();
     final nameTextController = useTextEditingController();
     final lecturer1TextController = useTextEditingController();
     final lecturer2TextController = useTextEditingController();
     final semesterTextController = useTextEditingController();
 
-    final matkulBloc = context.read<MatkulBloc>();
+    final selectedMatkul = context.select(
+      (MatkulBloc bloc) => bloc.state.selectedMatkul,
+    );
+
+    final semester = useState<int>(selectedMatkul?.semester ?? 0);
 
     useEffect(() {
-      semesterTextController.text = semester.value.toString();
+      if (selectedMatkul != null && selectedMatkul.id == id) {
+        nameTextController.text = selectedMatkul.name;
+        lecturer1TextController.text = selectedMatkul.lecturer1 ?? "";
+        lecturer2TextController.text = selectedMatkul.lecturer2 ?? "";
+
+        semester.value = selectedMatkul.semester;
+
+        if (selectedMatkul.semester > 0) {
+          semesterTextController.text = semester.value.toString();
+        } else {
+          semesterTextController.text = "";
+        }
+      }
+      print("semester sekarang: ${selectedMatkul?.semester}");
+      return null;
+    }, [selectedMatkul, id]);
+
+    useEffect(() {
+      if (semester.value > 0) {
+        semesterTextController.text = semester.value.toString();
+      } else {
+        semesterTextController.text = "";
+      }
       return null;
     }, [semester.value]);
 
     void saveMatkul() {
-      final newMatkul = Matkul.create(
+      if (selectedMatkul == null) {
+        return;
+      }
+      final newMatkul = selectedMatkul.copyWith(
         name: nameTextController.text,
         lecturer1: lecturer1TextController.text,
         lecturer2: lecturer2TextController.text,
         semester: int.parse(semesterTextController.text),
+        nameAbbreviation: Matkul.matkulAbbreviation(nameTextController.text),
       );
 
-      matkulBloc.add(AddMatkul(newMatkul));
+      matkulBloc.add(UpdateMatkul(newMatkul));
 
       context.pop();
     }
@@ -51,13 +88,8 @@ class AddMatkulScreen extends HookWidget {
       return null;
     }
 
-    useEffect(() {
-      semesterTextController.text = "";
-      return null;
-    }, []);
-
     return Scaffold(
-      appBar: AppBar(title: Text("Tambahkan Matkul Baru")),
+      appBar: AppBar(title: Text("Edit Mata Kuliah")),
       body: SafeArea(
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -147,7 +179,7 @@ class AddMatkulScreen extends HookWidget {
                         );
                       }
                     },
-                    label: Text("Simpan Matkul"),
+                    label: Text("Update Matkul"),
                     icon: Icon(LucideIcons.save),
                   ),
                 ),

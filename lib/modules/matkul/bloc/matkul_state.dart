@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:jaku/data/entities/matkul.dart';
 
-enum MatkulStatus { initial, loading, success, error }
+enum MatkulStatus { initial, loading, success, actionSuccess, error }
 
 class MatkulState extends Equatable {
   final List<Matkul> matkuls;

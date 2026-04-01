@@ -9,8 +9,12 @@ import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 
-class NoteGlobal extends StatelessWidget {
-  const NoteGlobal({super.key, this.showMatkul = true, required this.notes});
+class NoteListMasonryBuilder extends StatelessWidget {
+  const NoteListMasonryBuilder({
+    super.key,
+    this.showMatkul = true,
+    required this.notes,
+  });
 
   final bool showMatkul;
   final List<Note> notes;

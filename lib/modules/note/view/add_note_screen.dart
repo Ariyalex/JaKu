@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jaku/data/entities/note.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
-import 'package:jaku/core/widgets/select_matkul_widget.dart';
+import 'package:jaku/modules/note/widgets/select_matkul_widget.dart';
 
 class AddNoteScreen extends HookWidget {
   const AddNoteScreen({super.key});

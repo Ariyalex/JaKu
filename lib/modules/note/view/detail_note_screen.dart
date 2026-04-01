@@ -8,7 +8,7 @@ import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
-import 'package:jaku/core/widgets/select_matkul_widget.dart';
+import 'package:jaku/modules/note/widgets/select_matkul_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DetailNoteScreen extends HookWidget {
