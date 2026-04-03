@@ -51,9 +51,7 @@ class LocalMatkulProvider {
 
   Future<void> deleteMatkuls(List<String> ids) async {
     try {
-      for (var id in ids) {
-        await _matkulBox.delete(id);
-      }
+      await _matkulBox.deleteAll(ids);
     } catch (e) {
       rethrow;
     }

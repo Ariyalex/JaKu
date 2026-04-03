@@ -7,7 +7,8 @@ import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
 import 'package:jaku/modules/schedule/widgets/jadwal_kosong.dart';
-import 'package:jaku/modules/schedule/widgets/table_view/table.dart' as tbl;
+import 'package:jaku/modules/schedule/widgets/table_view/schedule_table.dart'
+    as tbl;
 
 class TableView extends HookWidget {
   const TableView({super.key});
@@ -43,7 +44,10 @@ class TableView extends HookWidget {
                   return const JadwalKosong();
                 }
 
-                return tbl.Table(schedules: schedules, matkuls: matkuls);
+                return tbl.ScheduleTable(
+                  schedules: schedules,
+                  matkuls: matkuls,
+                );
               }
 
               if (scheduleState.status == ScheduleStatus.error) {

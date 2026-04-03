@@ -7,16 +7,25 @@ import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_selection_state.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
-import 'package:jaku/modules/schedule/widgets/card_view/matkul_card.dart';
+import 'package:jaku/modules/schedule/widgets/card_view/schedule_card.dart';
 import 'package:jaku/modules/schedule/widgets/jadwal_kosong.dart';
 
 class CardView extends HookWidget {
-  const CardView({super.key});
+  final ScheduleSelectionCubit scheduleSelectionCubit;
+  final ScheduleSelectionState scheduleSelectionState;
+  const CardView({
+    super.key,
+    required this.scheduleSelectionCubit,
+    required this.scheduleSelectionState,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     final scheduleBloc = context.read<ScheduleBloc>();
 
     return BlocListener<MatkulBloc, MatkulState>(
@@ -77,10 +86,14 @@ class CardView extends HookWidget {
                         ),
                         child: Text(
                           scheduleDay.label,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                          // style: TextStyle(
+                          //   fontSize: 20,
+                          //   fontWeight: FontWeight.bold,
+                          //   color: theme.colorScheme.onPrimary,
+                          // ),
+                          style: theme.textTheme.titleMedium?.copyWith(
                             color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -106,9 +119,13 @@ class CardView extends HookWidget {
                                     orElse: () => matkuls.first,
                                   );
 
-                                  return MatkulCard(
+                                  return ScheduleCard(
                                     schedule: schedule,
                                     matkul: matkul,
+                                    scheduleSelectionCubit:
+                                        scheduleSelectionCubit,
+                                    scheduleSelectionState:
+                                        scheduleSelectionState,
                                   );
                                 },
                               );

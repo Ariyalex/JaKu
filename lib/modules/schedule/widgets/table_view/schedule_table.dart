@@ -12,11 +12,15 @@ import 'package:jaku/data/value_objects/day.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 
-class Table extends HookWidget {
+class ScheduleTable extends HookWidget {
   final List<MatkulSchedule> schedules;
   final List<Matkul> matkuls;
 
-  const Table({super.key, required this.schedules, required this.matkuls});
+  const ScheduleTable({
+    super.key,
+    required this.schedules,
+    required this.matkuls,
+  });
 
   @override
   Widget build(BuildContext context) {

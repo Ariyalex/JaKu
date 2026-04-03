@@ -7,6 +7,7 @@ import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_selection_cubit.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_dialogs.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_empty_widget.dart';
@@ -20,24 +21,14 @@ class MatkulDashboard extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final matkulBloc = context.read<MatkulBloc>();
+    final matkulSelectionCubit = context.read<MatkulSelectionCubit>();
+    final matkulSelectionState = context.watch<MatkulSelectionCubit>().state;
     final activeSemester = context.select(
       (MatkulBloc bloc) => bloc.state.activeSemester,
     );
 
-    final isSelectionMode = useState<bool>(false);
-    final selectedMatkul = useState<Set<String>>({});
-
     final editSemesterController = useTextEditingController();
     final editSemesterFormKey = GlobalKey<FormState>();
-
-    void clearSelection() {
-      isSelectionMode.value = false;
-      selectedMatkul.value.clear();
-    }
-
-    bool isSemesterSelected(int semester) {
-      return semester == activeSemester;
-    }
 
     void toggleSemester(bool value, int semester) {
       if (value) {
@@ -45,30 +36,20 @@ class MatkulDashboard extends HookWidget {
       }
     }
 
-    void toggleMatkul(String id) {
-      final newSet = Set<String>.from(selectedMatkul.value);
-      if (newSet.contains(id)) {
-        newSet.remove(id);
-      } else {
-        newSet.add(id);
-      }
-
-      selectedMatkul.value = newSet;
-
-      if (newSet.isEmpty) {
-        isSelectionMode.value = false;
-      }
-    }
-
     void deleteMatkuls() {
-      matkulBloc.add(DeleteMatkuls(selectedMatkul.value.toList()));
-      clearSelection();
+      matkulBloc.add(
+        DeleteMatkuls(matkulSelectionState.selectedMatkulIds.toList()),
+      );
+      matkulSelectionCubit.clearSelection();
       context.pop();
     }
 
     void editSemesterMatkuls() {
       final selectedmatkuls = matkulBloc.state.matkuls
-          .where((matkul) => selectedMatkul.value.contains(matkul.id))
+          .where(
+            (matkul) =>
+                matkulSelectionState.selectedMatkulIds.contains(matkul.id),
+          )
           .toList();
       matkulBloc.add(
         UpdateListMatkulSemester(
@@ -78,15 +59,15 @@ class MatkulDashboard extends HookWidget {
       );
 
       editSemesterController.text = "";
-      clearSelection();
+      matkulSelectionCubit.clearSelection();
       context.pop();
     }
 
     return Scaffold(
-      appBar: isSelectionMode.value
+      appBar: matkulSelectionState.isSelectionMode
           ? AppBar(
               leading: IconButton(
-                onPressed: clearSelection,
+                onPressed: matkulSelectionCubit.clearSelection,
                 icon: Icon(LucideIcons.x),
               ),
               actions: [
@@ -150,127 +131,18 @@ class MatkulDashboard extends HookWidget {
                           title: semester >= 0
                               ? "Semester $semester"
                               : "Tidak Terkelompokkan",
-                          isSelected: isSemesterSelected(semester),
+                          isSelected: semester == activeSemester,
                           onToggle: (value) => toggleSemester(value, semester),
                         ),
                         MatkulListCardWidget(
-                          selectedMatkul: selectedMatkul.value,
-                          isSelectionMode: isSelectionMode.value,
                           matkuls: listMatkulPerSemester,
-                          setSelectionMode: (value) =>
-                              isSelectionMode.value = value,
-                          toggleMatkul: toggleMatkul,
+                          matkulSelectionCubit: matkulSelectionCubit,
+                          matkulSelectionState: matkulSelectionState,
                         ),
                       ],
                     ),
                   );
                 },
-                // Card(
-                //   child: Column(
-                //     children: [
-                //       Container(
-                //         padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                //         alignment: Alignment.centerLeft,
-                //         decoration: BoxDecoration(color: theme.colorScheme.secondary),
-                //         child: Row(
-                //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //           children: [
-                //             Text(
-                //               "Semester 2",
-                //               style: TextStyle(
-                //                 fontSize: 18,
-                //                 fontWeight: FontWeight.bold,
-                //                 color: theme.colorScheme.onPrimary,
-                //               ),
-                //             ),
-                //             Switch(value: false, onChanged: (value) {}),
-                //           ],
-                //         ),
-                //       ),
-                //       Container(
-                //         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                //         child: MasonryGridView.builder(
-                //           shrinkWrap: true,
-                //           gridDelegate:
-                //               const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                //                 crossAxisCount: 2,
-                //               ),
-                //           mainAxisSpacing: 8,
-                //           crossAxisSpacing: 8,
-                //           itemBuilder: (context, index) => Container(
-                //             alignment: Alignment.center,
-                //             padding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                //             decoration: BoxDecoration(
-                //               color: theme.highlightColor,
-                //               borderRadius: BorderRadius.circular(6),
-                //             ),
-                //             child: Text(
-                //               "Basis Data",
-                //               style: TextStyle(
-                //                 fontSize: 16,
-                //                 fontWeight: FontWeight.bold,
-                //               ),
-                //             ),
-                //           ),
-                //           itemCount: 4,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // Card(
-                //   child: Column(
-                //     children: [
-                //       Container(
-                //         padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                //         alignment: Alignment.centerLeft,
-                //         decoration: BoxDecoration(color: theme.colorScheme.secondary),
-                //         child: Row(
-                //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //           children: [
-                //             Text(
-                //               "tidak tekelompokkan",
-                //               style: TextStyle(
-                //                 fontSize: 18,
-                //                 fontWeight: FontWeight.bold,
-                //                 color: theme.colorScheme.onPrimary,
-                //               ),
-                //             ),
-                //             Switch(value: false, onChanged: (value) {}),
-                //           ],
-                //         ),
-                //       ),
-                //       Container(
-                //         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                //         child: MasonryGridView.builder(
-                //           shrinkWrap: true,
-                //           gridDelegate:
-                //               const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                //                 crossAxisCount: 2,
-                //               ),
-                //           mainAxisSpacing: 8,
-                //           crossAxisSpacing: 8,
-                //           itemBuilder: (context, index) => Container(
-                //             alignment: Alignment.center,
-                //             padding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                //             decoration: BoxDecoration(
-                //               color: theme.highlightColor,
-                //               borderRadius: BorderRadius.circular(6),
-                //             ),
-                //             child: Text(
-                //               "Basis Data",
-                //               style: TextStyle(
-                //                 fontSize: 16,
-                //                 fontWeight: FontWeight.bold,
-                //               ),
-                //             ),
-                //           ),
-                //           itemCount: 4,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
               );
             } else {
               return Center(child: Text("undifined state"));

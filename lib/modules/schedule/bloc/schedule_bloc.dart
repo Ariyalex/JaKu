@@ -13,6 +13,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     on<AddSchedule>(_onAddSchedule);
     on<UpdateSchedule>(_onUpdateSchedule);
     on<DeleteSchedule>(_onDeleteSchedule);
+    on<DeleteSchedules>(_onDeleteSchedules);
     on<DeleteAllSchedule>(_onDeleteAllSchedule);
   }
 
@@ -98,6 +99,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       emit(
         state.copyWith(
           status: ScheduleStatus.actionSuccess,
+          selectedSchedule: event.schedule,
           message: "Berhasil memperbarui jadwal!",
         ),
       );
@@ -116,6 +118,23 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         state.copyWith(
           status: ScheduleStatus.actionSuccess,
           message: "Berhasil menghapus jadwal!",
+        ),
+      );
+    } catch (e) {
+      emit(state.copyWith(status: ScheduleStatus.error, message: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteSchedules(
+    DeleteSchedules event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    try {
+      await _repository.deleteSchedules(event.ids);
+      emit(
+        state.copyWith(
+          status: ScheduleStatus.actionSuccess,
+          message: "Berhasil menghapus jadwals!",
         ),
       );
     } catch (e) {

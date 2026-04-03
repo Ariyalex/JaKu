@@ -7,8 +7,8 @@ import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 
-class InformasiMatkul extends HookWidget {
-  const InformasiMatkul({super.key, required this.schedule});
+class ScheduleInformation extends HookWidget {
+  const ScheduleInformation({super.key, required this.schedule});
   final MatkulSchedule schedule;
 
   @override
@@ -41,8 +41,9 @@ class InformasiMatkul extends HookWidget {
 
           final matkul = state.selectedMatkul;
           if (matkul != null && matkul.id == schedule.matkulId) {
-            final String scheduleStartTime =
-                TimeParserHelper.formatTimeOfDay(schedule.startTime);
+            final String scheduleStartTime = TimeParserHelper.formatTimeOfDay(
+              schedule.startTime,
+            );
             final String scheduleEndTime = schedule.endTime != null
                 ? TimeParserHelper.formatTimeOfDay(schedule.endTime!)
                 : "";
@@ -108,11 +109,13 @@ class InformasiMatkul extends HookWidget {
                     children: [
                       Icon(Icons.room, color: theme.colorScheme.primary),
                       const SizedBox(width: 8),
-                      Text(
-                        schedule.room?.isNotEmpty == true
-                            ? schedule.room!
-                            : "Ruang belum diisi",
-                        style: theme.textTheme.bodyLarge,
+                      Expanded(
+                        child: Text(
+                          schedule.room?.isNotEmpty == true
+                              ? schedule.room!
+                              : "Ruang belum diisi",
+                          style: theme.textTheme.bodyLarge,
+                        ),
                       ),
                     ],
                   ),
@@ -126,10 +129,7 @@ class InformasiMatkul extends HookWidget {
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      schedule.day.label,
-                      style: theme.textTheme.bodyLarge,
-                    ),
+                    Text(schedule.day.label, style: theme.textTheme.bodyLarge),
                     const Spacer(),
                     Icon(
                       Icons.access_time,

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:jaku/core/utils/my_snackbar.dart';
+import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
@@ -36,7 +37,7 @@ class TaskDashboard extends HookWidget {
       return null;
     }, []);
 
-    List<dynamic> matkulList = context.select(
+    List<Matkul> matkulList = context.select(
       (MatkulBloc bloc) => bloc.state.activeMatkuls,
     );
     final taskTabs = context.select((MainTabBloc bloc) => bloc.state.taskTabs);
@@ -127,7 +128,7 @@ class TaskDashboard extends HookWidget {
           ),
         ),
         ...matkulList.map(
-          (m) => BuildTaskWidget(tabName: m.nameAbbreviation, tabIndex: m.id),
+          (m) => BuildTaskWidget(tabName: m.name, tabIndex: m.id),
         ),
       ];
     }, [taskTabs, matkulList]);
@@ -156,6 +157,10 @@ class TaskDashboard extends HookWidget {
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
           ),
+          labelStyle: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          unselectedLabelStyle: theme.textTheme.titleMedium,
           tabs: tabs,
         ),
       ),

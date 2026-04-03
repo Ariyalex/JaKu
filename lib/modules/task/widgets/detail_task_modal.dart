@@ -211,7 +211,7 @@ class DetailTaskModal extends HookWidget {
         final matkulState = context.watch<MatkulBloc>().state;
         final mainTabState = context.watch<MainTabBloc>().state;
 
-        List<Matkul> matkulList = matkulState.matkuls;
+        List<Matkul> matkulList = matkulState.activeMatkuls;
         final taskTabs = mainTabState.taskTabs;
 
         final timeNow = TimeOfDay.now();

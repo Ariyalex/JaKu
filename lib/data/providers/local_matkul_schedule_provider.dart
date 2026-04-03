@@ -56,6 +56,14 @@ class LocalMatkulScheduleProvider {
     }
   }
 
+  Future<void> deleteSchedules(List<String> ids) async {
+    try {
+      _box.deleteAll(ids);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteSchedulesByMatkulIds(List<String> matkulIds) async {
     try {
       final keysToDelete = _box.values

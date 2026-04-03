@@ -144,8 +144,18 @@ class BuildTaskWidget extends HookWidget {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(tabName, style: theme.textTheme.bodyLarge),
+                          Expanded(
+                            child: Text(
+                              tabName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
+                            ),
+                          ),
                           if (tabIndex != null && tabIndex!.startsWith("tab"))
                             DropdownButtonHideUnderline(
                               child: DropdownButton2<int>(
@@ -286,17 +296,15 @@ class BuildTaskWidget extends HookWidget {
                             },
                         onReorder: (oldIndex, newIndex) =>
                             onReorder(incompleteTasks, oldIndex, newIndex),
-                        children: incompleteTasks
-                            .map(
-                              (task) => TaskTile(
-                                task: task,
-                                key: ValueKey(task.id),
-                                showGroup: tabIndex == "0" || tabIndex == "1"
-                                    ? true
-                                    : false,
-                              ),
-                            )
-                            .toList(),
+                        children: incompleteTasks.map((task) {
+                          return TaskTile(
+                            task: task,
+                            key: ValueKey(task.id),
+                            showGroup: tabIndex == "0" || tabIndex == "1"
+                                ? true
+                                : false,
+                          );
+                        }).toList(),
                       ),
                   ],
                 ),
@@ -325,10 +333,11 @@ class BuildTaskWidget extends HookWidget {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Icon(
-                                showCompleted.value
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
+                              AnimatedRotation(
+                                duration: const Duration(milliseconds: 250),
+                                turns: showCompleted.value ? 0.5 : 0.0,
+                                curve: Curves.easeInOut,
+                                child: Icon(Icons.keyboard_arrow_down),
                               ),
                               const Spacer(),
                               Text("(${completedTasks.length})"),
@@ -336,57 +345,88 @@ class BuildTaskWidget extends HookWidget {
                           ),
                         ),
                       ),
-                      if (showCompleted.value)
-                        ReorderableListView(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 20,
-                          ),
-                          onReorder: (oldIndex, newIndex) =>
-                              onReorder(completedTasks, oldIndex, newIndex),
-                          proxyDecorator:
-                              (
-                                Widget child,
-                                int index,
-                                Animation<double> animation,
-                              ) {
-                                return AnimatedBuilder(
-                                  animation: animation,
-                                  builder: (BuildContext context, Widget? child) {
-                                    return Material(
-                                      elevation: 4,
-                                      // WAJIB: Tambahkan borderRadius di sini agar tidak lancip 🛠️
-                                      borderRadius: BorderRadius.circular(12),
-                                      // Pindahkan warna background ke sini
-                                      color: theme.colorScheme.surfaceContainer,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: theme.colorScheme.secondary,
-                                            width: 2.0,
-                                          ),
-                                        ),
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: child,
-                                );
-                              },
-                          children: completedTasks
-                              .map(
-                                (task) => TaskTile(
-                                  task: task,
-                                  key: ValueKey(task.id),
-                                  showGroup: tabIndex == "0" ? true : false,
+                      // if (showCompleted.value)
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 367),
+                        reverseDuration: const Duration(milliseconds: 250),
+                        switchInCurve: Curves.easeInOut,
+                        switchOutCurve: Curves.easeInOut,
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          // SizeTransition akan membuat efek memanjang secara vertikal saja
+                          return SizeTransition(
+                            sizeFactor: animation,
+                            axis: Axis
+                                .vertical, // Memastikan animasi hanya dari atas ke bawah ↕️
+                            axisAlignment:
+                                -1.0, // Memastikan konten mulai muncul dari atas
+                            child: child,
+                          );
+                        },
+                        child: showCompleted.value
+                            ? ReorderableListView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 20,
                                 ),
+                                onReorder: (oldIndex, newIndex) => onReorder(
+                                  completedTasks,
+                                  oldIndex,
+                                  newIndex,
+                                ),
+                                proxyDecorator:
+                                    (
+                                      Widget child,
+                                      int index,
+                                      Animation<double> animation,
+                                    ) {
+                                      return AnimatedBuilder(
+                                        animation: animation,
+                                        builder: (BuildContext context, Widget? child) {
+                                          return Material(
+                                            elevation: 4,
+                                            // WAJIB: Tambahkan borderRadius di sini agar tidak lancip 🛠️
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            // Pindahkan warna background ke sini
+                                            color: theme
+                                                .colorScheme
+                                                .surfaceContainer,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .secondary,
+                                                  width: 2.0,
+                                                ),
+                                              ),
+                                              child: child,
+                                            ),
+                                          );
+                                        },
+                                        child: child,
+                                      );
+                                    },
+                                children: completedTasks
+                                    .map(
+                                      (task) => TaskTile(
+                                        task: task,
+                                        key: ValueKey(task.id),
+                                        showGroup:
+                                            tabIndex == "0" || tabIndex == "1"
+                                            ? true
+                                            : false,
+                                      ),
+                                    )
+                                    .toList(),
                               )
-                              .toList(),
-                        ),
+                            : const SizedBox.shrink(),
+                      ),
                     ],
                   ),
                 ),

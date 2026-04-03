@@ -48,55 +48,58 @@ class NoteListMasonryBuilder extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               border: Border.all(color: theme.dividerColor, width: 1.2),
               borderRadius: BorderRadius.circular(12),
             ),
+
             margin: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (note.title != null && note.title!.isNotEmpty)
-                    Text(
-                      note.title!,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (note.title != null && note.title!.isNotEmpty)
+                  Text(
+                    note.title!,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  const SizedBox(height: 6),
-                  if (note.desc != null && note.desc!.isNotEmpty)
-                    Text(
-                      note.desc!,
-                      style: theme.textTheme.bodySmall,
-                      maxLines: 5,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  if (showMatkul &&
-                      note.matkulId != null &&
-                      note.matkulId!.isNotEmpty)
-                    BlocBuilder<MatkulBloc, MatkulState>(
-                      builder: (context, state) {
-                        String matkulName = '';
-                        if (state.status == MatkulStatus.success) {
-                          final m = state.matkuls
-                              .where((m) => m.id == note.matkulId)
-                              .firstOrNull;
-                          if (m != null) matkulName = m.nameAbbreviation;
-                        }
-                        if (matkulName.isEmpty) return const SizedBox.shrink();
-                        return Chip(
-                          label: Text(matkulName),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                            horizontal: 3,
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ),
+                  ),
+                const SizedBox(height: 6),
+                if (note.desc != null && note.desc!.isNotEmpty)
+                  Text(
+                    note.desc!,
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (showMatkul &&
+                    note.matkulId != null &&
+                    note.matkulId!.isNotEmpty)
+                  BlocBuilder<MatkulBloc, MatkulState>(
+                    builder: (context, state) {
+                      String matkulName = '';
+                      if (state.status == MatkulStatus.success) {
+                        final m = state.matkuls
+                            .where((m) => m.id == note.matkulId)
+                            .firstOrNull;
+                        if (m != null) matkulName = m.nameAbbreviation;
+                      }
+                      if (matkulName.isEmpty) return const SizedBox.shrink();
+                      return Chip(
+                        label: Text(
+                          matkulName,
+                          overflow: TextOverflow.visible,
+                          softWrap: true,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 3,
+                        ),
+                      );
+                    },
+                  ),
+              ],
             ),
           ),
         );

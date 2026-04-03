@@ -8,8 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:jaku/core/theme/theme_cubit.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
 import 'package:jaku/modules/schedule/widgets/card_view/card_view.dart';
+import 'package:jaku/modules/schedule/widgets/schedule_dialogs.dart';
 import 'package:jaku/modules/schedule/widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -17,38 +19,6 @@ import '../../../core/routes/route_named.dart';
 
 class ScheduleDashboard extends HookWidget {
   const ScheduleDashboard({super.key});
-
-  static void clearAllData(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          "Hapus semua data?",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-        content: const Text(
-          "Yakin ingin menghapus semua data termasuk semua note dan task yang berhubungan dengan matkul?",
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          OutlinedButton(
-            onPressed: () {
-              Navigator.pop(context); // Tutup dialog konfirmasi
-            },
-            child: const Text("Tidak"),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context); // Tutup dialog konfirmasi
-              context.read<ScheduleBloc>().add(DeleteAllSchedule());
-            },
-            child: const Text("Ya"),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,80 +30,108 @@ class ScheduleDashboard extends HookWidget {
     final theme = Theme.of(context);
 
     final themeC = context.read<ThemeCubit>();
+    final scheduleBloc = context.read<ScheduleBloc>();
+    final scheduleSelectionCubit = context.read<ScheduleSelectionCubit>();
+    final scheduleSelectionState = context
+        .watch<ScheduleSelectionCubit>()
+        .state;
     final isCardView = context.watch<ScheduleViewCubit>().state;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       key: scaffoldKey,
-      appBar: AppBar(
-        title: const Text("Jaku"),
-        leading: Builder(
-          builder: (context) => PopupMenuButton<String>(
-            icon: const Icon(Icons.menu),
-            onSelected: (value) {
-              if (value == "info") {
-                context.pushNamed(RouteNamed.guideGeneral);
-              } else if (value == "clear") {
-                clearAllData(context);
-              }
-            },
-            position: PopupMenuPosition.under,
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: "info",
-                child: ListTile(leading: Icon(Icons.info), title: Text("Info")),
+      appBar: scheduleSelectionState.isSelectionMode
+          ? AppBar(
+              leading: IconButton(
+                onPressed: scheduleSelectionCubit.clearSelection,
+                icon: Icon(LucideIcons.x),
               ),
-              const PopupMenuItem<String>(
-                value: "clear",
-                child: ListTile(
-                  leading: Icon(Icons.delete_sweep),
-                  title: Text("Clear All Data"),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    await ScheduleDialogs.showDeleteSchedules(context, () {
+                      scheduleBloc.add(
+                        DeleteSchedules(
+                          scheduleSelectionState.selectedScheduleIds.toList(),
+                        ),
+                      );
+                      scheduleSelectionCubit.clearSelection();
+
+                      context.pop();
+                    });
+                  },
+
+                  icon: Icon(LucideIcons.trash2, color: Colors.red),
+                ),
+              ],
+            )
+          : AppBar(
+              title: const Text("Jaku"),
+              leading: Builder(
+                builder: (context) => PopupMenuButton<String>(
+                  icon: const Icon(Icons.menu),
+                  onSelected: (value) {
+                    if (value == "info") {
+                      context.pushNamed(RouteNamed.guideGeneral);
+                    }
+                  },
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem<String>(
+                      value: "info",
+                      child: ListTile(
+                        leading: Icon(Icons.info),
+                        title: Text("Info"),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton.icon(
-            onPressed: () => context.read<ScheduleViewCubit>().toggleView(),
-            label: isCardView
-                ? Text(
-                    "Card view",
-                    style: textTheme.bodyMedium!.copyWith(
-                      color: colorTheme.primary,
-                    ),
-                  )
-                : Text(
-                    "Table view",
-                    style: textTheme.bodyMedium!.copyWith(
-                      color: colorTheme.onPrimary,
+              actions: [
+                TextButton.icon(
+                  onPressed: () =>
+                      context.read<ScheduleViewCubit>().toggleView(),
+                  label: isCardView
+                      ? Text(
+                          "Card view",
+                          style: textTheme.bodyMedium!.copyWith(
+                            color: colorTheme.primary,
+                          ),
+                        )
+                      : Text(
+                          "Table view",
+                          style: textTheme.bodyMedium!.copyWith(
+                            color: colorTheme.onPrimary,
+                          ),
+                        ),
+                  icon: isCardView
+                      ? const Icon(Icons.view_agenda_outlined)
+                      : const Icon(Icons.table_chart),
+                  style: ButtonStyle(
+                    backgroundColor: isCardView
+                        ? null
+                        : WidgetStatePropertyAll(colorTheme.primary),
+                    iconColor: isCardView
+                        ? null
+                        : WidgetStatePropertyAll(colorTheme.onPrimary),
+                    side: WidgetStatePropertyAll(
+                      BorderSide(width: 1, color: colorTheme.primary),
                     ),
                   ),
-            icon: isCardView
-                ? const Icon(Icons.view_agenda_outlined)
-                : const Icon(Icons.table_chart),
-            style: ButtonStyle(
-              backgroundColor: isCardView
-                  ? null
-                  : WidgetStatePropertyAll(colorTheme.primary),
-              iconColor: isCardView
-                  ? null
-                  : WidgetStatePropertyAll(colorTheme.onPrimary),
-              side: WidgetStatePropertyAll(
-                BorderSide(width: 1, color: colorTheme.primary),
-              ),
+                ),
+                const SizedBox(width: 15),
+                IconButton(
+                  onPressed: () => themeC.toggleTheme(),
+                  icon: const Icon(Icons.color_lens),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: 15),
-          IconButton(
-            onPressed: () => themeC.toggleTheme(),
-            icon: const Icon(Icons.color_lens),
-          ),
-        ],
-      ),
       body: SafeArea(
         child: isCardView
-            ? const CardView()
+            ? CardView(
+                scheduleSelectionCubit: scheduleSelectionCubit,
+                scheduleSelectionState: scheduleSelectionState,
+              )
             : Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: const TableView(),

@@ -57,4 +57,12 @@ class DeleteSchedule extends ScheduleEvent {
   List<Object?> get props => [id];
 }
 
+class DeleteSchedules extends ScheduleEvent {
+  final List<String> ids;
+  const DeleteSchedules(this.ids);
+
+  @override
+  List<Object?> get props => [ids];
+}
+
 class DeleteAllSchedule extends ScheduleEvent {}

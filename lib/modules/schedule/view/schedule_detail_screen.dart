@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/routes/route_named.dart';
-import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
@@ -11,9 +10,9 @@ import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
 import 'package:jaku/modules/task/bloc/task_event.dart';
-import 'package:jaku/modules/schedule/widgets/detail_matkul/informasi_matkul.dart';
-import 'package:jaku/modules/schedule/widgets/detail_matkul/note_matkul.dart';
-import 'package:jaku/modules/schedule/widgets/detail_matkul/task_matkul.dart';
+import 'package:jaku/modules/schedule/widgets/detail_schedule/schedule_information.dart';
+import 'package:jaku/modules/schedule/widgets/detail_schedule/note_matkul.dart';
+import 'package:jaku/modules/schedule/widgets/detail_schedule/task_matkul.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ScheduleDetailScreen extends HookWidget {
@@ -31,14 +30,12 @@ class ScheduleDetailScreen extends HookWidget {
       return null;
     }, [id]);
 
-    MatkulSchedule? selectedSchedule;
-    if (scheduleState.selectedSchedule?.id == id) {
-      selectedSchedule = scheduleState.selectedSchedule;
-    } else {
-      selectedSchedule = scheduleState.schedules
-          .where((element) => element.id == id)
-          .firstOrNull;
-    }
+    final selectedSchedule = useMemoized(() {
+      if (scheduleState.selectedSchedule?.id == id) {
+        return scheduleState.selectedSchedule;
+      }
+      return scheduleState.schedules.where((e) => e.id == id).firstOrNull;
+    }, [scheduleState.selectedSchedule, id]);
 
     useEffect(() {
       if (selectedSchedule != null) {
@@ -82,7 +79,7 @@ class ScheduleDetailScreen extends HookWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InformasiMatkul(schedule: selectedSchedule),
+                ScheduleInformation(schedule: selectedSchedule),
                 const SizedBox(height: 5),
                 NoteMatkul(matkulId: selectedSchedule.matkulId),
                 const SizedBox(height: 10),

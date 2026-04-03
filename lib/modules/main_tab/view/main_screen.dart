@@ -5,6 +5,7 @@ import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_selection_cubit.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/matkul/view/matkul_dashboard.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
@@ -13,6 +14,7 @@ import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/modules/note/view/note_dashboard.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_state.dart';
 import 'package:jaku/modules/schedule/view/schedule_dashboard.dart';
 import 'package:jaku/modules/task/bloc/task_bloc.dart';
@@ -160,14 +162,20 @@ class MainScreen extends StatelessWidget {
               },
               tabs: [
                 PersistentTabConfig(
-                  screen: const ScheduleDashboard(),
+                  screen: BlocProvider(
+                    create: (context) => ScheduleSelectionCubit(),
+                    child: const ScheduleDashboard(),
+                  ),
                   item: ItemConfig(
                     icon: const Icon(Icons.event_note),
                     title: "Schedule",
                   ),
                 ),
                 PersistentTabConfig(
-                  screen: const MatkulDashboard(),
+                  screen: BlocProvider(
+                    create: (context) => MatkulSelectionCubit(),
+                    child: const MatkulDashboard(),
+                  ),
                   item: ItemConfig(
                     icon: const Icon(LucideIcons.library),
                     title: "Matkul",

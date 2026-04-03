@@ -3,24 +3,20 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/data/entities/matkul.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_selection_cubit.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_selection_state.dart';
 
 class MatkulListCardWidget extends StatelessWidget {
   const MatkulListCardWidget({
     super.key,
-    required this.selectedMatkul,
-    required this.isSelectionMode,
     required this.matkuls,
-    required this.toggleMatkul,
-    required this.setSelectionMode,
+    required this.matkulSelectionCubit,
+    required this.matkulSelectionState,
   });
 
-  final Set<String> selectedMatkul;
-  final bool isSelectionMode;
-
+  final MatkulSelectionCubit matkulSelectionCubit;
+  final MatkulSelectionState matkulSelectionState;
   final List<Matkul> matkuls;
-
-  final ValueChanged<String> toggleMatkul;
-  final ValueChanged<bool> setSelectionMode;
 
   @override
   Widget build(BuildContext context) {
@@ -38,19 +34,22 @@ class MatkulListCardWidget extends StatelessWidget {
         crossAxisSpacing: 8,
         itemBuilder: (context, index) {
           final matkul = matkuls[index];
-          final isSelected = selectedMatkul.contains(matkul.id);
+          final isSelected = matkulSelectionState.selectedMatkulIds.contains(
+            matkul.id,
+          );
 
           return InkWell(
+            borderRadius: BorderRadius.circular(8),
             onLongPress: () {
-              if (!isSelectionMode) {
-                setSelectionMode(true);
-                toggleMatkul(matkul.id);
+              if (!matkulSelectionState.isSelectionMode) {
+                matkulSelectionCubit.setSelectionMode(true);
+                matkulSelectionCubit.toggleSelection(matkul.id);
               }
             },
 
             onTap: () {
-              if (isSelectionMode) {
-                toggleMatkul(matkul.id);
+              if (matkulSelectionState.isSelectionMode) {
+                matkulSelectionCubit.toggleSelection(matkul.id);
               } else {
                 context.pushNamed(
                   RouteNamed.editMatkul,
@@ -73,9 +72,38 @@ class MatkulListCardWidget extends StatelessWidget {
                       : Colors.transparent,
                 ),
               ),
-              child: Text(
-                matkul.name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Column(
+                spacing: 8,
+                children: [
+                  Text(
+                    matkul.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Column(
+                    spacing: 4,
+                    children: [
+                      if (matkul.lecturer1 != null && matkul.lecturer1 != "")
+                        Row(
+                          spacing: 6,
+                          children: [
+                            Icon(Icons.person),
+                            Expanded(child: Text(matkul.lecturer1!)),
+                          ],
+                        ),
+                      if (matkul.lecturer2 != null && matkul.lecturer2 != "")
+                        Row(
+                          spacing: 6,
+                          children: [
+                            Icon(Icons.person),
+                            Expanded(child: Text(matkul.lecturer2!)),
+                          ],
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           );

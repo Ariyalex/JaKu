@@ -32,10 +32,12 @@ class TaskTile extends HookWidget {
       if (showGroup != true) return null;
 
       // Cari di MatkulBloc
-      final matkuls = context.read<MatkulBloc>().state.matkuls;
+      final matkuls = context.read<MatkulBloc>().state.activeMatkuls;
       int matkulIndex = matkuls.indexWhere(
         (element) => element.id == task.groupId,
       );
+
+      print("matkul index: $matkulIndex");
 
       if (matkulIndex != -1) {
         return matkuls[matkulIndex].nameAbbreviation;
@@ -145,36 +147,25 @@ class TaskTile extends HookWidget {
               )
             : null,
       ),
-      subtitle:
-          (task.desc != null && task.desc!.isNotEmpty) ||
-              task.taskDueDate != null
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (task.desc != null && task.desc!.isNotEmpty)
-                  Text(
-                    task.desc!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                if (task.taskDueDate != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2.0),
-                    child: showTime(task.taskDueDate!),
-                  ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (task.desc != null && task.desc!.isNotEmpty)
+            Text(task.desc!, maxLines: 2, overflow: TextOverflow.ellipsis),
+          if (task.taskDueDate != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: showTime(task.taskDueDate!),
+            ),
 
-                if (groupName != null)
-                  Chip(
-                    label: Text(groupName),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 3,
-                    ),
-                  ),
-              ],
-            )
-          : null,
+          if (groupName != null)
+            Chip(
+              label: Text(groupName),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 3),
+            ),
+        ],
+      ),
       trailing: star
           ? IconButton(
               onPressed: () {

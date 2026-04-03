@@ -16,7 +16,7 @@ class MatkulSemesterCardHead extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: isSelected
@@ -28,10 +28,9 @@ class MatkulSemesterCardHead extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
             ),
           ),
           Switch(value: isSelected, onChanged: onToggle),
