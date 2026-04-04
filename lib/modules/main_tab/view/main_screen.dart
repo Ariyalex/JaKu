@@ -4,10 +4,7 @@ import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_state.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_selection_cubit.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
-import 'package:jaku/modules/matkul/view/matkul_dashboard.dart';
 import 'package:jaku/modules/note/bloc/note_bloc.dart';
 import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
@@ -153,10 +150,8 @@ class MainScreen extends StatelessWidget {
                     LoadListSchedule(currentMatkul),
                   );
                 } else if (value == 1) {
-                  context.read<MatkulBloc>().add(LoadAllMatkul());
-                } else if (value == 2) {
                   context.read<NoteBloc>().add(LoadListNote(currentMatkul));
-                } else if (value == 3) {
+                } else if (value == 2) {
                   context.read<TaskBloc>().add(LoadListTask(currentMatkul));
                 }
               },
@@ -171,16 +166,7 @@ class MainScreen extends StatelessWidget {
                     title: "Schedule",
                   ),
                 ),
-                PersistentTabConfig(
-                  screen: BlocProvider(
-                    create: (context) => MatkulSelectionCubit(),
-                    child: const MatkulDashboard(),
-                  ),
-                  item: ItemConfig(
-                    icon: const Icon(LucideIcons.library),
-                    title: "Matkul",
-                  ),
-                ),
+
                 PersistentTabConfig(
                   screen: const NoteDashboard(),
                   item: ItemConfig(

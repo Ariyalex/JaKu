@@ -58,7 +58,7 @@ class AddScheduleScreen extends HookWidget {
                             selectedItem: selectedMatkul.value,
                             itemAsString: (item) => item.name,
                             compareFn: (item1, item2) => item1.id == item2.id,
-                            items: (filter, loadProps) => state.matkuls,
+                            items: (filter, loadProps) => state.activeMatkuls,
                             decoratorProps: const DropDownDecoratorProps(
                               decoration: InputDecoration(
                                 hintText: "Pilih Matkul*",

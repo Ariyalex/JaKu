@@ -236,26 +236,18 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
   Future<void> _refreshAllData(Emitter<MatkulState> emit) async {
     try {
       final allMatkul = _matkulRepository.getAllMatkul();
-      final List<Matkul> activeMatkuls = [];
 
       final allSemester = allMatkul.map((matkul) => matkul.semester).toSet();
-      int? newActiveSemester;
+      int currentActiveSemester = state.activeSemester;
 
-      if (!allMatkul
-          .map((matkul) => matkul.semester)
-          .contains(state.activeSemester)) {
-        newActiveSemester = allSemester.maxOrNull;
-        if (newActiveSemester == null) {
-          newActiveSemester == -1;
-        }
-        activeMatkuls.addAll(
-          _matkulRepository.getListMatkulSemester(newActiveSemester!),
-        );
-      } else {
-        activeMatkuls.addAll(
-          _matkulRepository.getListMatkulSemester(state.activeSemester),
-        );
+      if (!allSemester.contains(currentActiveSemester)) {
+        currentActiveSemester = allSemester.maxOrNull ?? -1;
       }
+
+      final List<Matkul> activeMatkuls = _matkulRepository
+          .getListMatkulSemester(currentActiveSemester);
+
+      await _matkulRepository.updateActiveSemester(currentActiveSemester);
 
       emit(
         state.copyWith(
@@ -263,7 +255,7 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
           activeMatkuls: activeMatkuls,
           status: MatkulStatus.success,
           message: null,
-          activeSemester: newActiveSemester,
+          activeSemester: currentActiveSemester,
         ),
       );
     } catch (e) {

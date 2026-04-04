@@ -93,7 +93,7 @@ class EditScheduleScreen extends HookWidget {
                             selectedItem: selectedMatkul.value,
                             itemAsString: (item) => item.name,
                             compareFn: (item1, item2) => item1.id == item2.id,
-                            items: (filter, loadProps) => state.matkuls,
+                            items: (filter, loadProps) => state.activeMatkuls,
                             decoratorProps: const DropDownDecoratorProps(
                               decoration: InputDecoration(
                                 hintText: "Pilih Matkul*",
@@ -108,7 +108,6 @@ class EditScheduleScreen extends HookWidget {
                                 ),
                               ),
                               showSearchBox: true,
-                              constraints: const BoxConstraints(maxHeight: 500),
                               menuProps: MenuProps(
                                 align: MenuAlign.bottomStart,
                                 backgroundColor:
@@ -126,6 +125,8 @@ class EditScheduleScreen extends HookWidget {
                                       ListTile(
                                         title: Text(item.name),
                                         subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             if (item.lecturer1 != null)
                                               Text(item.lecturer1!),

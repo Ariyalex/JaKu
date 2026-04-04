@@ -7,8 +7,10 @@ import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/data/providers/remote_pdf_provider.dart';
 import 'package:jaku/data/repositories/pdf_repository.dart';
 import 'package:jaku/modules/main_tab/view/main_screen.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_selection_cubit.dart';
 import 'package:jaku/modules/matkul/view/add_matkul_screen.dart';
 import 'package:jaku/modules/matkul/view/edit_matkul_screen.dart';
+import 'package:jaku/modules/matkul/view/matkul_dashboard.dart';
 import 'package:jaku/modules/note/view/add_note_screen.dart';
 import 'package:jaku/modules/note/view/detail_note_screen.dart';
 import 'package:jaku/modules/pdf_parse/bloc/pdf_parse_bloc.dart';
@@ -84,6 +86,14 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return DetailNoteScreen(id: id);
         },
+      ),
+      GoRoute(
+        path: RouteNamed.matkulDashboard,
+        name: RouteNamed.matkulDashboard,
+        builder: (context, state) => BlocProvider(
+          create: (context) => MatkulSelectionCubit(),
+          child: const MatkulDashboard(),
+        ),
       ),
       GoRoute(
         path: RouteNamed.addMatkul,

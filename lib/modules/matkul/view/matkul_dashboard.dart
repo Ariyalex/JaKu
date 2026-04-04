@@ -7,13 +7,11 @@ import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_selection_cubit.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
-import 'package:jaku/modules/matkul/widgets/matkul_dialogs.dart';
+import 'package:jaku/modules/matkul/widgets/matkul_app_bar.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_empty_widget.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_list_card_widget.dart';
 import 'package:jaku/modules/matkul/widgets/matkul_semester_card_head.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MatkulDashboard extends HookWidget {
   const MatkulDashboard({super.key});
@@ -21,14 +19,15 @@ class MatkulDashboard extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final matkulBloc = context.read<MatkulBloc>();
-    final matkulSelectionCubit = context.read<MatkulSelectionCubit>();
-    final matkulSelectionState = context.watch<MatkulSelectionCubit>().state;
+
+    useEffect(() {
+      matkulBloc.add(LoadAllMatkul());
+      return null;
+    }, []);
+
     final activeSemester = context.select(
       (MatkulBloc bloc) => bloc.state.activeSemester,
     );
-
-    final editSemesterController = useTextEditingController();
-    final editSemesterFormKey = GlobalKey<FormState>();
 
     void toggleSemester(bool value, int semester) {
       if (value) {
@@ -36,65 +35,8 @@ class MatkulDashboard extends HookWidget {
       }
     }
 
-    void deleteMatkuls() {
-      matkulBloc.add(
-        DeleteMatkuls(matkulSelectionState.selectedMatkulIds.toList()),
-      );
-      matkulSelectionCubit.clearSelection();
-      context.pop();
-    }
-
-    void editSemesterMatkuls() {
-      final selectedmatkuls = matkulBloc.state.matkuls
-          .where(
-            (matkul) =>
-                matkulSelectionState.selectedMatkulIds.contains(matkul.id),
-          )
-          .toList();
-      matkulBloc.add(
-        UpdateListMatkulSemester(
-          matkuls: selectedmatkuls,
-          semester: int.parse(editSemesterController.text),
-        ),
-      );
-
-      editSemesterController.text = "";
-      matkulSelectionCubit.clearSelection();
-      context.pop();
-    }
-
     return Scaffold(
-      appBar: matkulSelectionState.isSelectionMode
-          ? AppBar(
-              leading: IconButton(
-                onPressed: matkulSelectionCubit.clearSelection,
-                icon: Icon(LucideIcons.x),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () async {
-                    await MatkulDialogs.showEditSemesterDialog(
-                      context,
-                      editSemesterController,
-                      editSemesterMatkuls,
-                      editSemesterFormKey,
-                    );
-                  },
-                  icon: Icon(LucideIcons.squarePen),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    await MatkulDialogs.showDeleteMatkuls(
-                      context,
-                      deleteMatkuls,
-                    );
-                  },
-
-                  icon: Icon(LucideIcons.trash2, color: Colors.red),
-                ),
-              ],
-            )
-          : AppBar(title: Text("Organisir Mata Kuliah")),
+      appBar: MatkulAppBar(),
       body: SafeArea(
         child: BlocBuilder<MatkulBloc, MatkulState>(
           bloc: matkulBloc,
@@ -134,11 +76,7 @@ class MatkulDashboard extends HookWidget {
                           isSelected: semester == activeSemester,
                           onToggle: (value) => toggleSemester(value, semester),
                         ),
-                        MatkulListCardWidget(
-                          matkuls: listMatkulPerSemester,
-                          matkulSelectionCubit: matkulSelectionCubit,
-                          matkulSelectionState: matkulSelectionState,
-                        ),
+                        MatkulListCardWidget(matkuls: listMatkulPerSemester),
                       ],
                     ),
                   );

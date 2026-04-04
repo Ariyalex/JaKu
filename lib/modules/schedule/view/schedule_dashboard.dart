@@ -5,13 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
-import 'package:jaku/core/theme/theme_cubit.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
 import 'package:jaku/modules/schedule/widgets/card_view/card_view.dart';
-import 'package:jaku/modules/schedule/widgets/schedule_dialogs.dart';
+import 'package:jaku/modules/schedule/widgets/main_screen_drawer_widget.dart';
+import 'package:jaku/modules/schedule/widgets/schedule_app_bar.dart';
 import 'package:jaku/modules/schedule/widgets/table_view/table_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -29,109 +26,16 @@ class ScheduleDashboard extends HookWidget {
     final textTheme = Theme.of(context).textTheme;
     final theme = Theme.of(context);
 
-    final themeC = context.read<ThemeCubit>();
-    final scheduleBloc = context.read<ScheduleBloc>();
-    final scheduleSelectionCubit = context.read<ScheduleSelectionCubit>();
-    final scheduleSelectionState = context
-        .watch<ScheduleSelectionCubit>()
-        .state;
     final isCardView = context.watch<ScheduleViewCubit>().state;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       key: scaffoldKey,
-      appBar: scheduleSelectionState.isSelectionMode
-          ? AppBar(
-              leading: IconButton(
-                onPressed: scheduleSelectionCubit.clearSelection,
-                icon: Icon(LucideIcons.x),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () async {
-                    await ScheduleDialogs.showDeleteSchedules(context, () {
-                      scheduleBloc.add(
-                        DeleteSchedules(
-                          scheduleSelectionState.selectedScheduleIds.toList(),
-                        ),
-                      );
-                      scheduleSelectionCubit.clearSelection();
-
-                      context.pop();
-                    });
-                  },
-
-                  icon: Icon(LucideIcons.trash2, color: Colors.red),
-                ),
-              ],
-            )
-          : AppBar(
-              title: const Text("Jaku"),
-              leading: Builder(
-                builder: (context) => PopupMenuButton<String>(
-                  icon: const Icon(Icons.menu),
-                  onSelected: (value) {
-                    if (value == "info") {
-                      context.pushNamed(RouteNamed.guideGeneral);
-                    }
-                  },
-                  position: PopupMenuPosition.under,
-                  itemBuilder: (BuildContext context) => [
-                    const PopupMenuItem<String>(
-                      value: "info",
-                      child: ListTile(
-                        leading: Icon(Icons.info),
-                        title: Text("Info"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton.icon(
-                  onPressed: () =>
-                      context.read<ScheduleViewCubit>().toggleView(),
-                  label: isCardView
-                      ? Text(
-                          "Card view",
-                          style: textTheme.bodyMedium!.copyWith(
-                            color: colorTheme.primary,
-                          ),
-                        )
-                      : Text(
-                          "Table view",
-                          style: textTheme.bodyMedium!.copyWith(
-                            color: colorTheme.onPrimary,
-                          ),
-                        ),
-                  icon: isCardView
-                      ? const Icon(Icons.view_agenda_outlined)
-                      : const Icon(Icons.table_chart),
-                  style: ButtonStyle(
-                    backgroundColor: isCardView
-                        ? null
-                        : WidgetStatePropertyAll(colorTheme.primary),
-                    iconColor: isCardView
-                        ? null
-                        : WidgetStatePropertyAll(colorTheme.onPrimary),
-                    side: WidgetStatePropertyAll(
-                      BorderSide(width: 1, color: colorTheme.primary),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-                IconButton(
-                  onPressed: () => themeC.toggleTheme(),
-                  icon: const Icon(Icons.color_lens),
-                ),
-              ],
-            ),
+      appBar: ScheduleAppBar(),
+      drawer: MainScreenDrawerWidget(),
       body: SafeArea(
         child: isCardView
-            ? CardView(
-                scheduleSelectionCubit: scheduleSelectionCubit,
-                scheduleSelectionState: scheduleSelectionState,
-              )
+            ? CardView()
             : Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: const TableView(),

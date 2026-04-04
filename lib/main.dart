@@ -106,7 +106,6 @@ class MyApp extends HookWidget {
             return BlocListener<NotificationBloc, NotificationState>(
               listener: (context, state) {
                 if (state is NotificationLoaded && state.payload.isNotEmpty) {
-                  // Jump to Task tab (index 2)
                   context.read<MainTabBloc>().add(const ChangeTab(2));
                 }
               },
