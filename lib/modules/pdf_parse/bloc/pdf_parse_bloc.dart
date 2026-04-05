@@ -8,6 +8,29 @@ class PdfParseBloc extends Bloc<PdfParseEvent, PdfParseState> {
 
   PdfParseBloc(this._repository) : super(PdfparseInitial()) {
     on<UploadAndProcessPdf>(_onUploadAndProcessPdf);
+    on<UpdateParsedMatkul>(_onUpdateParsedMatkul);
+    on<UpdateParsedSchedule>(_onUpdateParsedSchedule);
+    on<UpdateSemesterMultipleMatkul>(_onUpdateSemesterMultipleMatkul);
+  }
+
+  void _onUpdateSemesterMultipleMatkul(
+    UpdateSemesterMultipleMatkul event,
+    Emitter<PdfParseState> emit,
+  ) {
+    if (state is PdfParseSuccess) {
+      final currentState = state as PdfParseSuccess;
+      final updatedMatkuls = currentState.matkuls.map((matkul) {
+        if (event.matkulIds.contains(matkul.id)) {
+          return matkul.copyWith(semester: event.newSemester);
+        }
+        return matkul;
+      }).toList();
+
+      emit(PdfParseSuccess(
+        matkuls: updatedMatkuls,
+        schedules: currentState.schedules,
+      ));
+    }
   }
 
   Future<void> _onUploadAndProcessPdf(
@@ -25,6 +48,44 @@ class PdfParseBloc extends Bloc<PdfParseEvent, PdfParseState> {
       );
     } catch (e) {
       emit(PdfParseFailure(e.toString()));
+    }
+  }
+
+  void _onUpdateParsedMatkul(
+    UpdateParsedMatkul event,
+    Emitter<PdfParseState> emit,
+  ) {
+    if (state is PdfParseSuccess) {
+      final currentState = state as PdfParseSuccess;
+      final updatedMatkuls = currentState.matkuls.map((matkul) {
+        return matkul.id == event.updatedMatkul.id
+            ? event.updatedMatkul
+            : matkul;
+      }).toList();
+
+      emit(PdfParseSuccess(
+        matkuls: updatedMatkuls,
+        schedules: currentState.schedules,
+      ));
+    }
+  }
+
+  void _onUpdateParsedSchedule(
+    UpdateParsedSchedule event,
+    Emitter<PdfParseState> emit,
+  ) {
+    if (state is PdfParseSuccess) {
+      final currentState = state as PdfParseSuccess;
+      final updatedSchedules = currentState.schedules.map((schedule) {
+        return schedule.id == event.updatedSchedule.id
+            ? event.updatedSchedule
+            : schedule;
+      }).toList();
+
+      emit(PdfParseSuccess(
+        matkuls: currentState.matkuls,
+        schedules: updatedSchedules,
+      ));
     }
   }
 }
