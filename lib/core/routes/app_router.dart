@@ -20,6 +20,7 @@ import 'package:jaku/modules/schedule/view/schedule_detail_screen.dart';
 import 'package:jaku/modules/guides/view/guide_schedule.dart';
 import 'package:jaku/modules/guides/view/guide_pdf.dart';
 import 'package:jaku/modules/pdf_parse/views/pdf_parsing.dart';
+import 'package:jaku/modules/setting/view/setting_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -107,6 +108,12 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return EditMatkulScreen(id: id);
         },
+      ),
+
+      GoRoute(
+        path: RouteNamed.settings,
+        name: RouteNamed.settings,
+        builder: (context, state) => const SettingScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -14,4 +14,5 @@ abstract class RouteNamed {
   static const editSchedule = '/edit_schedule/:id';
   static const addMatkul = '/add_matkul';
   static const editMatkul = '/edit_matkul/:id';
+  static const settings = "/settings_screen";
 }

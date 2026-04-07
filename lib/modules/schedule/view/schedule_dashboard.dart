@@ -5,11 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
 import 'package:jaku/modules/schedule/widgets/card_view/card_view.dart';
 import 'package:jaku/modules/schedule/widgets/main_screen_drawer_widget.dart';
 import 'package:jaku/modules/schedule/widgets/schedule_app_bar.dart';
 import 'package:jaku/modules/schedule/widgets/table_view/table_view.dart';
+import 'package:jaku/modules/setting/bloc/setting_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/routes/route_named.dart';
@@ -26,7 +26,9 @@ class ScheduleDashboard extends HookWidget {
     final textTheme = Theme.of(context).textTheme;
     final theme = Theme.of(context);
 
-    final isCardView = context.watch<ScheduleViewCubit>().state;
+    final isCardView = context.select(
+      (SettingBloc bloc) => bloc.state.setting.scheduleView,
+    );
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,

@@ -10,7 +10,9 @@ import 'package:jaku/core/client/hive_client.dart';
 import 'package:jaku/core/di/app_providers.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/routes/app_router.dart';
-import 'package:jaku/core/theme/theme_cubit.dart';
+import 'package:jaku/core/utils/theme_mode_utils.dart';
+import 'package:jaku/data/providers/local_settings_provider.dart';
+import 'package:jaku/data/repositories/application_settings_repository.dart';
 import 'package:jaku/data/repositories/task_tab_repository.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
@@ -20,7 +22,9 @@ import 'package:jaku/modules/notification/bloc/notification_state.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
 import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/firebase_options.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
+import 'package:jaku/modules/setting/bloc/setting_bloc.dart';
+import 'package:jaku/modules/setting/bloc/setting_event.dart';
+import 'package:jaku/modules/setting/bloc/setting_state.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:uuid/uuid.dart';
 import 'core/theme/theme.dart';
@@ -46,6 +50,11 @@ void main() async {
   await Hive.openBox('settings');
   await HiveClient().init();
 
+  final settingProvider = LocalSettingsProvider();
+  final settingRepo = ApplicationSettingsRepository(settingProvider);
+  final settingBloc = SettingBloc(settingRepo);
+  settingBloc.add(LoadSetting());
+
   final notificationBloc = NotificationBloc();
   notificationBloc.add(NotificationInitialize());
 
@@ -64,18 +73,21 @@ void main() async {
 
   runApp(
     MultiRepositoryProvider(
-      providers: AppProviders.repositoryProviders,
+      providers: [
+        RepositoryProvider(create: (context) => settingProvider),
+        RepositoryProvider(create: (context) => settingRepo),
+        ...AppProviders.repositoryProviders,
+      ],
       child: MultiBlocProvider(
         providers: [
           ...AppProviders.blocProviders,
-          BlocProvider(create: (context) => ThemeCubit()..initTheme()),
+          BlocProvider(create: (context) => settingBloc),
           BlocProvider(create: (context) => notificationBloc),
           BlocProvider(
             create: (context) =>
                 MainTabBloc(context.read<TaskTabRepository>())
                   ..add(LoadAllTaskTabs()),
           ),
-          BlocProvider(create: (context) => ScheduleViewCubit()..initView()),
         ],
         child: const MyApp(),
       ),
@@ -101,7 +113,9 @@ class MyApp extends HookWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return BlocBuilder<ThemeCubit, ThemeMode>(
+        return BlocSelector<SettingBloc, SettingState, ThemeMode>(
+          selector: (state) =>
+              ThemeModeUtils.stringToThemeMode(state.setting.themeMode),
           builder: (context, themeMode) {
             return BlocListener<NotificationBloc, NotificationState>(
               listener: (context, state) {

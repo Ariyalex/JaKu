@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_view_cubit.dart';
 import 'package:jaku/modules/schedule/widgets/schedule_dialogs.dart';
+import 'package:jaku/modules/setting/bloc/setting_bloc.dart';
+import 'package:jaku/modules/setting/bloc/setting_event.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ScheduleAppBar extends HookWidget implements PreferredSizeWidget {
@@ -51,14 +52,17 @@ class ScheduleAppBar extends HookWidget implements PreferredSizeWidget {
   }
 
   Widget _buildNormalAppBar(BuildContext context) {
-    final isCardView = context.watch<ScheduleViewCubit>().state;
+    final isCardView = context.select(
+      (SettingBloc bloc) => bloc.state.setting.scheduleView,
+    );
     final theme = Theme.of(context);
     return AppBar(
       key: const ValueKey("normal_app_bar"),
       title: const Text("Jaku"),
       actions: [
         TextButton.icon(
-          onPressed: () => context.read<ScheduleViewCubit>().toggleView(),
+          onPressed: () =>
+              context.read<SettingBloc>().add(ToggleScheduleView()),
           label: isCardView
               ? Text(
                   "Card view",
@@ -88,10 +92,6 @@ class ScheduleAppBar extends HookWidget implements PreferredSizeWidget {
           ),
         ),
         const SizedBox(width: 15),
-        // IconButton(
-        //   onPressed: () => themeC.toggleTheme(),
-        //   icon: const Icon(Icons.color_lens),
-        // ),
       ],
     );
   }

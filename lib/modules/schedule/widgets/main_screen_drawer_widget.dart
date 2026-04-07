@@ -46,6 +46,10 @@ class MainScreenDrawerWidget extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.settings),
             title: Text("Pengaturan"),
+            onTap: () {
+              Navigator.pop(context);
+              context.pushNamed(RouteNamed.settings);
+            },
           ),
           ListTile(
             leading: Icon(Icons.info_outline_rounded),
