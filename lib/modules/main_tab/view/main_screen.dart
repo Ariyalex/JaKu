@@ -52,6 +52,9 @@ class MainScreen extends StatelessWidget {
                   context.read<ScheduleBloc>().add(
                     LoadListSchedule(state.activeMatkuls),
                   );
+                  context.read<ScheduleBloc>().add(
+                    RescheduleAllAlarms(state.activeMatkuls),
+                  );
                   context.read<NoteBloc>().add(
                     LoadListNote(state.activeMatkuls),
                   );
@@ -145,11 +148,7 @@ class MainScreen extends StatelessWidget {
             child: PersistentTabView(
               controller: mainTabBloc.mainTabController,
               onTabChanged: (value) {
-                if (value == 0) {
-                  context.read<ScheduleBloc>().add(
-                    LoadListSchedule(currentMatkul),
-                  );
-                } else if (value == 1) {
+                if (value == 1) {
                   context.read<NoteBloc>().add(LoadListNote(currentMatkul));
                 } else if (value == 2) {
                   context.read<TaskBloc>().add(LoadListTask(currentMatkul));

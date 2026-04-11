@@ -6,6 +6,7 @@ import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ScheduleInformation extends HookWidget {
   const ScheduleInformation({super.key, required this.schedule});
@@ -145,6 +146,54 @@ class ScheduleInformation extends HookWidget {
                     ),
                   ],
                 ),
+                if (schedule.alarms.any(
+                  (element) => element.isNotificationOnly == true,
+                )) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(LucideIcons.bell),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: schedule.alarms
+                            .where((e) => e.isNotificationOnly == true)
+                            .map((notif) {
+                              return Text(
+                                notif.offsetMinutes == 0
+                                    ? "- On time"
+                                    : "- ${notif.offsetMinutes} menit sebelum",
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ],
+                if (schedule.alarms.any(
+                  (element) => element.isNotificationOnly == false,
+                )) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(LucideIcons.alarmClock),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: schedule.alarms
+                            .where((e) => e.isNotificationOnly == false)
+                            .map((notif) {
+                              return Text(
+                                notif.offsetMinutes == 0
+                                    ? "- On time"
+                                    : "- ${notif.offsetMinutes} menit sebelum",
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             );
           }

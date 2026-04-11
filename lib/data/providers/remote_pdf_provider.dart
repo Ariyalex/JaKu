@@ -69,6 +69,7 @@ class RemotePdfProvider {
               ),
               endTime: TimeParserHelper.parseTimeOfDay(schedule['end_time']),
               room: schedule['room'],
+              alarms: [],
             ),
           );
         }

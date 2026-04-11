@@ -37,11 +37,10 @@ class MatkulBloc extends Bloc<MatkulEvent, MatkulState> {
     LoadAllMatkul event,
     Emitter<MatkulState> emit,
   ) async {
-    emit(state.copyWith(status: MatkulStatus.loading));
     try {
       final matkuls = _matkulRepository.getAllMatkul();
 
-      emit(state.copyWith(status: MatkulStatus.success, matkuls: matkuls));
+      emit(state.copyWith(matkuls: matkuls));
     } catch (e) {
       print(e);
       emit(state.copyWith(status: MatkulStatus.error, message: e.toString()));

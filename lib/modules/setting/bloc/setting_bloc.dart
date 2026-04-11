@@ -64,7 +64,6 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
   ) async {
     try {
       final currentView = state.setting.scheduleView;
-      print("current view: $currentView");
       await _repository.updateScheduleView(!currentView);
       emit(
         state.copyWith(

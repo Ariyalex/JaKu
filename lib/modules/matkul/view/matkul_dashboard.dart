@@ -20,11 +20,6 @@ class MatkulDashboard extends HookWidget {
   Widget build(BuildContext context) {
     final matkulBloc = context.read<MatkulBloc>();
 
-    useEffect(() {
-      matkulBloc.add(LoadAllMatkul());
-      return null;
-    }, []);
-
     final activeSemester = context.select(
       (MatkulBloc bloc) => bloc.state.activeSemester,
     );

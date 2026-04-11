@@ -3,6 +3,7 @@ import 'package:jaku/data/entities/application_setting.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/entities/note.dart';
+import 'package:jaku/data/entities/schedule_reminder.dart';
 import 'package:jaku/data/entities/task.dart';
 import 'package:jaku/data/entities/task_tab.dart';
 import 'package:jaku/data/entities/time_of_day_adapter.dart';
@@ -16,6 +17,7 @@ class HiveClient {
     Hive.registerAdapter(TimeOfDayAdapter());
     Hive.registerAdapter(MatkulAdapter());
     Hive.registerAdapter(MatkulScheduleAdapter());
+    Hive.registerAdapter(ScheduleReminderAdapter());
     Hive.registerAdapter(NoteAdapter());
     Hive.registerAdapter(TaskAdapter());
     Hive.registerAdapter(TaskTabAdapter());

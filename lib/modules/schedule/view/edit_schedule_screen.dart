@@ -5,13 +5,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/core/utils/time_parser_helper.dart';
 import 'package:jaku/data/entities/matkul.dart';
-import 'package:jaku/data/entities/matkul_schedule.dart';
+import 'package:jaku/data/entities/schedule_reminder.dart';
 import 'package:jaku/data/value_objects/day.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/widgets/add_reminder_dialog.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class EditScheduleScreen extends HookWidget {
@@ -29,6 +30,7 @@ class EditScheduleScreen extends HookWidget {
     final selectedStartTime = useState<TimeOfDay?>(null);
     final selectedEndTime = useState<TimeOfDay?>(null);
     final selectedMatkul = useState<Matkul?>(null);
+    final selectedReminders = useState<List<ScheduleReminder>>([]);
 
     final scheduleState = context.watch<ScheduleBloc>().state;
     final matkulState = context.watch<MatkulBloc>().state;
@@ -47,6 +49,7 @@ class EditScheduleScreen extends HookWidget {
         selectedDay.value = schedule.day;
         selectedStartTime.value = schedule.startTime;
         selectedEndTime.value = schedule.endTime;
+        selectedReminders.value = schedule.alarms;
 
         // Load matkul terkait jika belum ada
         context.read<MatkulBloc>().add(LoadMatkul(schedule.matkulId));
@@ -65,7 +68,39 @@ class EditScheduleScreen extends HookWidget {
     }, [matkulState.selectedMatkul, matkulState.status]);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Jadwal")),
+      appBar: AppBar(
+        title: const Text("Edit Jadwal"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (selectedMatkul.value != null &&
+                  selectedDay.value != null &&
+                  selectedStartTime.value != null) {
+                final updatedSchedule = scheduleState.selectedSchedule!
+                    .copyWith(
+                      matkulId: selectedMatkul.value?.id,
+                      day: selectedDay.value,
+                      startTime: selectedStartTime.value,
+                      endTime: selectedEndTime.value,
+                      room: scheduleRoomTextC.text,
+                      alarms: selectedReminders.value,
+                    );
+
+                context.read<ScheduleBloc>().add(
+                  UpdateSchedule(updatedSchedule),
+                );
+                Navigator.pop(context);
+              } else {
+                MySnackbar.error(
+                  title: "Form tidak lengkap!",
+                  message: 'Harap isi Matkul, Hari, dan Jam',
+                );
+              }
+            },
+            child: Text("Save", style: theme.textTheme.bodyLarge),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Container(
           width: mediaQueryWidth,
@@ -299,47 +334,72 @@ class EditScheduleScreen extends HookWidget {
                       textInputAction: TextInputAction.next,
                       controller: scheduleRoomTextC,
                     ),
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 6,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("(*) wajib diisi", style: theme.textTheme.labelLarge),
-                    SizedBox(
+                    Container(
                       width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          if (selectedMatkul.value != null &&
-                              selectedDay.value != null &&
-                              selectedStartTime.value != null) {
-                            final updatedSchedule = MatkulSchedule(
-                              id: scheduleId,
-                              matkulId: selectedMatkul.value!.id,
-                              day: selectedDay.value!,
-                              startTime: selectedStartTime.value!,
-                              endTime: selectedEndTime.value,
-                              room: scheduleRoomTextC.text,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Reminder", style: theme.textTheme.titleMedium),
+                          SizedBox(height: 10),
+                          ...selectedReminders.value.map((reminder) {
+                            return ListTile(
+                              title: Row(
+                                spacing: 10,
+                                children: [
+                                  Text(
+                                    reminder.offsetMinutes == 0
+                                        ? "On time"
+                                        : "${reminder.offsetMinutes} menit sebelum",
+                                  ),
+                                  if (!reminder.isNotificationOnly)
+                                    Icon(Icons.alarm),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  selectedReminders.value = selectedReminders
+                                      .value
+                                      .where((item) => item.id != reminder.id)
+                                      .toList();
+                                },
+                                icon: Icon(LucideIcons.x),
+                              ),
                             );
-                            context.read<ScheduleBloc>().add(
-                              UpdateSchedule(updatedSchedule),
-                            );
-                            Navigator.pop(context);
-                          } else {
-                            MySnackbar.error(
-                              title: "Form tidak lengkap!",
-                              message: 'Harap isi Matkul, Hari, dan Jam',
-                            );
-                          }
-                        },
-                        label: Text(
-                          "Save",
-                          style: theme.textTheme.bodyLarge!.copyWith(
-                            color: theme.colorScheme.onPrimary,
+                          }),
+                          OutlinedButton(
+                            onPressed: () async {
+                              final ScheduleReminder? result = await showDialog(
+                                context: context,
+                                builder: (context) => AddReminderDialog(),
+                              );
+
+                              if (result != null) {
+                                bool isDuplicate = selectedReminders.value.any(
+                                  (item) =>
+                                      item.offsetMinutes ==
+                                          result.offsetMinutes &&
+                                      item.isNotificationOnly ==
+                                          result.isNotificationOnly,
+                                );
+                                if (!isDuplicate) {
+                                  selectedReminders.value = [
+                                    ...selectedReminders.value,
+                                    result,
+                                  ];
+                                }
+                              }
+                            },
+                            child: Text("Tambahkan reminder"),
                           ),
-                        ),
-                        icon: const Icon(LucideIcons.save500, size: 20),
+                        ],
                       ),
                     ),
                   ],

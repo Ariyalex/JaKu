@@ -65,4 +65,12 @@ class DeleteSchedules extends ScheduleEvent {
   List<Object?> get props => [ids];
 }
 
-class DeleteAllSchedule extends ScheduleEvent {}
+class RescheduleAllAlarms extends ScheduleEvent {
+  final List<Matkul> matkuls;
+  const RescheduleAllAlarms(this.matkuls);
+
+  @override
+  List<Object?> get props => [matkuls];
+}
+
+// class DeleteAllSchedule extends ScheduleEvent {}

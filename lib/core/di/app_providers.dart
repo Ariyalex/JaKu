@@ -4,6 +4,7 @@ import 'package:jaku/data/providers/local_matkul_schedule_provider.dart';
 import 'package:jaku/data/providers/local_note_provider.dart';
 import 'package:jaku/data/providers/local_task_provider.dart';
 import 'package:jaku/data/providers/local_task_tab_provider.dart';
+import 'package:jaku/data/repositories/application_settings_repository.dart';
 import 'package:jaku/data/repositories/matkul_repository.dart';
 import 'package:jaku/data/repositories/matkul_schedule_repository.dart';
 import 'package:jaku/data/repositories/note_repositoruy.dart';
@@ -63,8 +64,11 @@ class AppProviders {
       ),
     ),
     BlocProvider<ScheduleBloc>(
-      create: (context) =>
-          ScheduleBloc(context.read<MatkulScheduleRepository>()),
+      create: (context) => ScheduleBloc(
+        context.read<MatkulScheduleRepository>(),
+        context.read<ApplicationSettingsRepository>(),
+        context.read<MatkulRepository>(),
+      ),
     ),
     BlocProvider<NoteBloc>(
       create: (context) => NoteBloc(context.read<NoteRepository>()),

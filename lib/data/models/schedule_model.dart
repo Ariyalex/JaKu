@@ -10,6 +10,7 @@ class ScheduleModel extends MatkulSchedule {
     required super.startTime,
     super.endTime,
     super.room,
+    required super.alarms,
   });
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json, String matkulId) {
@@ -20,6 +21,7 @@ class ScheduleModel extends MatkulSchedule {
       startTime: TimeParserHelper.parseTimeOfDay(json["start_time"]),
       endTime: TimeParserHelper.parseTimeOfDay(json["end_time"]),
       room: json["room"],
+      alarms: [],
     );
   }
 
@@ -31,6 +33,7 @@ class ScheduleModel extends MatkulSchedule {
       startTime: startTime,
       endTime: endTime,
       room: room,
+      alarms: alarms,
     );
   }
 }

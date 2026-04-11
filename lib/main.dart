@@ -10,6 +10,7 @@ import 'package:jaku/core/client/hive_client.dart';
 import 'package:jaku/core/di/app_providers.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/routes/app_router.dart';
+import 'package:jaku/core/utils/alarm_helper.dart';
 import 'package:jaku/core/utils/theme_mode_utils.dart';
 import 'package:jaku/data/providers/local_settings_provider.dart';
 import 'package:jaku/data/repositories/application_settings_repository.dart';
@@ -39,6 +40,8 @@ void main() async {
   tz.initializeTimeZones();
 
   await dotenv.load(fileName: ".env");
+
+  await AlarmHelper.init();
 
   // inisialisasi firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -103,6 +106,7 @@ class MyApp extends HookWidget {
     final matkulBloc = context.read<MatkulBloc>();
 
     useEffect(() {
+      matkulBloc.add(LoadAllMatkul());
       matkulBloc.add(LoadActiveSemester());
 
       return null;

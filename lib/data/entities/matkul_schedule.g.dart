@@ -23,13 +23,16 @@ class MatkulScheduleAdapter extends TypeAdapter<MatkulSchedule> {
       startTime: fields[3] as TimeOfDay,
       endTime: fields[4] as TimeOfDay?,
       room: fields[5] as String?,
+      alarms: fields[6] == null
+          ? []
+          : (fields[6] as List).cast<ScheduleReminder>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, MatkulSchedule obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +44,9 @@ class MatkulScheduleAdapter extends TypeAdapter<MatkulSchedule> {
       ..writeByte(4)
       ..write(obj.endTime)
       ..writeByte(5)
-      ..write(obj.room);
+      ..write(obj.room)
+      ..writeByte(6)
+      ..write(obj.alarms);
   }
 
   @override

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:jaku/core/utils/matkul_utils.dart';
 import 'package:jaku/core/utils/time_parser_helper.dart';
 import 'package:jaku/data/entities/matkul.dart';
 import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/value_objects/day.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
-import 'package:jaku/modules/schedule/bloc/schedule_selection_state.dart';
 import 'package:jaku/modules/schedule/widgets/table_view/schedule_data_source.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -98,64 +95,53 @@ class ScheduleTable extends HookWidget {
       return null;
     }, []);
 
-    return BlocListener<ScheduleSelectionCubit, ScheduleSelectionState>(
-      listenWhen: (previous, current) =>
-          previous.selectedScheduleIds != current.selectedScheduleIds ||
-          previous.isSelectionMode != current.isSelectionMode,
-      listener: (context, state) {
-        dataSource.updateSelectionState(
-          state.selectedScheduleIds,
-          state.isSelectionMode,
-        );
+    return SfDataGrid(
+      source: dataSource,
+      frozenColumnsCount: 1,
+      gridLinesVisibility: GridLinesVisibility.both,
+      headerGridLinesVisibility: GridLinesVisibility.both,
+      columnWidthMode: ColumnWidthMode.fitByCellValue,
+      horizontalScrollController: horizontalScrollController,
+
+      columnSizer: columnSizer,
+      allowColumnsResizing: true,
+      onQueryRowHeight: (details) {
+        if (details.rowIndex == 0) {
+          return 50.0;
+        }
+
+        return details.getIntrinsicRowHeight(details.rowIndex);
       },
-      child: SfDataGrid(
-        source: dataSource,
-        frozenColumnsCount: 1,
-        gridLinesVisibility: GridLinesVisibility.both,
-        headerGridLinesVisibility: GridLinesVisibility.both,
-        columnWidthMode: ColumnWidthMode.fitByCellValue,
-        horizontalScrollController: horizontalScrollController,
-
-        columnSizer: columnSizer,
-        allowColumnsResizing: true,
-        onQueryRowHeight: (details) {
-          if (details.rowIndex == 0) {
-            return 50.0;
-          }
-
-          return details.getIntrinsicRowHeight(details.rowIndex);
-        },
-        columns: [
-          GridColumn(
-            columnName: 'jam',
-            width: 60,
+      columns: [
+        GridColumn(
+          columnName: 'jam',
+          width: 60,
+          label: Container(
+            alignment: Alignment.center,
+            color: theme.primaryColor.withValues(alpha: 0.1),
+            child: Text("Jam", style: theme.textTheme.labelLarge),
+          ),
+        ),
+        ...days.map(
+          (day) => GridColumn(
+            columnName: day.name,
+            width: 200,
             label: Container(
               alignment: Alignment.center,
               color: theme.primaryColor.withValues(alpha: 0.1),
-              child: Text("Jam", style: theme.textTheme.labelLarge),
-            ),
-          ),
-          ...days.map(
-            (day) => GridColumn(
-              columnName: day.name,
-              width: 200,
-              label: Container(
-                alignment: Alignment.center,
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                child: Text(
-                  day.display,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: day == todayDay ? theme.colorScheme.primary : null,
-                    fontWeight: day == todayDay
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
+              child: Text(
+                day.display,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: day == todayDay ? theme.colorScheme.primary : null,
+                  fontWeight: day == todayDay
+                      ? FontWeight.bold
+                      : FontWeight.normal,
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -36,7 +36,10 @@ class EditParsedScheduleDialog extends HookWidget {
               itemAsString: (item) => item.display,
               compareFn: (item1, item2) => item1 == item2,
               decoratorProps: const DropDownDecoratorProps(
-                decoration: InputDecoration(hintText: "Pilih hari", labelText: "Hari"),
+                decoration: InputDecoration(
+                  hintText: "Pilih hari",
+                  labelText: "Hari",
+                ),
               ),
               onChanged: (value) {
                 if (value != null) selectedDay.value = value;
@@ -63,7 +66,10 @@ class EditParsedScheduleDialog extends HookWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () async {
-                      final time = await showTimePicker(context: context, initialTime: selectedStartTime.value);
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: selectedStartTime.value,
+                      );
                       if (time != null) selectedStartTime.value = time;
                     },
                     label: const Text("Mulai"),
@@ -74,7 +80,11 @@ class EditParsedScheduleDialog extends HookWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () async {
-                      final time = await showTimePicker(context: context, initialTime: selectedEndTime.value ?? selectedStartTime.value);
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime:
+                            selectedEndTime.value ?? selectedStartTime.value,
+                      );
                       if (time != null) selectedEndTime.value = time;
                     },
                     label: const Text("Selesai"),
@@ -84,7 +94,10 @@ class EditParsedScheduleDialog extends HookWidget {
               ],
             ),
             const SizedBox(height: 16),
-            TextField(controller: roomCtrl, decoration: const InputDecoration(labelText: 'Ruangan')),
+            TextField(
+              controller: roomCtrl,
+              decoration: const InputDecoration(labelText: 'Ruangan'),
+            ),
           ],
         ),
       ),
@@ -92,14 +105,20 @@ class EditParsedScheduleDialog extends HookWidget {
         TextButton(onPressed: () => context.pop(), child: const Text('Batal')),
         FilledButton(
           onPressed: () {
-            final updated = MatkulSchedule(
-              id: schedule.id,
-              matkulId: schedule.matkulId,
+            final updated = schedule.copyWith(
               day: selectedDay.value,
               startTime: selectedStartTime.value,
               endTime: selectedEndTime.value,
               room: roomCtrl.text.isEmpty ? null : roomCtrl.text,
             );
+            // MatkulSchedule(
+            //   id: schedule.id,
+            //   matkulId: schedule.matkulId,
+            //   day: selectedDay.value,
+            //   startTime: selectedStartTime.value,
+            //   endTime: selectedEndTime.value,
+            //   room: roomCtrl.text.isEmpty ? null : roomCtrl.text,
+            // );
             context.read<PdfParseBloc>().add(UpdateParsedSchedule(updated));
             context.pop();
           },
