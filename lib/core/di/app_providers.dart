@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaku/core/di/dependency_injection.dart';
+import 'package:jaku/core/services/alarm_service.dart';
 import 'package:jaku/data/providers/local_matkul_provider.dart';
 import 'package:jaku/data/providers/local_matkul_schedule_provider.dart';
 import 'package:jaku/data/providers/local_note_provider.dart';
@@ -68,6 +70,7 @@ class AppProviders {
         context.read<MatkulScheduleRepository>(),
         context.read<ApplicationSettingsRepository>(),
         context.read<MatkulRepository>(),
+        getIt<AlarmService>(),
       ),
     ),
     BlocProvider<NoteBloc>(

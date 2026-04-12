@@ -1,3 +1,4 @@
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +11,6 @@ import 'package:jaku/core/client/hive_client.dart';
 import 'package:jaku/core/di/app_providers.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/routes/app_router.dart';
-import 'package:jaku/core/utils/alarm_helper.dart';
 import 'package:jaku/core/utils/theme_mode_utils.dart';
 import 'package:jaku/data/providers/local_settings_provider.dart';
 import 'package:jaku/data/repositories/application_settings_repository.dart';
@@ -41,7 +41,7 @@ void main() async {
 
   await dotenv.load(fileName: ".env");
 
-  await AlarmHelper.init();
+  await AndroidAlarmManager.initialize();
 
   // inisialisasi firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

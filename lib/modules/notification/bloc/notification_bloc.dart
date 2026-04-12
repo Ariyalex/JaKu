@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:jaku/core/utils/alarm_helper.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'notification_event.dart';
 import 'notification_state.dart';
@@ -39,6 +41,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
       await flutterLocalNotificationsPlugin.initialize(
         settings: initializationSettings,
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+        onDidReceiveNotificationResponse: (details) async {
+          await FlutterRingtonePlayer().stop();
+        },
       );
     } catch (e) {
       emit(NotificationError(e.toString()));

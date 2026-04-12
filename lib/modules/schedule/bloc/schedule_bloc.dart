@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jaku/core/utils/alarm_helper.dart';
+import 'package:jaku/core/services/alarm_service.dart';
 import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/repositories/application_settings_repository.dart';
 import 'package:jaku/data/repositories/matkul_repository.dart';
@@ -11,11 +11,13 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   final MatkulScheduleRepository _repository;
   final ApplicationSettingsRepository _settingsRepository;
   final MatkulRepository _matkulRepository;
+  final AlarmService _alarmService;
 
   ScheduleBloc(
     this._repository,
     this._settingsRepository,
     this._matkulRepository,
+    this._alarmService,
   ) : super(const ScheduleState()) {
     on<LoadListSchedule>(_onLoadListScheduleByMatkuls);
     on<LoadSchedule>(_onLoadSchedule);
@@ -80,7 +82,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
       final matkul = _matkulRepository.getMatkulById(event.schedule.matkulId);
       final setting = _settingsRepository.getSetting();
-      await AlarmHelper.scheduleAllForMatkul(matkul, event.schedule, setting);
+      await _alarmService.scheduleAllForMatkul(matkul, event.schedule, setting);
 
       emit(
         state.copyWith(
@@ -113,13 +115,13 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     try {
       // Clear old alarm first
       final oldSchedule = _repository.getScheduleById(event.schedule.id);
-      await AlarmHelper.cancelAllForMatkul(oldSchedule);
+      await _alarmService.cancelAllForMatkul(oldSchedule);
 
       // Save and set new alarm
       await _repository.updateSchedule(event.schedule);
       final matkul = _matkulRepository.getMatkulById(event.schedule.matkulId);
       final setting = _settingsRepository.getSetting();
-      await AlarmHelper.scheduleAllForMatkul(matkul, event.schedule, setting);
+      await _alarmService.scheduleAllForMatkul(matkul, event.schedule, setting);
 
       emit(
         state.copyWith(
@@ -139,7 +141,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       final schedule = _repository.getScheduleById(event.id);
-      await AlarmHelper.cancelAllForMatkul(schedule);
+      await _alarmService.cancelAllForMatkul(schedule);
 
       await _repository.deleteSchedule(event.id);
 
@@ -162,7 +164,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       final List<MatkulSchedule> schedules = state.schedules
           .where((schedule) => event.ids.contains(schedule.id))
           .toList();
-      AlarmHelper.cancelMultipleSchedules(schedules);
+      _alarmService.cancelMultipleSchedules(schedules);
 
       await _repository.deleteSchedules(event.ids);
       emit(
@@ -183,7 +185,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     try {
       // 1. Get all schedules and cancel all alarms to be sure
       final allSchedules = _repository.getAllSchedules();
-      await AlarmHelper.cancelMultipleSchedules(allSchedules);
+      await _alarmService.cancelMultipleSchedules(allSchedules);
 
       // 2. Schedule only for active matkuls
       final activeMatkulIds = event.matkuls.map((e) => e.id).toList();
@@ -192,7 +194,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
           .toList();
 
       final setting = _settingsRepository.getSetting();
-      await AlarmHelper.scheduleMultipleSchedules(
+      await _alarmService.scheduleMultipleSchedules(
         event.matkuls,
         activeSchedules,
         setting,
