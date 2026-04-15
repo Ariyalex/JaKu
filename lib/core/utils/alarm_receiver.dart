@@ -1,35 +1,15 @@
+import 'dart:convert';
 import 'dart:developer' as dev;
-import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:jaku/core/services/native_ringtone_service.dart';
 
 @pragma('vm:entry-point')
 void alarmCallback(int id, Map<String, dynamic> params) async {
   WidgetsFlutterBinding.ensureInitialized();
   dev.log("Alarm triggered with ID: $id", name: "AlarmHelperCallback");
-
-  final String portName = 'alarm_port_$id';
-
-  IsolateNameServer.removePortNameMapping(portName);
-
-  final recievePort = ReceivePort();
-  IsolateNameServer.registerPortWithName(recievePort.sendPort, portName);
-
-  recievePort.listen((message) async {
-    if (message == 'stop_audio') {
-      await FlutterRingtonePlayer().stop();
-
-      final notificationPlugin = FlutterLocalNotificationsPlugin();
-      await notificationPlugin.cancel(id: id);
-
-      recievePort.close();
-      IsolateNameServer.removePortNameMapping(portName);
-    }
-  });
 
   final notificationPlugin = FlutterLocalNotificationsPlugin();
   const androidSettings = AndroidInitializationSettings('notif_icon');
@@ -37,9 +17,6 @@ void alarmCallback(int id, Map<String, dynamic> params) async {
   await notificationPlugin.initialize(
     settings: InitializationSettings(android: androidSettings),
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-    onDidReceiveNotificationResponse: (details) async {
-      await FlutterRingtonePlayer().stop();
-    },
   );
 
   try {
@@ -66,31 +43,29 @@ void alarmCallback(int id, Map<String, dynamic> params) async {
       ],
     );
 
+    final payloadMap = {
+      'id': id.toString(),
+      'name': params['name'] ?? "Unknown",
+      'room': params['room'] ?? "Unknown",
+      'startTime': params['startTime'] ?? "--:--",
+    };
+
     await notificationPlugin.show(
       id: id,
       title: "Waktunya Kelas!",
       body: "Kelas ${params['name']} akan segera dimulai!",
       notificationDetails: const NotificationDetails(android: androidDetails),
-      payload: id.toString(),
+      payload: jsonEncode(payloadMap),
     );
 
     final String? customUri = params['ringtoneUri'];
 
-    if (customUri != null && customUri.isNotEmpty) {
-      await FlutterRingtonePlayer().play(
-        android: AndroidSounds.alarm,
-        fromFile: customUri,
-        looping: true,
-        asAlarm: true,
-      );
-    } else {
-      await FlutterRingtonePlayer().playAlarm(looping: true);
-    }
+    final nativeRingtoneService = NativeRingtoneService();
+
+    await nativeRingtoneService.playRingtone(customUri);
 
     //scheduel next week
-    final nextWeek = DateTime.now().add(const Duration(minutes: 6));
-
-    // await AndroidAlarmManager.initialize();
+    final nextWeek = DateTime.now().add(const Duration(days: 7));
 
     await AndroidAlarmManager.oneShotAt(
       nextWeek,
@@ -103,9 +78,7 @@ void alarmCallback(int id, Map<String, dynamic> params) async {
     );
 
     Future.delayed(const Duration(minutes: 5), () async {
-      FlutterRingtonePlayer().stop();
-      recievePort.close();
-      IsolateNameServer.removePortNameMapping(portName);
+      await nativeRingtoneService.stopRingtone();
       await notificationPlugin.cancel(id: id);
     });
 
@@ -119,15 +92,6 @@ void alarmCallback(int id, Map<String, dynamic> params) async {
 void notificationTapBackground(NotificationResponse response) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (response.actionId == 'stop_alarm' || response.actionId == null) {
-    final String? idString = response.payload;
-
-    if (idString != null) {
-      final String portName = 'alarm_port_$idString';
-      final SendPort? sendPort = IsolateNameServer.lookupPortByName(portName);
-
-      if (sendPort != null) {
-        sendPort.send('stop_audio');
-      }
-    }
+    await NativeRingtoneService().stopRingtone();
   }
 }

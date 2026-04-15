@@ -28,4 +28,14 @@ class UpdateThemeMode extends SettingEvent {
   List<Object?> get props => [themeMode];
 }
 
+class UpdateRingtone extends SettingEvent {
+  final String ringtoneUri;
+  final String ringtoneTitle;
+
+  const UpdateRingtone(this.ringtoneUri, this.ringtoneTitle);
+
+  @override
+  List<Object?> get props => [ringtoneUri, ringtoneTitle];
+}
+
 class ToggleScheduleView extends SettingEvent {}

@@ -5,19 +5,38 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import io.flutter.embedding.android.FlutterActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugins.GeneratedPluginRegistrant
 
-
-class MainActivity: FlutterActivity() {
+class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "jaku.channel/ringtone"
     private var pendingResult: MethodChannel.Result? = null
+    private lateinit var ringtonePickerLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Mendaftarkan peluncur untuk ActivityResult (untuk Picker Nada Dering)
+        ringtonePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data: Intent? = result.data
+                val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                }
+                pendingResult?.success(uri?.toString())
+            } else {
+                pendingResult?.success(null)
+            }
+            pendingResult = null
+        }
+
+        // Konfigurasi agar aplikasi bisa dibangunkan saat layar terkunci (Lock Screen)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -25,10 +44,15 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        GeneratedPluginRegistrant.registerWith(flutterEngine)
+        // PERHATIAN: 
+        // Baris `GeneratedPluginRegistrant.registerWith(flutterEngine)` DIHAPUS
+        // karena Flutter versi baru (>= 3.0) sudah otomatis mendaftarkan plugin.
+        // Menambahkan baris tersebut akan menyebabkan Warning 'already registered'
+        // dan masalah saat di-compile ke mode Release.
         super.configureFlutterEngine(flutterEngine)
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {call, result ->
+        // Mendaftarkan MethodChannel untuk komunikasi Dart <-> Kotlin
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "openRingtonePicker" -> {
                     pendingResult = result
@@ -37,7 +61,7 @@ class MainActivity: FlutterActivity() {
                         putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
                         putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true)
                     }
-                    startActivityForResult(intent, 999)
+                    ringtonePickerLauncher.launch(intent)
                 }
 
                 "getDefaultAlarmUri" -> {
@@ -65,30 +89,6 @@ class MainActivity: FlutterActivity() {
                     result.notImplemented()
                 }
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        
-        // Menangkap hasil dari Ringtone Picker UI bawaan Android
-        if (requestCode == 999) {
-            if (resultCode == RESULT_OK) {
-                // Pengecekan versi OS untuk menghindari Deprecation Warning
-                val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    // Untuk Android 13 ke atas (Aman tipe data)
-                    data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java)
-                } else {
-                    // Untuk Android 12 ke bawah
-                    @Suppress("DEPRECATION")
-                    data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-                }
-                
-                pendingResult?.success(uri?.toString())
-            } else {
-                pendingResult?.success(null) // User membatalkan pilihan
-            }
-            pendingResult = null // Bersihkan memori
         }
     }
 }

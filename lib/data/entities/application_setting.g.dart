@@ -19,17 +19,23 @@ class ApplicationSettingAdapter extends TypeAdapter<ApplicationSetting> {
     return ApplicationSetting(
       themeMode: fields[0] as String,
       scheduleView: fields[1] as bool,
+      ringtoneUri: fields[2] as String?,
+      ringtoneTitle: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ApplicationSetting obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.themeMode)
       ..writeByte(1)
-      ..write(obj.scheduleView);
+      ..write(obj.scheduleView)
+      ..writeByte(2)
+      ..write(obj.ringtoneUri)
+      ..writeByte(3)
+      ..write(obj.ringtoneTitle);
   }
 
   @override
