@@ -76,7 +76,7 @@ class SettingScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text("Ringtone"), Text(value ?? "undifined")],
+                    children: [Text("Ringtone"), Text(value ?? "default")],
                   ),
                 ),
               );

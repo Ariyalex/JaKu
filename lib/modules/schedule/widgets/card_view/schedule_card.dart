@@ -104,27 +104,32 @@ class ScheduleCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Icon(Icons.room, color: theme.colorScheme.primary),
-                            Flexible(
-                              fit: FlexFit.loose,
-                              child: Text(
-                                "${schedule.room}",
-                                style: theme.textTheme.bodyMedium!.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
+                      if (schedule.room != null &&
+                          (schedule.room ?? "").isNotEmpty)
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(
+                                Icons.room,
+                                color: theme.colorScheme.primary,
                               ),
-                            ),
-                          ],
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Text(
+                                  "${schedule.room}",
+                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   Column(

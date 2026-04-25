@@ -52,9 +52,12 @@ class CardView extends HookWidget {
             itemCount: sortedDay.length,
             itemBuilder: (context, index) {
               final scheduleDay = sortedDay[index];
-              final scheduleListPerDay = schedules
-                  .where((schedule) => schedule.day == scheduleDay)
-                  .toList();
+              final scheduleListPerDay =
+                  schedules
+                      .where((schedule) => schedule.day == scheduleDay)
+                      .toList()
+                    ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
               return Card(
                 elevation: 0,
                 clipBehavior: Clip.hardEdge,

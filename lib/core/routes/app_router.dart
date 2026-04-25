@@ -99,7 +99,13 @@ class AppRouter {
       GoRoute(
         path: RouteNamed.addMatkul,
         name: RouteNamed.addMatkul,
-        builder: (context, state) => const AddMatkulScreen(),
+        builder: (context, state) {
+          final Map<String, String>? extra =
+              state.extra as Map<String, String>?;
+
+          print("matkul name: ${extra?['name']}");
+          return AddMatkulScreen(matkulName: extra?['name']);
+        },
       ),
       GoRoute(
         path: RouteNamed.editMatkul,

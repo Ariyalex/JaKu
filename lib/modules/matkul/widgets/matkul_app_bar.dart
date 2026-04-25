@@ -57,7 +57,7 @@ class MatkulAppBar extends HookWidget implements PreferredSizeWidget {
 
   Widget _buildSelectionAppBar(BuildContext context) {
     final editSemesterController = useTextEditingController();
-    final editSemesterFormKey = GlobalKey<FormState>();
+    final editSemesterFormKey = useMemoized(() => GlobalKey<FormState>());
 
     final matkulSelectionCubit = context.read<MatkulSelectionCubit>();
     final selectedMatkulIds = context.select(

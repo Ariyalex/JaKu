@@ -33,6 +33,7 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       // PersistentTabView sudah mengelola Scaffold internal,
       // tapi membungkusnya di sini memastikan area aman dan layout yang benar.
+      resizeToAvoidBottomInset: false,
       body: BlocBuilder<MainTabBloc, MainTabState>(
         buildWhen: (previous, current) => false,
         builder: (context, state) {

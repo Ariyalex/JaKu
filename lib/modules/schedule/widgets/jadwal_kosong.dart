@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jaku/core/routes/route_named.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 
 class JadwalKosong extends StatelessWidget {
   const JadwalKosong({super.key});
@@ -19,9 +22,23 @@ class JadwalKosong extends StatelessWidget {
           children: [
             Column(
               children: [
-                const Text(
-                  "Jadwal Kosong??!!!",
-                  style: TextStyle(fontSize: 25),
+                BlocSelector<MatkulBloc, MatkulState, int>(
+                  selector: (state) {
+                    return state.activeSemester;
+                  },
+                  builder: (context, state) {
+                    if (state < 1) {
+                      return const Text(
+                        "Jadwal Kosong??!!!",
+                        style: TextStyle(fontSize: 25),
+                      );
+                    } else {
+                      return Text(
+                        "Jadwal semester $state kosong??!!",
+                        style: TextStyle(fontSize: 25),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 10),
                 SizedBox(

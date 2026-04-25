@@ -21,7 +21,7 @@ class EditMatkulScreen extends HookWidget {
       return null;
     }, [id]);
 
-    final formKey = GlobalKey<FormState>();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameTextController = useTextEditingController();
     final lecturer1TextController = useTextEditingController();
     final lecturer2TextController = useTextEditingController();
@@ -49,7 +49,7 @@ class EditMatkulScreen extends HookWidget {
       }
       print("semester sekarang: ${selectedMatkul?.semester}");
       return null;
-    }, [selectedMatkul, id]);
+    }, [selectedMatkul?.id]);
 
     useEffect(() {
       if (semester.value > 0) {
@@ -155,15 +155,15 @@ class EditMatkulScreen extends HookWidget {
                       ),
                     ),
 
-                    FilledButton.icon(
+                    IconButton.filled(
                       onPressed: () {
                         if (semester.value > 1) semester.value--;
                       },
-                      label: Icon(LucideIcons.minus),
+                      icon: Icon(LucideIcons.minus),
                     ),
-                    FilledButton.icon(
+                    IconButton.filled(
                       onPressed: () => semester.value++,
-                      label: Icon(LucideIcons.plus),
+                      icon: Icon(LucideIcons.plus),
                     ),
                   ],
                 ),

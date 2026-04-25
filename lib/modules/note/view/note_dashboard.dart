@@ -8,7 +8,8 @@ import 'package:jaku/modules/note/bloc/note_event.dart';
 import 'package:jaku/modules/note/bloc/note_state.dart';
 import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/core/widgets/note_list_masonry_builder.dart';
-import 'package:jaku/modules/note/widgets/search_textfield.dart';
+import 'package:jaku/modules/note/widgets/note_dashboard_appbar.dart';
+import 'package:jaku/modules/schedule/widgets/main_screen_drawer_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class NoteDashboard extends HookWidget {
@@ -20,6 +21,8 @@ class NoteDashboard extends HookWidget {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
+      appBar: NoteDashboardAppbar(),
+      drawer: MainScreenDrawerWidget(),
       body: BlocBuilder<NoteBloc, NoteState>(
         builder: (context, state) {
           if (state.status == NoteStatus.initial ||
@@ -36,7 +39,6 @@ class NoteDashboard extends HookWidget {
                 mainAxisSize: MainAxisSize.max,
                 spacing: 12,
                 children: [
-                  SearchTextfield(),
                   Expanded(
                     child: notes.isNotEmpty
                         ? NoteListMasonryBuilder(notes: notes)

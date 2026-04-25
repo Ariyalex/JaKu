@@ -9,6 +9,7 @@ import 'package:jaku/core/services/native_ringtone_service.dart';
 @pragma('vm:entry-point')
 void alarmCallback(int id, Map<String, dynamic> params) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AndroidAlarmManager.initialize();
   dev.log("Alarm triggered with ID: $id", name: "AlarmHelperCallback");
 
   final notificationPlugin = FlutterLocalNotificationsPlugin();
@@ -77,9 +78,9 @@ void alarmCallback(int id, Map<String, dynamic> params) async {
       params: params,
     );
 
-    Future.delayed(const Duration(minutes: 5), () async {
-      await nativeRingtoneService.stopRingtone();
-      await notificationPlugin.cancel(id: id);
+    await Future.delayed(const Duration(minutes: 5), () async {
+      nativeRingtoneService.stopRingtone();
+      notificationPlugin.cancel(id: id);
     });
 
     dev.log("Notification shown for ID: $id", name: "AlarmHelperCallback");

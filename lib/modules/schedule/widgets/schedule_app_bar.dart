@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/routes/route_named.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_selection_cubit.dart';
+import 'package:jaku/modules/schedule/widgets/looping_undifined_semester.dart';
 import 'package:jaku/modules/schedule/widgets/schedule_dialogs.dart';
 import 'package:jaku/modules/setting/bloc/setting_bloc.dart';
 import 'package:jaku/modules/setting/bloc/setting_event.dart';
@@ -55,10 +58,19 @@ class ScheduleAppBar extends HookWidget implements PreferredSizeWidget {
     final isCardView = context.select(
       (SettingBloc bloc) => bloc.state.setting.scheduleView,
     );
+    final semester = context.select(
+      (MatkulBloc bloc) => bloc.state.activeSemester,
+    );
+
     final theme = Theme.of(context);
     return AppBar(
       key: const ValueKey("normal_app_bar"),
-      title: const Text("Jaku"),
+      title: InkWell(
+        onTap: () => context.pushNamed(RouteNamed.matkulDashboard),
+        child: semester < 1
+            ? LoopingUndifinedSemester()
+            : Text("Semester $semester"),
+      ),
       actions: [
         TextButton.icon(
           onPressed: () =>

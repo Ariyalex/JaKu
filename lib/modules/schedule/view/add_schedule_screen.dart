@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jaku/core/routes/route_named.dart';
 import 'package:jaku/core/utils/my_snackbar.dart';
 import 'package:jaku/core/utils/time_parser_helper.dart';
 import 'package:jaku/data/entities/matkul.dart';
@@ -9,7 +10,6 @@ import 'package:jaku/data/entities/matkul_schedule.dart';
 import 'package:jaku/data/entities/schedule_reminder.dart';
 import 'package:jaku/data/value_objects/day.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
-import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
 import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
@@ -135,30 +135,38 @@ class AddScheduleScreen extends HookWidget {
                                         selected: isSelected,
                                       ),
                               emptyBuilder: (context, searchEntry) {
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Buat object baru dengan nilai default
-                                        final newMatkul = Matkul.create(
-                                          name: searchEntry,
-                                        );
+                                if (searchEntry.isNotEmpty) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: FilledButton(
+                                        onPressed: () async {
+                                          context.pop();
+                                          final Matkul? createdMatkul =
+                                              await context.pushNamed(
+                                                RouteNamed.addMatkul,
+                                                extra: {"name": searchEntry},
+                                              );
 
-                                        context.read<MatkulBloc>().add(
-                                          AddMatkul(newMatkul),
-                                        );
-                                        selectedMatkul.value = newMatkul;
-
-                                        // Tutup dropdown menu secara otomatis
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text(
-                                        'Tambah Matkul baru: "$searchEntry"',
+                                          selectedMatkul.value = createdMatkul;
+                                        },
+                                        child: Text(
+                                          'Tambah Matkul baru: "$searchEntry"',
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                } else {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        "Tidak ada matkul, isi kolom pencarian dengan nama matkul yang mau ditambahkan",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                             ),
                             validator: (value) {

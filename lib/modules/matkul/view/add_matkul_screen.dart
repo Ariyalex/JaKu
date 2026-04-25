@@ -9,12 +9,13 @@ import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AddMatkulScreen extends HookWidget {
-  const AddMatkulScreen({super.key});
+  final String? matkulName;
+  const AddMatkulScreen({super.key, required this.matkulName});
 
   @override
   Widget build(BuildContext context) {
     final semester = useState<int>(0);
-    final formKey = GlobalKey<FormState>();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameTextController = useTextEditingController();
     final lecturer1TextController = useTextEditingController();
     final lecturer2TextController = useTextEditingController();
@@ -37,7 +38,11 @@ class AddMatkulScreen extends HookWidget {
 
       matkulBloc.add(AddMatkul(newMatkul));
 
-      context.pop();
+      if (matkulName != null) {
+        context.pop<Matkul>(newMatkul);
+      } else {
+        context.pop();
+      }
     }
 
     String? validateName(String? value) {
@@ -52,6 +57,7 @@ class AddMatkulScreen extends HookWidget {
     }
 
     useEffect(() {
+      nameTextController.text = matkulName ?? "";
       semesterTextController.text = "";
       return null;
     }, []);
