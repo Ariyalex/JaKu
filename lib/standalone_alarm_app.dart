@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/services/native_ringtone_service.dart';
@@ -26,7 +27,8 @@ class StandaloneAlarmApp extends StatelessWidget {
       await notificationPlugin.cancel(id: notificationId);
       await nativeRingtoneService.stopRingtone();
 
-      SystemNavigator.pop();
+      // SystemNavigator.pop();
+      exit(0);
     }
 
     final room = payload['room'] as String?;

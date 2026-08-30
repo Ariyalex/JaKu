@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaku/core/di/dependency_injection.dart';
 import 'package:jaku/core/services/native_ringtone_service.dart';
+import 'package:jaku/core/utils/alarm_permission_helper.dart';
 import 'package:jaku/modules/setting/bloc/setting_bloc.dart';
 import 'package:jaku/modules/setting/bloc/setting_event.dart';
 import 'package:jaku/modules/setting/bloc/setting_state.dart';
@@ -80,6 +81,14 @@ class SettingScreen extends StatelessWidget {
                   ),
                 ),
               );
+            },
+          ),
+          ListTile(
+            title: const Text("Izin Alarm & Latar Belakang"),
+            subtitle: const Text("Atur izin agar alarm menyala tepat waktu"),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () async {
+              await AlarmPermissionHelper.requestEssentialPermissions(context);
             },
           ),
         ],
