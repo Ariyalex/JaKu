@@ -1,0 +1,86 @@
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jaku/data/entities/task.dart';
+
+class LocalTaskProvider {
+  Box<Task> get _taskBox => Hive.box<Task>("taskBox");
+
+  List<Task> getListTaskByMatkuls(List<String> matkulIds) {
+    try {
+      return _taskBox.values.where((task) {
+        if (task.groupId != null) {
+          return matkulIds.contains(task.groupId) ||
+              task.groupId!.startsWith("tab-");
+        }
+
+        return true;
+      }).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  List<Task> getTasksByMatkul(String matkulId) {
+    try {
+      final tasks = _taskBox.values.toList();
+      return tasks.where((task) => task.groupId == matkulId).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveTask(Task task) async {
+    try {
+      await _taskBox.put(task.id, task);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveTasks(List<Task> tasks) async {
+    try {
+      for (var task in tasks) {
+        await _taskBox.put(task.id, task);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAllTask() async {
+    try {
+      await _taskBox.clear();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTask(String id) async {
+    try {
+      await _taskBox.delete(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTasksByMatkulIds(List<String> matkulIds) async {
+    try {
+      final keysToDelete = _taskBox.values
+          .where((matkul) => matkulIds.contains(matkul.groupId))
+          .map((matkul) => matkul.id);
+
+      if (keysToDelete.isNotEmpty) {
+        _taskBox.deleteAll(keysToDelete);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Task? getTaskById(String id) {
+    try {
+      return _taskBox.get(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+}

@@ -1,0 +1,414 @@
+import 'package:flutter/material.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:jaku/core/utils/my_snackbar.dart';
+import 'package:jaku/core/utils/time_parser_helper.dart';
+import 'package:jaku/data/entities/matkul.dart';
+import 'package:jaku/data/entities/schedule_reminder.dart';
+import 'package:jaku/data/value_objects/day.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_bloc.dart';
+import 'package:jaku/modules/schedule/bloc/schedule_event.dart';
+import 'package:jaku/modules/schedule/widgets/add_reminder_dialog.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+class EditScheduleScreen extends HookWidget {
+  const EditScheduleScreen({super.key, required this.scheduleId});
+
+  final String scheduleId;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQueryWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+
+    final scheduleRoomTextC = useTextEditingController();
+    final selectedDay = useState<Day?>(null);
+    final selectedStartTime = useState<TimeOfDay?>(null);
+    final selectedEndTime = useState<TimeOfDay?>(null);
+    final selectedMatkul = useState<Matkul?>(null);
+    final selectedReminders = useState<List<ScheduleReminder>>([]);
+
+    final scheduleState = context.watch<ScheduleBloc>().state;
+    final matkulState = context.watch<MatkulBloc>().state;
+
+    // 1. Hook untuk memicu loading data saat pertama kali buka
+    useEffect(() {
+      context.read<ScheduleBloc>().add(LoadSchedule(scheduleId));
+      return null;
+    }, [scheduleId]);
+
+    // 2. Hook untuk sinkronisasi data Schedule ke Form Lokal
+    useEffect(() {
+      final schedule = scheduleState.selectedSchedule;
+      if (schedule != null && schedule.id == scheduleId) {
+        scheduleRoomTextC.text = schedule.room ?? "";
+        selectedDay.value = schedule.day;
+        selectedStartTime.value = schedule.startTime;
+        selectedEndTime.value = schedule.endTime;
+        selectedReminders.value = schedule.alarms;
+
+        // Load matkul terkait jika belum ada
+        context.read<MatkulBloc>().add(LoadMatkul(schedule.matkulId));
+      }
+      return null;
+    }, [scheduleState.selectedSchedule]);
+
+    // 3. Hook untuk sinkronisasi data Matkul ke State Lokal
+    useEffect(() {
+      if ((matkulState.status == MatkulStatus.success ||
+              matkulState.status == MatkulStatus.actionSuccess) &&
+          matkulState.selectedMatkul != null) {
+        selectedMatkul.value = matkulState.selectedMatkul;
+      }
+      return null;
+    }, [matkulState.selectedMatkul, matkulState.status]);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Edit Jadwal"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (selectedMatkul.value != null &&
+                  selectedDay.value != null &&
+                  selectedStartTime.value != null) {
+                final updatedSchedule = scheduleState.selectedSchedule!
+                    .copyWith(
+                      matkulId: selectedMatkul.value?.id,
+                      day: selectedDay.value,
+                      startTime: selectedStartTime.value,
+                      endTime: selectedEndTime.value,
+                      room: scheduleRoomTextC.text,
+                      alarms: selectedReminders.value,
+                    );
+
+                context.read<ScheduleBloc>().add(
+                  UpdateSchedule(updatedSchedule),
+                );
+                Navigator.pop(context);
+              } else {
+                MySnackbar.error(
+                  title: "Form tidak lengkap!",
+                  message: 'Harap isi Matkul, Hari, dan Jam',
+                );
+              }
+            },
+            child: Text("Save", style: theme.textTheme.bodyLarge),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Container(
+          width: mediaQueryWidth,
+          padding: EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 30,
+              children: [
+                Column(
+                  spacing: 12,
+                  children: [
+                    BlocBuilder<MatkulBloc, MatkulState>(
+                      builder: (context, state) {
+                        if (state.status == MatkulStatus.loading ||
+                            state.status == MatkulStatus.initial) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state.status == MatkulStatus.success ||
+                            state.status == MatkulStatus.actionSuccess) {
+                          return DropdownSearch<Matkul>(
+                            selectedItem: selectedMatkul.value,
+                            itemAsString: (item) => item.name,
+                            compareFn: (item1, item2) => item1.id == item2.id,
+                            items: (filter, loadProps) => state.activeMatkuls,
+                            decoratorProps: const DropDownDecoratorProps(
+                              decoration: InputDecoration(
+                                hintText: "Pilih Matkul*",
+                              ),
+                            ),
+                            popupProps: PopupProps.menu(
+                              searchDelay: const Duration(milliseconds: 100),
+                              searchFieldProps: TextFieldProps(
+                                decoration: const InputDecoration(
+                                  hintText:
+                                      "Cari atau tambahkan matkul baru...",
+                                ),
+                              ),
+                              showSearchBox: true,
+                              menuProps: MenuProps(
+                                align: MenuAlign.bottomStart,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainer,
+                                margin: const EdgeInsets.only(top: 12),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
+                                ),
+                              ),
+                              showSelectedItems: true,
+                              itemBuilder:
+                                  (context, item, isDisabled, isSelected) =>
+                                      ListTile(
+                                        title: Text(item.name),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (item.lecturer1 != null)
+                                              Text(item.lecturer1!),
+                                            if (item.lecturer2 != null)
+                                              Text(item.lecturer2!),
+                                          ],
+                                        ),
+                                        selected: isSelected,
+                                      ),
+                              emptyBuilder: (context, searchEntry) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        final newMatkul = Matkul.create(
+                                          name: searchEntry,
+                                        );
+                                        context.read<MatkulBloc>().add(
+                                          AddMatkul(newMatkul),
+                                        );
+                                        selectedMatkul.value = newMatkul;
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text(
+                                        'Tambah Matkul baru: "$searchEntry"',
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null) {
+                                return "Matkul tidak boleh kosong";
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              selectedMatkul.value = value;
+                            },
+                          );
+                        } else if (state.status == MatkulStatus.error) {
+                          return Text(state.message ?? "Error");
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+
+                    DropdownSearch<Day>(
+                      selectedItem: selectedDay.value,
+                      decoratorProps: const DropDownDecoratorProps(
+                        decoration: InputDecoration(hintText: "Pilih hari*"),
+                      ),
+                      compareFn: (item1, item2) => item1 == item2,
+                      popupProps: PopupProps.menu(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        menuProps: MenuProps(
+                          align: MenuAlign.bottomStart,
+                          backgroundColor: theme.colorScheme.surfaceContainer,
+                          margin: const EdgeInsets.only(top: 12),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ),
+                        showSelectedItems: true,
+                      ),
+                      items: (filter, loadProps) => Day.getAllDay(),
+                      itemAsString: (item) => item.display,
+                      onChanged: (value) {
+                        selectedDay.value = value;
+                      },
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 8,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: theme.colorScheme.outline,
+                                  ),
+                                ),
+                                child: Text(
+                                  TimeParserHelper.format2TimeDayToString(
+                                    time1: selectedStartTime.value,
+                                    time2: selectedEndTime.value,
+                                  ),
+                                  style: theme.textTheme.bodyLarge,
+                                ),
+                              ),
+                            ),
+                            if (selectedStartTime.value != null ||
+                                selectedEndTime.value != null)
+                              IconButton(
+                                onPressed: () {
+                                  selectedStartTime.value = null;
+                                  selectedEndTime.value = null;
+                                },
+                                icon: const Icon(LucideIcons.x),
+                                tooltip: "Hapus Waktu",
+                              ),
+                          ],
+                        ),
+                        Row(
+                          spacing: 8,
+                          children: [
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: () async {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime:
+                                        selectedStartTime.value ??
+                                        TimeOfDay.now(),
+                                  );
+                                  if (time != null) {
+                                    selectedStartTime.value = time;
+                                  }
+                                },
+                                label: const Text("Mulai"),
+                                icon: const Icon(
+                                  LucideIcons.clockFading500,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                            if (selectedStartTime.value != null)
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: () async {
+                                    final time = await showTimePicker(
+                                      context: context,
+                                      initialTime:
+                                          selectedEndTime.value ??
+                                          selectedStartTime.value!,
+                                    );
+                                    if (time != null) {
+                                      selectedEndTime.value = time;
+                                    }
+                                  },
+                                  label: const Text("Selesai"),
+                                  icon: const Icon(
+                                    LucideIcons.clockCheck500,
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    TextField(
+                      decoration: const InputDecoration(
+                        hintText: "Ex: fst-404",
+                        labelText: "Ruang kelas",
+                        alignLabelWithHint: true,
+                      ),
+                      autocorrect: false,
+                      style: const TextStyle(fontWeight: FontWeight.normal),
+                      textInputAction: TextInputAction.next,
+                      controller: scheduleRoomTextC,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Reminder", style: theme.textTheme.titleMedium),
+                          SizedBox(height: 10),
+                          ...selectedReminders.value.map((reminder) {
+                            return ListTile(
+                              title: Row(
+                                spacing: 10,
+                                children: [
+                                  Text(
+                                    reminder.offsetMinutes == 0
+                                        ? "On time"
+                                        : "${reminder.offsetMinutes} menit sebelum",
+                                  ),
+                                  if (!reminder.isNotificationOnly)
+                                    Icon(Icons.alarm),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  selectedReminders.value = selectedReminders
+                                      .value
+                                      .where((item) => item.id != reminder.id)
+                                      .toList();
+                                },
+                                icon: Icon(LucideIcons.x),
+                              ),
+                            );
+                          }),
+                          OutlinedButton(
+                            onPressed: () async {
+                              final ScheduleReminder? result = await showDialog(
+                                context: context,
+                                builder: (context) => AddReminderDialog(),
+                              );
+
+                              if (result != null) {
+                                bool isDuplicate = selectedReminders.value.any(
+                                  (item) =>
+                                      item.offsetMinutes ==
+                                          result.offsetMinutes &&
+                                      item.isNotificationOnly ==
+                                          result.isNotificationOnly,
+                                );
+                                if (!isDuplicate) {
+                                  selectedReminders.value = [
+                                    ...selectedReminders.value,
+                                    result,
+                                  ];
+                                }
+                              }
+                            },
+                            child: Text("Tambahkan reminder"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

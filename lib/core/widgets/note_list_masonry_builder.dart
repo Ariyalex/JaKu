@@ -1,0 +1,109 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
+import 'package:jaku/data/entities/note.dart';
+import 'package:jaku/core/routes/route_named.dart';
+import 'package:jaku/modules/note/bloc/note_bloc.dart';
+import 'package:jaku/modules/note/bloc/note_event.dart';
+
+class NoteListMasonryBuilder extends StatelessWidget {
+  const NoteListMasonryBuilder({
+    super.key,
+    this.showMatkul = true,
+    required this.notes,
+  });
+
+  final bool showMatkul;
+  final List<Note> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final matkulBloc = context.read<MatkulBloc>();
+    final noteBloc = context.read<NoteBloc>();
+
+    return MasonryGridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: notes.length,
+      gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+      itemBuilder: (context, index) {
+        final Note note = notes[index];
+
+        return InkWell(
+          onTap: () async {
+            await context.pushNamed(
+              RouteNamed.detailNote,
+              pathParameters: {'id': note.id},
+            );
+
+            noteBloc.add(LoadListNote(matkulBloc.state.activeMatkuls));
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.dividerColor, width: 1.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+
+            margin: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (note.title != null && note.title!.isNotEmpty)
+                  Text(
+                    note.title!,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                const SizedBox(height: 6),
+                if (note.desc != null && note.desc!.isNotEmpty)
+                  Text(
+                    note.desc!,
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (showMatkul &&
+                    note.matkulId != null &&
+                    note.matkulId!.isNotEmpty)
+                  BlocBuilder<MatkulBloc, MatkulState>(
+                    builder: (context, state) {
+                      String matkulName = '';
+                      if (state.status == MatkulStatus.success) {
+                        final m = state.matkuls
+                            .where((m) => m.id == note.matkulId)
+                            .firstOrNull;
+                        if (m != null) matkulName = m.nameAbbreviation;
+                      }
+                      if (matkulName.isEmpty) return const SizedBox.shrink();
+                      return Chip(
+                        label: Text(
+                          matkulName,
+                          overflow: TextOverflow.visible,
+                          softWrap: true,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 3,
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

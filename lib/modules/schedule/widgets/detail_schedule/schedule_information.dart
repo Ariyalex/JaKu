@@ -1,0 +1,205 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:jaku/core/utils/time_parser_helper.dart';
+import 'package:jaku/data/entities/matkul_schedule.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_state.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+class ScheduleInformation extends HookWidget {
+  const ScheduleInformation({super.key, required this.schedule});
+  final MatkulSchedule schedule;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final matkulBloc = context.read<MatkulBloc>();
+
+    useEffect(() {
+      matkulBloc.add(LoadMatkul(schedule.matkulId));
+      return;
+    }, [schedule.matkulId]);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: BlocBuilder<MatkulBloc, MatkulState>(
+        bloc: matkulBloc,
+        builder: (context, state) {
+          if (state.status == MatkulStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state.status == MatkulStatus.error) {
+            return Center(child: Text(state.message ?? "Error"));
+          }
+
+          final matkul = state.selectedMatkul;
+          if (matkul != null && matkul.id == schedule.matkulId) {
+            final String scheduleStartTime = TimeParserHelper.formatTimeOfDay(
+              schedule.startTime,
+            );
+            final String scheduleEndTime = schedule.endTime != null
+                ? TimeParserHelper.formatTimeOfDay(schedule.endTime!)
+                : "";
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Row(
+                        spacing: 8,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.book, color: theme.colorScheme.primary),
+                          Expanded(
+                            child: Text(
+                              matkul.name,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(Icons.person, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        matkul.lecturer1?.isNotEmpty == true
+                            ? matkul.lecturer1!
+                            : "Dosen belum ditambahkan",
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ),
+                  ],
+                ),
+                if (matkul.lecturer2?.isNotEmpty == true)
+                  Row(
+                    children: [
+                      Icon(Icons.person, color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          matkul.lecturer2!,
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                    children: [
+                      Icon(Icons.room, color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          schedule.room?.isNotEmpty == true
+                              ? schedule.room!
+                              : "Ruang belum diisi",
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(schedule.day.label, style: theme.textTheme.bodyLarge),
+                    const Spacer(),
+                    Icon(
+                      Icons.access_time,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      schedule.endTime != null
+                          ? "$scheduleStartTime - $scheduleEndTime"
+                          : scheduleStartTime,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+                if (schedule.alarms.any(
+                  (element) => element.isNotificationOnly == true,
+                )) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(LucideIcons.bell),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: schedule.alarms
+                            .where((e) => e.isNotificationOnly == true)
+                            .map((notif) {
+                              return Text(
+                                notif.offsetMinutes == 0
+                                    ? "- On time"
+                                    : "- ${notif.offsetMinutes} menit sebelum",
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ],
+                if (schedule.alarms.any(
+                  (element) => element.isNotificationOnly == false,
+                )) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(LucideIcons.alarmClock),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: schedule.alarms
+                            .where((e) => e.isNotificationOnly == false)
+                            .map((notif) {
+                              return Text(
+                                notif.offsetMinutes == 0
+                                    ? "- On time"
+                                    : "- ${notif.offsetMinutes} menit sebelum",
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}

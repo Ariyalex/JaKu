@@ -1,161 +1,171 @@
+import 'dart:convert';
+
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jaku/controllers/main_tab_controller.dart';
-import 'package:jaku/controllers/matkul_controllers.dart';
-import 'package:jaku/controllers/notification_controller.dart';
-import 'package:jaku/controllers/theme_c.dart';
+import 'package:jaku/core/client/hive_client.dart';
+import 'package:jaku/core/di/app_providers.dart';
+import 'package:jaku/core/di/dependency_injection.dart';
+import 'package:jaku/core/routes/app_router.dart';
+import 'package:jaku/core/utils/theme_mode_utils.dart';
+import 'package:jaku/data/providers/local_settings_provider.dart';
+import 'package:jaku/data/repositories/application_settings_repository.dart';
+import 'package:jaku/data/repositories/task_tab_repository.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_bloc.dart';
+import 'package:jaku/modules/matkul/bloc/matkul_event.dart';
+import 'package:jaku/modules/notification/bloc/notification_bloc.dart';
+import 'package:jaku/modules/notification/bloc/notification_event.dart';
+import 'package:jaku/modules/main_tab/bloc/main_tab_bloc.dart';
+import 'package:jaku/modules/main_tab/bloc/main_tab_event.dart';
 import 'package:jaku/firebase_options.dart';
-import 'package:jaku/screens/note/note_dashboard.dart';
-import 'package:jaku/screens/task/task_dashboard.dart';
-import 'package:jaku/services/jadwal_service.dart';
-import 'package:jaku/controllers/version_control.dart';
-import 'package:jaku/routes/page_route.dart';
-import 'package:jaku/screens/schedule/schedule_dashboard.dart';
-import 'package:jaku/services/matkul_service.dart';
-import 'package:jaku/services/note_service.dart';
-import 'package:jaku/services/task_service.dart';
-import 'package:jaku/services/task_tab_service.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
+import 'package:jaku/modules/setting/bloc/setting_bloc.dart';
+import 'package:jaku/modules/setting/bloc/setting_event.dart';
+import 'package:jaku/modules/setting/bloc/setting_state.dart';
+import 'package:jaku/standalone_alarm_app.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
-import './theme/theme.dart';
+import 'package:uuid/uuid.dart';
+import 'core/theme/theme.dart';
+import 'package:toastification/toastification.dart';
+
+const uuid = Uuid();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  //initialise the time zone database
+  // initialise the time zone database
   tz.initializeTimeZones();
 
-  //inisialisasi firebase
+  await dotenv.load(fileName: ".env");
+
+  await AndroidAlarmManager.initialize();
+
+  // inisialisasi firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  //inisialisasi hive
+  await DependencyInjection.init();
+
+  // init hive
   await Hive.initFlutter();
-  await JadwalService.initScheduleService();
-  await NoteService.initNoteService();
-  await MatkulService.iniMatkulService();
-  await TaskService.initTaskService();
-  await TaskTabService.initTaskTabService();
-
-  // Inisialisasi controller tanpa menyimpan ke variabel lokal
-  Get.put(MatkulController(), permanent: true);
-  Get.put(VersionControl(), permanent: true);
-  final notifC = Get.put(NotificationController(), permanent: true);
-  Get.put(MainTabController(), permanent: true);
-
-  //init theme
   await Hive.openBox('settings');
-  final themeC = Get.put(ThemeC(), permanent: true);
-  themeC.initTheme();
+  await HiveClient().init();
 
-  //ambil data notif yang membuka aplikasi
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   final NotificationAppLaunchDetails? notificationAppLaunchDetails =
-      await notifC.flutterLocalNotificationsPlugin
-          .getNotificationAppLaunchDetails();
+      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
+  bool isLaunchedByAlarm = false;
+  Map<String, dynamic>? alarmPayload;
 
   if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-    notifC.payload.value =
-        notificationAppLaunchDetails!.notificationResponse!.payload!;
+    final payloadString =
+        notificationAppLaunchDetails!.notificationResponse?.payload ?? "";
+    if (payloadString.isNotEmpty) {
+      try {
+        final Map<String, dynamic> decodePayload = jsonDecode(payloadString);
+        if (decodePayload.containsKey('id')) {
+          isLaunchedByAlarm = true;
+          alarmPayload = decodePayload;
+        }
+      } catch (e) {
+        print("🐛 DEBUG -> Format JSON payload tidak valid");
+      }
+    }
   }
 
-  runApp(const MyApp());
+  if (isLaunchedByAlarm && alarmPayload != null) {
+    runApp(StandaloneAlarmApp(payload: alarmPayload));
+  } else {
+    final settingProvider = LocalSettingsProvider();
+    final settingRepo = ApplicationSettingsRepository(settingProvider);
+    final settingBloc = SettingBloc(settingRepo);
+    settingBloc.add(LoadSetting());
+
+    final notificationBloc = NotificationBloc();
+    notificationBloc.add(NotificationInitialize());
+
+    // ambil data notif yang membuka aplikasi
+    final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+        await notificationBloc.flutterLocalNotificationsPlugin
+            .getNotificationAppLaunchDetails();
+
+    if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+      final payload =
+          notificationAppLaunchDetails!.notificationResponse?.payload ?? "";
+      if (payload.isNotEmpty) {
+        notificationBloc.add(SetNotificationPayload(payload));
+      }
+    }
+
+    runApp(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider(create: (context) => settingProvider),
+          RepositoryProvider(create: (context) => settingRepo),
+          ...AppProviders.repositoryProviders,
+        ],
+        child: MultiBlocProvider(
+          providers: [
+            ...AppProviders.blocProviders,
+            BlocProvider(create: (context) => settingBloc),
+            BlocProvider(create: (context) => notificationBloc),
+            BlocProvider(
+              create: (context) =>
+                  MainTabBloc(context.read<TaskTabRepository>())
+                    ..add(LoadAllTaskTabs()),
+            ),
+          ],
+          child: const MyApp(),
+        ),
+      ),
+    );
+  }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends HookWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeDark = AppTheme.dark;
-    final themeLight = AppTheme.light;
-    final themeC = Get.find<ThemeC>();
-    final tabC = Get.find<MainTabController>();
-    final notifC = Get.find<NotificationController>();
+    final matkulBloc = context.read<MatkulBloc>();
 
-    if (notifC.payload.value.isNotEmpty) {
-      print("payload ada isinya: ${notifC.payload.value}");
-      Future.microtask(() {
-        tabC.routing(2);
-      });
-    }
+    useEffect(() {
+      matkulBloc.add(LoadAllMatkul());
+      matkulBloc.add(LoadActiveSemester());
 
-    return GetX<ThemeC>(
-      builder: (controller) => GetMaterialApp(
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: themeC.themeMode,
-        debugShowCheckedModeBanner: false,
-        home: Obx(
-          () => PersistentTabView(
-            stateManagement: false,
-            controller: tabC.mainTabController,
-            tabs: [
-              PersistentTabConfig(
-                screen: const ScheduleDashboard(),
+      return null;
+    }, []);
 
-                item: ItemConfig(
-                  activeForegroundColor: themeC.isLight.value
-                      ? themeLight.colorScheme.onPrimary
-                      : themeDark.colorScheme.onPrimary,
-                  activeColorSecondary: themeC.isLight.value
-                      ? themeLight.colorScheme.primary
-                      : themeDark.colorScheme.primary,
-                  icon: const Icon(LucideIcons.calendarRange),
-                  title: "Schedule",
-                ),
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return BlocSelector<SettingBloc, SettingState, ThemeMode>(
+          selector: (state) =>
+              ThemeModeUtils.stringToThemeMode(state.setting.themeMode),
+          builder: (context, themeMode) {
+            return ToastificationWrapper(
+              child: MaterialApp.router(
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: themeMode,
+                debugShowCheckedModeBanner: false,
+                routerConfig: AppRouter.router,
+                builder: (context, child) {
+                  return child!;
+                },
               ),
-              PersistentTabConfig(
-                screen: const NoteDashboard(),
-                item: ItemConfig(
-                  activeForegroundColor: themeC.isLight.value
-                      ? themeLight.colorScheme.onPrimary
-                      : themeDark.colorScheme.onPrimary,
-                  activeColorSecondary: themeC.isLight.value
-                      ? themeLight.colorScheme.primary
-                      : themeDark.colorScheme.primary,
-                  icon: const Icon(LucideIcons.notebook),
-                  title: "Note",
-                ),
-              ),
-              PersistentTabConfig(
-                screen: const TaskDashboard(),
-                item: ItemConfig(
-                  activeForegroundColor: themeC.isLight.value
-                      ? themeLight.colorScheme.onPrimary
-                      : themeDark.colorScheme.onPrimary,
-                  activeColorSecondary: themeC.isLight.value
-                      ? themeLight.colorScheme.primary
-                      : themeDark.colorScheme.primary,
-                  icon: const Icon(LucideIcons.listTodo),
-                  title: "Task",
-                ),
-              ),
-            ],
-            navBarBuilder: (navBarConfig) => Obx(() {
-              final bgColor = themeC.isLight.value
-                  ? themeLight.colorScheme.surface
-                  : themeDark.colorScheme.surface;
-
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.ease,
-                color: bgColor,
-                child: Style8BottomNavBar(
-                  navBarConfig: navBarConfig,
-                  navBarDecoration: const NavBarDecoration(
-                    color: Colors.transparent,
-                  ),
-                  height: 60,
-                ),
-              );
-            }),
-          ),
-        ),
-        getPages: AppPage.pages,
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -1,0 +1,85 @@
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jaku/data/entities/note.dart';
+
+class LocalNoteProvider {
+  Box<Note> get _noteBox => Hive.box<Note>("noteBox");
+
+  List<Note> getListNoteByMatkuls(List<String> matkulIds) {
+    try {
+      return _noteBox.values
+          .where(
+            (note) =>
+                matkulIds.contains(note.matkulId) || note.matkulId == null,
+          )
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  List<Note> getNotesByMatkul(String matkulId) {
+    try {
+      final notes = _noteBox.values.toList();
+      return notes.where((note) => note.matkulId == matkulId).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveNote(Note note) async {
+    try {
+      await _noteBox.put(note.id, note);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveNotes(List<Note> notes) async {
+    try {
+      for (var note in notes) {
+        await _noteBox.put(note.id, note);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAllNote() async {
+    try {
+      await _noteBox.clear();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteNote(String id) async {
+    try {
+      await _noteBox.delete(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteNotesByMatkulIds(List<String> matkulIds) async {
+    try {
+      final keysToDelete = _noteBox.values
+          .where((note) => matkulIds.contains(note.matkulId))
+          .map((note) => note.id)
+          .toList();
+
+      if (keysToDelete.isNotEmpty) {
+        await _noteBox.deleteAll(keysToDelete);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Note? getNoteById(String id) {
+    try {
+      return _noteBox.get(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+}
